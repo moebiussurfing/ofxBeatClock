@@ -5,27 +5,30 @@
 //---------------------------
 void ofxBeatClock::gui_CLOCKER_setup(){
     
+    int panelW, x, y;
+    panelW = 200;
+    x = 500;
+    y = 10;
+    
     // 1. control
     params_control.setName("CLOCK CONTROL");
     params_control.add(enable_CLOCK.set("ENABLE", true));
     params_control.add(PLAYER_state.set("PLAY", false));
     params_control.add(internal_CLOCK.set("INTERNAL", false));
-    params_control.add(BPM_MASTER_CLOCK.set("MIDI-IN CLOCK", true));
+    params_control.add(ENABLEB_MIDI_CLOCK.set("MIDI-IN CLOCK", true));
     
     // 2. monitor
     params_clocker.setName("BPM CONTROL");
-    params_clocker.add(enable_CLOCK.set("ENABLE", true));
-    params_clocker.add(PLAYER_state.set("PLAY", false));
-    params_clocker.add(BPM_of_PLAYER.set("BPM", 120, 60, 300));
-    params_clocker.add(BPM_TimeBar.set("ms", 1, 1, 5000));
+    params_clocker.add(BPM_value.set("BPM", BPM_INIT, 60, 300));
+    params_clocker.add(BPM_TimeBar.set("ms", 60000 / BPM_value, 1, 5000));
     params_clocker.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
     
     
     container_controls = gui_CLOCKER.addGroup(params_control);
-    container_controls->setPosition(ofPoint(100, 10));
+    container_controls->setPosition(ofPoint(x, y));
     
     container_clocker = gui_CLOCKER.addGroup(params_clocker);
-    container_clocker->setPosition(ofPoint(400, 100));
+    container_clocker->setPosition(ofPoint(x + panelW, y));
     
     ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_gui_CLOCKER);
     ofAddListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_gui_CLOCKER);
@@ -44,27 +47,9 @@ void ofxBeatClock::setup()
     
     metronome_ball_pos.set(400, 700);
     metronome_ball_radius = 25;
-
-    
-    //---
-    
-    tappet_division_SELECTED = 0;
-    BPM_gotBeat = false;
-    PLAYER_state = false; // true: playing
-    PLAYER_start_TRIG = false; // true: starting play
-    PLAYER_stop_TRIG = false; // true: stoping trig
-    
-    
-    BPM_of_PLAYER = BPM_INIT;
-    BPM_TimeBar = 60000 / BPM_of_PLAYER;
     
     
     
-    
-    
-    PLAYER_state.addListener(this, &ofxBeatClock::PLAYER_state_Changed);//engine bpm player
-    beatsInBar.addListener(this, &ofxBeatClock::beatsInBar_Changed);
-
     //---
     
     // SOUNDS
@@ -78,45 +63,15 @@ void ofxBeatClock::setup()
     mySound2.setMultiPlay(false);
     
     //--
-    
-    // BPM ENGINE:
-    
-    // use the `setup(bpm, beatPerBpm)` function to initialize the bpm and beatPerBpm
-    bpm.setup(BPM_of_PLAYER, 4);
-    
-    // other initialisation method
-    //bpm.setBpm(120);
-    //bpm.setBeatPerBar(4);
-    
-    // use the `start` function to start the bpm
-    //bpm.start();
-    bpm.stop();
-    
-    // add a listener on the beatEvent to listen to every beat
-    ofAddListener(bpm.beatEvent, this, &ofxBeatClock::onBeatEvent);
-    
-    //-
-    
-    // tap tempo
-    bpmTapper.setBpm(BPM_of_PLAYER);
+
     
     // 60,000 / BPM = one beat in milliseconds
-//    myTubesBlinker.LFO_timeCycle = 60000 / bpm.getBpm();
-    
-    //-
-    
-    BPM_MASTER_CLOCK = true;//enable clock sync
-    
-    //-
-    
-    BPM_of_PLAYER.addListener(this, &ofxBeatClock::BPM_of_PLAYER_Changed);
-
     
     //--
     
     setup_MIDI_CLOCK();
-    
-    //gui_set_BPM();
+    beatsInBar.addListener(this, &ofxBeatClock::beatsInBar_Changed);
+
     
     gui_CLOCKER_setup();
     
@@ -126,8 +81,6 @@ void ofxBeatClock::setup()
 //--------------------------------------------------------------
 void ofxBeatClock::setup_MIDI_CLOCK()
 {
-//    midiIn_CLOCK.addListener(this);
-    
     
     // EXTERNAL MIDI CLOCK:
     
@@ -178,6 +131,41 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
 
     }
     
+    else if (wid == "TAP" && BPM_Tap_Tempo_TRIG)
+    {
+        if (BPM_Tap_Tempo_TRIG == true)
+        {
+            ofLogNotice() << "BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
+        }
+
+    }
+    
+    else if (wid == "PLAY")
+    {
+        ofLogNotice() << "PLAYER_state: " << PLAYER_state;
+
+        if (PLAYER_state == true) //play
+        {
+            PLAYER_START();
+        }
+
+        else //stop
+        {
+            PLAYER_STOP();
+        }
+    }
+    
+    else if (wid == "BPM")
+    {
+        ofLogNotice() << "NEW BPM   : " << BPM_value;
+        
+        BPM_TimeBar = 60000 / BPM_value;// 60,000 / BPM = one beat in milliseconds
+        
+        ofLogNotice() << "TIME BEAT : " << BPM_TimeBar << "ms";
+        ofLogNotice() << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
+        
+        
+    }
 }
 
 
@@ -198,15 +186,6 @@ void ofxBeatClock::update()
         
         //-
         
-        // blinker update
-        BPM_TimeBar = 60000 / bpm_CLOCK;// 60,000 / BPM = one beat in milliseconds
-//        myTubesBlinker.LFO_timeCycle = BPM_TimeBar;// 1-bar for lfo
-//        
-//        ((ofxUIIntSlider*)gui_BPM->getWidget("1-BAR TIME"))->setValue(BPM_TimeBar);//update ui:
-//        ((ofxUILabel*)gui_BPM->getWidget("BPM_LABEL"))->setLabel("BPM: " + ofToString((int)bpm_CLOCK));//update ui
-//        
-        //-
-        
 #ifdef BPM_MIDI_CLOCK_REFRESH_RATE
         bpm_CheckUpdated_lastTime = ofGetElapsedTimeMillis();
     }
@@ -216,49 +195,44 @@ void ofxBeatClock::update()
     
     // BPM ENGINE:
     
-    // TODO: SE ESTA USANDO EN DOS LUGARES LA VARIABLE FLAG!!
-    if (BPM_gotBeat == true)
-    {
-        //----
-        
-        //test
-        BPM_LAST_Tick_Time_ELLAPSED_PRE = BPM_LAST_Tick_Time_ELLAPSED;
-        BPM_LAST_Tick_Time_ELLAPSED = ofGetElapsedTimeMillis() - BPM_LAST_Tick_Time_LAST;//test
-        BPM_LAST_Tick_Time_LAST = ofGetElapsedTimeMillis();//test
-        ELLAPSED_diff = BPM_LAST_Tick_Time_ELLAPSED_PRE - BPM_LAST_Tick_Time_ELLAPSED;
-        
-        //----
-        
-        if (bpm.barIndex == 0)
-        {
-            //if (myTubesBlinker.OUT_BPM_TAP && bpm.barIndex == 0) {
-            ////ofLogNotice() << "BEAT ! " << bpmTapper.beatPerc();
-            
-            if (BPM_Metronome)
-                mySound1.play();
-            
-            //ofLogNotice() << "| ! BEAT ! |";
-            ofLogNotice() << "| ! BEAT ! | " << BPM_LAST_Tick_Time_ELLAPSED << " | " << ELLAPSED_diff;//test
-        }
-        
-        else
-        {
-            //else if (myTubesBlinker.OUT_BPM_TAP) {
-            if (BPM_Metronome)
-                mySound2.play();
-            
-            //ofLogNotice() << "|   BEAT   |";
-            ofLogNotice() << "|   BEAT   | " << BPM_LAST_Tick_Time_ELLAPSED << " | " << ELLAPSED_diff;//test
-            
-        }
-        
-        BPM_gotBeat = false;
-    }
+//    // TODO: SE ESTA USANDO EN DOS LUGARES LA VARIABLE FLAG!!
+//    if (BPM_gotBeat == true)
+//    {
+//        //----
+//
+//        BPM_LAST_Tick_Time_ELLAPSED_PRE = BPM_LAST_Tick_Time_ELLAPSED;
+//        BPM_LAST_Tick_Time_ELLAPSED = ofGetElapsedTimeMillis() - BPM_LAST_Tick_Time_LAST;//test
+//        BPM_LAST_Tick_Time_LAST = ofGetElapsedTimeMillis();//test
+//        ELLAPSED_diff = BPM_LAST_Tick_Time_ELLAPSED_PRE - BPM_LAST_Tick_Time_ELLAPSED;
+//
+//        //----
+//
+//        if (bpm.barIndex == 0)
+//        {
+//            if (ENABLE_sound)
+//                mySound1.play();
+//
+//            //ofLogNotice() << "| ! BEAT ! |";
+//            ofLogNotice() << "| ! BEAT ! | " << BPM_LAST_Tick_Time_ELLAPSED << " | " << ELLAPSED_diff;//test
+//        }
+//
+//        else
+//        {
+//            if (ENABLE_sound)
+//                mySound2.play();
+//
+//            //ofLogNotice() << "|   BEAT   |";
+//            ofLogNotice() << "|   BEAT   | " << BPM_LAST_Tick_Time_ELLAPSED << " | " << ELLAPSED_diff;//test
+//        }
+//
+//        BPM_gotBeat = false;
+//    }
     
     //-
     
     ofSoundUpdate();
-    bpmTapper.update();
+    
+//    bpmTapper.update();
 
 }
 
@@ -272,52 +246,37 @@ void ofxBeatClock::draw()
 void ofxBeatClock::draw_MIDI_IN_CLOCK(){
     
     int interline = 12; // line heigh
-    //    int i = 0; // line number
-    //    int pad_Rect = 8; // rectangle up
-    //    int size_Rect = interline / 4; // rectangle up
-    //    int total_Lines = 15;
-    //    int midi_DEBUG_h = ofGetHeight() - 110 - total_Lines * interline;
-    //    ofPushMatrix();
-    //    ofTranslate(20, midi_DEBUG_h);
-    //    ofSetColor(ofColor::white);
-    
-    //--
-    
-    // MIDI CLOCK
-    
-    int px = 24;
-    int py = 80;
-    int paddingAlign = 98;
-    ofPushMatrix();
-    ofTranslate(px, py);
-    
     int i = 0;
+    int px = 10;
+    int py = 10;
+    int paddingAlign = 98;
     
+    ofPushMatrix();
+    
+    ofTranslate(px, py);
     TTF_message = "MIDI CLOCK IN port: " + ofToString(midiIn_CLOCK.getPort());
     TTF_small.drawString(TTF_message, 0, interline * i++);
     TTF_message = ofToString("'" + ofToString(midiIn_CLOCK.getName()) + "'");
     TTF_small.drawString(TTF_message, 0, interline * i++); i++;
     
     ofTranslate(paddingAlign, 7);
-    //TTF_message = (clockRunning ? "clock: running" : "MIDI clock: stopped");
-    //TTF_small.drawString(TTF_message, 0, interline * i++);
-    //TTF_message = ("beats: " + ofToString(beats));
-    //TTF_small.drawString(TTF_message, 0, interline * i++);
-    //TTF_message = ("seconds: " + ofToString((int)seconds));
-    //TTF_small.drawString(TTF_message, 0, interline * i++);
-    TTF_message = ("BPM: " + ofToString(round(bpm_CLOCK)));
+    TTF_message = ("BPM: " + ofToString(BPM_value));
     TTF_small.drawString(TTF_message, 0, interline * i++);
-    
-    // a MIDI beat is a 16th note, so do a little math to convert to a time signature:
-    // 4/4 -> 4 notes per bar & quarter note = 1 beat, add 1 to count from 1 instead of 0
+
     quarters = beats / 4; // convert total # beats to # quarters
     bars = (quarters / 4) + 1; // compute # of bars
     beatsInBar = (quarters % 4) + 1; // compute remainder as # notes within the current bar
+    
     TTF_message = ("4/4 BARS: " + ofToString(bars + 53));
     TTF_small.drawString(TTF_message, 0, interline * i++);
     TTF_message = ("BEAT: " + ofToString(beatsInBar));
     TTF_small.drawString(TTF_message, 0, interline * i++);
+    
     ofPopMatrix();
+    
+    //--
+    
+    // BEATS SQUEARES
     
     py += 95;
     int w = 50;//squares beats size
@@ -339,13 +298,12 @@ void ofxBeatClock::draw_MIDI_IN_CLOCK(){
     
     //--
     
-    // BPM MIDI CLOCK:
-
-    
+    // TICK BALL:
     
     ofPushStyle();
+    
     ofSetColor(16); // ball background
-                    //ofSetColor(ofColor::yellow); // ball background
+    //ofSetColor(ofColor::yellow); // ball background
     ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
     
     if (bpm_beat_TICKER == true)
@@ -361,6 +319,7 @@ void ofxBeatClock::draw_MIDI_IN_CLOCK(){
         
         beatsInBar_PRE = beatsInBar;//test
     }
+    
     ofPopStyle();
     
     //-
@@ -368,239 +327,115 @@ void ofxBeatClock::draw_MIDI_IN_CLOCK(){
 //--------------------------------------------------------------
 void ofxBeatClock::exit()
 {
-    
-    bpm.stop();
 
 
     midiIn_CLOCK.closePort();
     midiIn_CLOCK.removeListener(this);
-
-//    delete gui_BPM;
 }
-
-
-//
-////-------------------------------------
-//void ofxBeatClock::gui_Event(ofxUIEventArgs &e)
-//{
-//    string name = e.getName();
-//    int kind = e.getKind();
-//    ofLogNotice() << "got event from: " << name;
-//    
-//    if (false) {
-//    }
-//    
-//    //else if (name == "CLOCK SYNC")
-//    //{
-//    //    ofxUIToggle *toggle = (ofxUIToggle *)e.getToggle();
-//    //    BPM_MASTER_CLOCK = toggle->getValue();
-//    //    ofLogNotice() << "|- BPM_MASTER_CLOCK: " << BPM_MASTER_CLOCK;
-//    //}
-//    
-//    //else if (name == "  METRONOME")
-//    //{
-//    //    ofxUIToggle *toggle = (ofxUIToggle *)e.getToggle();
-//    //    BPM_Metronome = toggle->getValue();
-//    //    ofLogNotice() << "|- BPM_Metronome : " << BPM_Metronome;
-//    //}
-//    
-//    //else if (name == "TAP TEMPO!")
-//    //{
-//    //    ofxUIButton *button = (ofxUIButton *)e.getButton();
-//    //    BPM_Tap_Tempo_TRIG = button->getValue();
-//    
-//    //    if (BPM_Tap_Tempo_TRIG)
-//    //    {
-//    //        ofLogNotice() << "|- BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
-//    
-//    //        bpmTapper.tap();
-//    //        BPM_of_PLAYER = bpmTapper.bpm();
-//    //        bpm.setBpm(BPM_of_PLAYER);
-//    //    }
-//    //}
-//    
-//    //else if (name == "PLAY")
-//    //{
-//    //    ofxUIToggle *toggle = (ofxUIToggle *)e.getToggle();
-//    //    PLAYER_state = toggle->getValue();
-//    //    ofLogNotice() << "|- PLAYER_state: " << PLAYER_state;
-//    
-//    //    if (PLAYER_state == true)//play
-//    //    {
-//    //        PLAYER_START();
-//    //    }
-//    
-//    //    else//stop
-//    //    {
-//    //        PLAYER_STOP();
-//    //    }
-//    //}
-//}
 
 //--------------------------------------------------------
 
-// BPM ENGINE:
-
-//--------------------------------------------------------------
 void ofxBeatClock::PLAYER_START()
 {
-    ofLogNotice() << "|--------------------- PLAYER_START ---------------------|";
-    //ofLogNotice() << "|- PLAYER_START";
+    ofLogNotice() << "PLAYER_START";
     
-    PLAYER_state = true;//redundante si viene de click gui. no si viene de key pressed
-    if (!bpm.isPlaying)
+    if (internal_CLOCK)
     {
-        bpm.start();
-        //sequencer.start();
-        
-        //-
-        
-        //refresh tempos
-        BPM_TimeBar = 60000 / bpm.getBpm();//60,000 / BPM = one beat in milliseconds
-//        myTubesBlinker.LFO_timeCycle = BPM_TimeBar;
-//        myTubesFixture.CURVE_Anim_Duration_TIME = BPM_TimeBar * 4;
-//
-//        // trig preset
-//        TRIG_PRESET_Bool = true;
-        
-        //-
+
+    }
+    else
+    {
+        ofLogNotice() << "skip. already playing or internal clock disabled";
     }
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::PLAYER_STOP()
 {
-    //ofLogNotice() << "|- PLAYER_STOP";
-    ofLogNotice() << "|--------------------- PLAYER_STOP ---------------------|";
+    ofLogNotice() << "PLAYER_STOP";
     
-    PLAYER_state = false;//redundante si viene de click gui. no si viene de key pressed
-    if (bpm.isPlaying)
+    if (!internal_CLOCK)
     {
-        bpm.stop();
-        //sequencer.stop();
-        bpm.reset();
-        //sequencer.reset();
-        //bpmTapper.startFresh();
-        
-//        // stop preset
-//        //STOP_PRESET_Bool = true;
-//        STOP_PRESET_Function();
+
+
+    }
+    else
+    {
+        ofLogNotice() << "skip. not playing playing or internal clock disabled";
     }
 }
+
 
 //--------------------------------------------------------------
-void ofxBeatClock::PLAYER_state_Changed(bool & PLAYER_state)
-{
-    ofLogNotice() << "|- ENGINE BPM PLAYER_state changed: " << PLAYER_state;
-    //myTubesBlinker.PRESET_Playing = PLAYER_state;
-    //myTubesFixture.PRESET_Playing = PLAYER_state;
-}
-
-////--------------------------------------------------
-//void ofxBeatClock::bpm_CLOCK_Changed(float & bpm_CLOCK) {
-//    ofLogNotice() << "bpm_CLOCK: " << bpm_CLOCK;
-//
-//    BPM_TimeBar = 60000 / bpm_CLOCK;// 60,000 / BPM = one beat in milliseconds
-//    ofLogNotice() << "TIME BEAT : " << BPM_TimeBar << "ms";
-//    ofLogNotice() << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
-//
-//    //-
-//
-//    // TODO: BPM:
-//    myTubesBlinker.LFO_timeCycle = BPM_TimeBar;
-//    //myTubesFixture.CURVE_Anim_Duration_TIME = BPM_TimeBar * 4;
-//
-//    //-
-//
-//}
-
 void ofxBeatClock::beatsInBar_Changed(int & beatsInBar) {
     if (beatsInBar != beatsInBar_PRE) {
-        //ofLogNotice() << "BPM CLOCK TICK! " << beatsInBar;
+        ofLogVerbose() << "MIDI CLOCK TICK! " << beatsInBar;
         bpm_beat_TICKER = true;
-        /*beatsInBar_PRE = beatsInBar;*/
     }
 }
 
-//--------------------------------------------------
-void ofxBeatClock::BPM_of_PLAYER_Changed(float & BPM_of_PLAYER) {
-    ofLogNotice() << "NEW BPM   : " << BPM_of_PLAYER;
-    
-    BPM_TimeBar = 60000 / bpm.getBpm();// 60,000 / BPM = one beat in milliseconds
-    ofLogNotice() << "TIME BEAT : " << BPM_TimeBar << "ms";
-    ofLogNotice() << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
-
-    
-}
-
-
-
-
-
-
-//#ifdef MODE_ENABLE_BPM_ENGINE
-void ofxBeatClock::onBeatEvent() {
-    BPM_gotBeat = true;
-}
-//#endif
 
 //--------------------------------------------------------------
 void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
     
-    //--
-    
-    // 1. MIDI CLOCK:
-    
-    //if ( ofxMidiMessage::getStatusString(message.status) == "Time Clock" )
-    if ((message.status == MIDI_TIME_CLOCK) ||
-        (message.status == MIDI_SONG_POS_POINTER) ||
-        //(message.status == MIDI_ACTIVE_SENSING) ||
-        (message.status == MIDI_START) ||
-        (message.status == MIDI_CONTINUE) ||
-        (message.status == MIDI_STOP))
+    if ( ENABLEB_MIDI_CLOCK )
     {
+        // 1. MIDI CLOCK:
         
-        //    midiCLOCK_Message = message;
-        
-        // 1. MIDI CLOCK
-        
-        // update the clock length and song pos in beats
-        if (clock.update(message.bytes)) {
-            // we got a new song pos
-            beats = clock.getBeats();
-            seconds = clock.getSeconds();
-        }
-        
-        // compute the seconds and bpm
-        switch (message.status)
+        if ((message.status == MIDI_TIME_CLOCK) ||
+            (message.status == MIDI_SONG_POS_POINTER) ||
+            (message.status == MIDI_START) ||
+            (message.status == MIDI_CONTINUE) ||
+            (message.status == MIDI_STOP))
         {
-                
-                // compute seconds and bpm live, you may or may not always need this
-                // which is why it is not integrated into the ofxMidiClock parser class
-            case MIDI_TIME_CLOCK:
+            
+            //    midiCLOCK_Message = message;
+            
+            // 1. MIDI CLOCK
+            
+            // update the clock length and song pos in beats
+            if (clock.update(message.bytes))
+            {
+                // we got a new song pos
+                beats = clock.getBeats();
                 seconds = clock.getSeconds();
-                bpm_CLOCK += (clock.getBpm() - bpm_CLOCK) / 5; // average the last 5 bpm values
-                                                               // no break here so the next case statement is checked,
-                                                               // this way we can set clockRunning if we've missed a MIDI_START
-                                                               // ie. master was running before we started this example
-                
-                // transport control
-            case MIDI_START: case MIDI_CONTINUE:
-                if (!clockRunning) {
-                    clockRunning = true;
-                    ofLog() << "clock started";
-                }
-                break;
-            case MIDI_STOP:
-                if (clockRunning) {
-                    clockRunning = false;
-                    ofLog() << "clock stopped";
-                }
-                break;
-                
-            default:
-                break;
+            }
+            
+            // compute the seconds and bpm
+            
+            switch (message.status)
+            {
+                    // compute seconds and bpm live, you may or may not always need this
+                    // which is why it is not integrated into the ofxMidiClock parser class
+                    
+                case MIDI_TIME_CLOCK:
+                    seconds = clock.getSeconds();
+                    bpm_CLOCK += (clock.getBpm() - bpm_CLOCK) / 5; // average the last 5 bpm values
+                   // no break here so the next case statement is checked,
+                   // this way we can set clockRunning if we've missed a MIDI_START
+                   // ie. master was running before we started this example
+                    
+                    BPM_value = bpm_CLOCK;
+                    
+                    // transport control
+                    
+                case MIDI_START: case MIDI_CONTINUE:
+                    if (!clockRunning) {
+                        clockRunning = true;
+                        ofLog() << "clock started";
+                    }
+                    break;
+                    
+                case MIDI_STOP:
+                    if (clockRunning) {
+                        clockRunning = false;
+                        ofLog() << "clock stopped";
+                    }
+                    break;
+                    
+                default:
+                    break;
+            }
         }
-    
     }
 }

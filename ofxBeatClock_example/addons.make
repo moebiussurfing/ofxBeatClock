@@ -1,9 +1,5 @@
 ofxBeatClock
-ofxBpm
-ofxGui
 ofxGuiExtended
-ofxMSABPMTapper
-ofxMSATimer
 ofxMidi
-ofxUI
+ofxTapMachine
 ofxXmlSettings
