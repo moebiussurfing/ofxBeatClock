@@ -1,6 +1,7 @@
 ofxBeatClock
 ofxBpm
 ofxGui
+ofxGuiExtended
 ofxMSABPMTapper
 ofxMSATimer
 ofxMidi

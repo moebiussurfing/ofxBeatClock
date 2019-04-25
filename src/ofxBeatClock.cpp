@@ -1,6 +1,38 @@
 
 #include "ofxBeatClock.h"
 
+
+//---------------------------
+void ofxBeatClock::gui_CLOCKER_setup(){
+    
+    // 1. control
+    params_control.setName("CLOCK CONTROL");
+    params_control.add(enable_CLOCK.set("ENABLE", true));
+    params_control.add(PLAYER_state.set("PLAY", false));
+    params_control.add(internal_CLOCK.set("INTERNAL", false));
+    params_control.add(BPM_MASTER_CLOCK.set("MIDI-IN CLOCK", true));
+    
+    // 2. monitor
+    params_clocker.setName("BPM CONTROL");
+    params_clocker.add(enable_CLOCK.set("ENABLE", true));
+    params_clocker.add(PLAYER_state.set("PLAY", false));
+    params_clocker.add(BPM_of_PLAYER.set("BPM", 120, 60, 300));
+    params_clocker.add(BPM_TimeBar.set("ms", 1, 1, 5000));
+    params_clocker.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
+    
+    
+    container_controls = gui_CLOCKER.addGroup(params_control);
+    container_controls->setPosition(ofPoint(100, 10));
+    
+    container_clocker = gui_CLOCKER.addGroup(params_clocker);
+    container_clocker->setPosition(ofPoint(400, 100));
+    
+    ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_gui_CLOCKER);
+    ofAddListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_gui_CLOCKER);
+    
+    
+}
+
 //--------------------------------------------------------------
 void ofxBeatClock::setup()
 {
@@ -10,8 +42,9 @@ void ofxBeatClock::setup()
     TTF_medium.load("fonts/mono.ttf", 12);
     TTF_big.load("fonts/mono.ttf", 18);
     
-    ofxGuiSetTextColor(ofColor(255));
-    ofxGuiSetFont("fonts/PragmataProR_0822.ttf", 9);
+    metronome_ball_pos.set(400, 700);
+    metronome_ball_radius = 25;
+
     
     //---
     
@@ -20,8 +53,15 @@ void ofxBeatClock::setup()
     PLAYER_state = false; // true: playing
     PLAYER_start_TRIG = false; // true: starting play
     PLAYER_stop_TRIG = false; // true: stoping trig
+    
+    
     BPM_of_PLAYER = BPM_INIT;
     BPM_TimeBar = 60000 / BPM_of_PLAYER;
+    
+    
+    
+    
+    
     PLAYER_state.addListener(this, &ofxBeatClock::PLAYER_state_Changed);//engine bpm player
     beatsInBar.addListener(this, &ofxBeatClock::beatsInBar_Changed);
 
@@ -72,11 +112,15 @@ void ofxBeatClock::setup()
     BPM_of_PLAYER.addListener(this, &ofxBeatClock::BPM_of_PLAYER_Changed);
 
     
-    //---
-
+    //--
     
-    gui_set_BPM();
     setup_MIDI_CLOCK();
+    
+    //gui_set_BPM();
+    
+    gui_CLOCKER_setup();
+    
+    //--
 }
 
 //--------------------------------------------------------------
@@ -97,6 +141,7 @@ void ofxBeatClock::setup_MIDI_CLOCK()
     int midi_IN_Clock_PortSelected = 0;
     midiIn_CLOCK.openPort(midi_IN_Clock_PortSelected);
     //midiIn_CLOCK.openVirtualPort(midi_IN_Clock_PortSelected);
+    
     // --------------------------------------------------------------------
     
     //midiIn_CLOCK.openPort("loopMIDI Port 1 7");
@@ -122,68 +167,25 @@ void ofxBeatClock::setup_MIDI_CLOCK()
 }
 
 
-//----------------------
-void ofxBeatClock::gui_set_BPM()
+//--------------------------------------------------------------
+void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
 {
+    string wid = e.getName();
+    ofLogNotice() << "Changed_gui_CLOCKER '" << wid << "': " << e;
+    
+    if (wid == " ")
+    {
 
+    }
     
-    int pad_wid = 25;
-    
-    gui_BPM = new ofxUISuperCanvas(" ");
-    
-    //gui_BPM->setGlobalCanvasWidth(100);
-    gui_BPM->setGlobalButtonDimension(30);
-    gui_BPM->setGlobalSliderHeight(30);
-    
-    gui_BPM->addSpacer(0, pad_wid / 2);
-    gui_BPM->addLabel("MASTER TIME CLOCK", OFX_UI_FONT_MEDIUM);
-    gui_BPM->addSpacer(0, pad_wid);
-    gui_BPM->setWidgetFontSize(OFX_UI_FONT_LARGE);
-    gui_BPM->addLabel("BPM_LABEL");
-    gui_BPM->addSpacer(0, pad_wid*0.1);
-    
-    int gui_Width = 200;
-    gui_BPM->addIntSlider("1-BAR TIME", 251, 1538, 500, gui_Width, 5);//240 to 40 bpm. 120 default
-                                                                      //gui_BPM->setWidgetFontSize(OFX_UI_FONT_LARGE);
-                                                                      //gui_BPM->addLabelToggle("PLAY", false, 50, 50);
-    gui_BPM->addSpacer(0, pad_wid);
-    gui_BPM->setWidgetFontSize(OFX_UI_FONT_SMALL);
-    
-    //gui_BPM->addLabelToggle("CLOCK SYNC", false);
-    
-    ////gui_BPM->addSpacer(0, pad_wid * 0.25);
-    //gui_BPM->addLabelButton("TAP TEMPO!", false);
-    ////gui_BPM->addSpacer(0, pad_wid * 0.5);
-    //gui_BPM->setWidgetFontSize(OFX_UI_FONT_SMALL);
-    ////gui_BPM->setWidgetSpacing(10.0);
-    //gui_BPM->addToggle("  METRONOME", false);
-    //gui_BPM->addSpacer(0, pad_wid);
-    //gui_BPM->addSpacer(0, 225);
-    
-    gui_BPM->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(16));
-    gui_BPM->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(255, 128));
-    //gui_BPM->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor::red);
-    //gui_BPM->setWidgetColor(OFX_UI_WIDGET_COLOR_OUTLINE, ofColor::green);
-#ifdef COLOR_THEME_RED
-    gui_PRESETS->setWidgetColor(OFX_UI_WIDGET_COLOR_OUTLINE_HIGHLIGHT, ofColor::red);
-#endif
-#ifdef COLOR_THEME_BLACK_AND_WHITE
-    gui_PRESETS->setWidgetColor(OFX_UI_WIDGET_COLOR_OUTLINE_HIGHLIGHT, ofColor(255));
-#endif
-    
-    gui_BPM->autoSizeToFitWidgets();
-    gui_BPM->setPosition(20, 216);
-    ofAddListener(gui_BPM->newGUIEvent, this, &ofxBeatClock::gui_Event);
-    
-    //((ofxUIToggle*)gui_BPM->getWidget("CLOCK SYNC"))->setValue(BPM_MASTER_CLOCK);
-    //((ofxUIToggle*)gui_BPM->getWidget("  METRONOME"))->setValue(BPM_Metronome);
 }
+
 
 //--------------------------------------------------------------
 void ofxBeatClock::update()
 {
     
-    //-----------------------------------------------------------------------------
+    //------------------------------------------------------------------------
     
     // MIDI CLOCK
     
@@ -199,10 +201,10 @@ void ofxBeatClock::update()
         // blinker update
         BPM_TimeBar = 60000 / bpm_CLOCK;// 60,000 / BPM = one beat in milliseconds
 //        myTubesBlinker.LFO_timeCycle = BPM_TimeBar;// 1-bar for lfo
-        
-        ((ofxUIIntSlider*)gui_BPM->getWidget("1-BAR TIME"))->setValue(BPM_TimeBar);//update ui:
-        ((ofxUILabel*)gui_BPM->getWidget("BPM_LABEL"))->setLabel("BPM: " + ofToString((int)bpm_CLOCK));//update ui
-        
+//        
+//        ((ofxUIIntSlider*)gui_BPM->getWidget("1-BAR TIME"))->setValue(BPM_TimeBar);//update ui:
+//        ((ofxUILabel*)gui_BPM->getWidget("BPM_LABEL"))->setLabel("BPM: " + ofToString((int)bpm_CLOCK));//update ui
+//        
         //-
         
 #ifdef BPM_MIDI_CLOCK_REFRESH_RATE
@@ -212,7 +214,6 @@ void ofxBeatClock::update()
     
     //--
     
-#ifdef MODE_ENABLE_BPM_ENGINE
     // BPM ENGINE:
     
     // TODO: SE ESTA USANDO EN DOS LUGARES LA VARIABLE FLAG!!
@@ -225,6 +226,7 @@ void ofxBeatClock::update()
         BPM_LAST_Tick_Time_ELLAPSED = ofGetElapsedTimeMillis() - BPM_LAST_Tick_Time_LAST;//test
         BPM_LAST_Tick_Time_LAST = ofGetElapsedTimeMillis();//test
         ELLAPSED_diff = BPM_LAST_Tick_Time_ELLAPSED_PRE - BPM_LAST_Tick_Time_ELLAPSED;
+        
         //----
         
         if (bpm.barIndex == 0)
@@ -257,7 +259,7 @@ void ofxBeatClock::update()
     
     ofSoundUpdate();
     bpmTapper.update();
-#endif
+
 }
 
 //--------------------------------------------------------------
@@ -266,19 +268,18 @@ void ofxBeatClock::draw()
     draw_MIDI_IN_CLOCK();
 }
 
-//-----------
-
+//--------------------------------------------------------------
 void ofxBeatClock::draw_MIDI_IN_CLOCK(){
     
     int interline = 12; // line heigh
-                        //    int i = 0; // line number
-                        //    int pad_Rect = 8; // rectangle up
-                        //    int size_Rect = interline / 4; // rectangle up
-                        //    int total_Lines = 15;
-                        //    int midi_DEBUG_h = ofGetHeight() - 110 - total_Lines * interline;
-                        //    ofPushMatrix();
-                        //    ofTranslate(20, midi_DEBUG_h);
-                        //    ofSetColor(ofColor::white);
+    //    int i = 0; // line number
+    //    int pad_Rect = 8; // rectangle up
+    //    int size_Rect = interline / 4; // rectangle up
+    //    int total_Lines = 15;
+    //    int midi_DEBUG_h = ofGetHeight() - 110 - total_Lines * interline;
+    //    ofPushMatrix();
+    //    ofTranslate(20, midi_DEBUG_h);
+    //    ofSetColor(ofColor::white);
     
     //--
     
@@ -338,15 +339,13 @@ void ofxBeatClock::draw_MIDI_IN_CLOCK(){
     
     //--
     
-    //--
-    
-#ifdef MODE_ENABLE_BPM_ENGINE
     // BPM MIDI CLOCK:
+
+    
     
     ofPushStyle();
     ofSetColor(16); // ball background
                     //ofSetColor(ofColor::yellow); // ball background
-    metronome_ball_radius = 25;
     ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
     
     if (bpm_beat_TICKER == true)
@@ -363,7 +362,6 @@ void ofxBeatClock::draw_MIDI_IN_CLOCK(){
         beatsInBar_PRE = beatsInBar;//test
     }
     ofPopStyle();
-#endif
     
     //-
 }
@@ -371,81 +369,77 @@ void ofxBeatClock::draw_MIDI_IN_CLOCK(){
 void ofxBeatClock::exit()
 {
     
-#ifdef MODE_ENABLE_BPM_ENGINE
     bpm.stop();
-#endif
-    
-    
+
+
     midiIn_CLOCK.closePort();
     midiIn_CLOCK.removeListener(this);
 
-    delete gui_BPM;
+//    delete gui_BPM;
 }
 
 
-
-//-------------------------------------
-void ofxBeatClock::gui_Event(ofxUIEventArgs &e)
-{
-    string name = e.getName();
-    int kind = e.getKind();
-    ofLogNotice() << "got event from: " << name;
-    
-    if (false) {
-    }
-    
-    //else if (name == "CLOCK SYNC")
-    //{
-    //    ofxUIToggle *toggle = (ofxUIToggle *)e.getToggle();
-    //    BPM_MASTER_CLOCK = toggle->getValue();
-    //    ofLogNotice() << "|- BPM_MASTER_CLOCK: " << BPM_MASTER_CLOCK;
-    //}
-    
-    //else if (name == "  METRONOME")
-    //{
-    //    ofxUIToggle *toggle = (ofxUIToggle *)e.getToggle();
-    //    BPM_Metronome = toggle->getValue();
-    //    ofLogNotice() << "|- BPM_Metronome : " << BPM_Metronome;
-    //}
-    
-    //else if (name == "TAP TEMPO!")
-    //{
-    //    ofxUIButton *button = (ofxUIButton *)e.getButton();
-    //    BPM_Tap_Tempo_TRIG = button->getValue();
-    
-    //    if (BPM_Tap_Tempo_TRIG)
-    //    {
-    //        ofLogNotice() << "|- BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
-    
-    //        bpmTapper.tap();
-    //        BPM_of_PLAYER = bpmTapper.bpm();
-    //        bpm.setBpm(BPM_of_PLAYER);
-    //    }
-    //}
-    
-    //else if (name == "PLAY")
-    //{
-    //    ofxUIToggle *toggle = (ofxUIToggle *)e.getToggle();
-    //    PLAYER_state = toggle->getValue();
-    //    ofLogNotice() << "|- PLAYER_state: " << PLAYER_state;
-    
-    //    if (PLAYER_state == true)//play
-    //    {
-    //        PLAYER_START();
-    //    }
-    
-    //    else//stop
-    //    {
-    //        PLAYER_STOP();
-    //    }
-    //}
-}
+//
+////-------------------------------------
+//void ofxBeatClock::gui_Event(ofxUIEventArgs &e)
+//{
+//    string name = e.getName();
+//    int kind = e.getKind();
+//    ofLogNotice() << "got event from: " << name;
+//    
+//    if (false) {
+//    }
+//    
+//    //else if (name == "CLOCK SYNC")
+//    //{
+//    //    ofxUIToggle *toggle = (ofxUIToggle *)e.getToggle();
+//    //    BPM_MASTER_CLOCK = toggle->getValue();
+//    //    ofLogNotice() << "|- BPM_MASTER_CLOCK: " << BPM_MASTER_CLOCK;
+//    //}
+//    
+//    //else if (name == "  METRONOME")
+//    //{
+//    //    ofxUIToggle *toggle = (ofxUIToggle *)e.getToggle();
+//    //    BPM_Metronome = toggle->getValue();
+//    //    ofLogNotice() << "|- BPM_Metronome : " << BPM_Metronome;
+//    //}
+//    
+//    //else if (name == "TAP TEMPO!")
+//    //{
+//    //    ofxUIButton *button = (ofxUIButton *)e.getButton();
+//    //    BPM_Tap_Tempo_TRIG = button->getValue();
+//    
+//    //    if (BPM_Tap_Tempo_TRIG)
+//    //    {
+//    //        ofLogNotice() << "|- BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
+//    
+//    //        bpmTapper.tap();
+//    //        BPM_of_PLAYER = bpmTapper.bpm();
+//    //        bpm.setBpm(BPM_of_PLAYER);
+//    //    }
+//    //}
+//    
+//    //else if (name == "PLAY")
+//    //{
+//    //    ofxUIToggle *toggle = (ofxUIToggle *)e.getToggle();
+//    //    PLAYER_state = toggle->getValue();
+//    //    ofLogNotice() << "|- PLAYER_state: " << PLAYER_state;
+//    
+//    //    if (PLAYER_state == true)//play
+//    //    {
+//    //        PLAYER_START();
+//    //    }
+//    
+//    //    else//stop
+//    //    {
+//    //        PLAYER_STOP();
+//    //    }
+//    //}
+//}
 
 //--------------------------------------------------------
 
 // BPM ENGINE:
-
-#ifdef MODE_ENABLE_BPM_ENGINE
 
 //--------------------------------------------------------------
 void ofxBeatClock::PLAYER_START()
@@ -535,17 +529,10 @@ void ofxBeatClock::BPM_of_PLAYER_Changed(float & BPM_of_PLAYER) {
     BPM_TimeBar = 60000 / bpm.getBpm();// 60,000 / BPM = one beat in milliseconds
     ofLogNotice() << "TIME BEAT : " << BPM_TimeBar << "ms";
     ofLogNotice() << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
-    
-    //-
-    
-//    // TODO: BPM:
-//    myTubesBlinker.LFO_timeCycle = BPM_TimeBar;
-//    myTubesFixture.CURVE_Anim_Duration_TIME = BPM_TimeBar * 4;
-//
-    //-
+
     
 }
-#endif
+
 
 
 
