@@ -4,7 +4,17 @@
 //--------------------------------------------------------------
 void ofxBeatClock::setup()
 {
-#ifdef MODE_ENABLE_BPM_ENGINE
+    //-
+    
+    TTF_small.load("fonts/mono.ttf", 8);
+    TTF_medium.load("fonts/mono.ttf", 12);
+    TTF_big.load("fonts/mono.ttf", 18);
+    
+    ofxGuiSetTextColor(ofColor(255));
+    ofxGuiSetFont("fonts/PragmataProR_0822.ttf", 9);
+    
+    //---
+    
     tappet_division_SELECTED = 0;
     BPM_gotBeat = false;
     PLAYER_state = false; // true: playing
@@ -14,10 +24,8 @@ void ofxBeatClock::setup()
     BPM_TimeBar = 60000 / BPM_of_PLAYER;
     PLAYER_state.addListener(this, &ofxBeatClock::PLAYER_state_Changed);//engine bpm player
     beatsInBar.addListener(this, &ofxBeatClock::beatsInBar_Changed);
-#endif
-    
-    
-#ifdef MODE_ENABLE_BPM_ENGINE
+
+    //---
     
     // SOUNDS
     
@@ -62,17 +70,20 @@ void ofxBeatClock::setup()
     //-
     
     BPM_of_PLAYER.addListener(this, &ofxBeatClock::BPM_of_PLAYER_Changed);
-#endif
 
     
-        gui_set_BPM();
+    //---
+
     
-     setup_MIDI_CLOCK();
+    gui_set_BPM();
+    setup_MIDI_CLOCK();
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::setup_MIDI_CLOCK()
 {
+//    midiIn_CLOCK.addListener(this);
+    
     
     // EXTERNAL MIDI CLOCK:
     
@@ -114,6 +125,8 @@ void ofxBeatClock::setup_MIDI_CLOCK()
 //----------------------
 void ofxBeatClock::gui_set_BPM()
 {
+
+    
     int pad_wid = 25;
     
     gui_BPM = new ofxUISuperCanvas(" ");
@@ -250,6 +263,7 @@ void ofxBeatClock::update()
 //--------------------------------------------------------------
 void ofxBeatClock::draw()
 {
+    draw_MIDI_IN_CLOCK();
 }
 
 //-----------
@@ -375,7 +389,7 @@ void ofxBeatClock::gui_Event(ofxUIEventArgs &e)
 {
     string name = e.getName();
     int kind = e.getKind();
-    //ofLogNotice() << "got event from: " << name;
+    ofLogNotice() << "got event from: " << name;
     
     if (false) {
     }
@@ -535,84 +549,13 @@ void ofxBeatClock::BPM_of_PLAYER_Changed(float & BPM_of_PLAYER) {
 
 
 
-//-------------------------------
-void ofxBeatClock::keyPressed(int key) {
-#ifdef MODE_ENABLE_SHORTCUTS
-    
-    //ofLogNotice(); ofLogNotice() << "|--------------------- PRESSED KEY " << key << " ---------------------|";
-    
-    //--
-    
-    switch (key) {
 
 
-            //-----
-            
-            
-#ifdef MODE_ENABLE_BPM_ENGINE
-            
-            
-            // BPM PLAYER:
-            
-        case OF_KEY_RETURN:
-            if (PLAYER_state == false)//play from stopped
-            {
-                PLAYER_state = true;
-                PLAYER_START();
-                //                ((ofxUIToggle*)gui_BPM->getWidget("PLAY"))->setValue(PLAYER_state);
-            }
-            
-            else//stop from playing
-            {
-                PLAYER_state = false;
-                PLAYER_STOP();
-                //                ((ofxUIToggle*)gui_BPM->getWidget("PLAY"))->setValue(PLAYER_state);
-            }
-            break;
-            //--
-            
-        case '-':
-            BPM_of_PLAYER--;
-            bpm.setBpm(BPM_of_PLAYER);
-            bpmTapper.setBpm(BPM_of_PLAYER);
-            //sequencer.setBpm(BPM_of_PLAYER);
-            break;
-            
-        case '+':
-            BPM_of_PLAYER++;
-            bpm.setBpm(BPM_of_PLAYER);
-            bpmTapper.setBpm(BPM_of_PLAYER);
-            //sequencer.setBpm(BPM_of_PLAYER);
-            break;
-            
-        case 't': case 'T':
-            bpmTapper.tap();
-            BPM_of_PLAYER = bpmTapper.bpm();
-            bpm.setBpm(BPM_of_PLAYER);
-            //sequencer.setBpm(BPM_of_PLAYER);
-            break;
-            
-            // case 'r':
-            // bpm.reset();
-            // break;
-#endif
-            
-        default:
-            break;
-            
-    }
-    
-    //---
-
-#endif//MODE_ENABLE_SHORTCUTS
-    
-}
-
-#ifdef MODE_ENABLE_BPM_ENGINE
+//#ifdef MODE_ENABLE_BPM_ENGINE
 void ofxBeatClock::onBeatEvent() {
     BPM_gotBeat = true;
 }
-#endif
+//#endif
 
 //--------------------------------------------------------------
 void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
@@ -642,7 +585,8 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
         }
         
         // compute the seconds and bpm
-        switch (message.status) {
+        switch (message.status)
+        {
                 
                 // compute seconds and bpm live, you may or may not always need this
                 // which is why it is not integrated into the ofxMidiClock parser class

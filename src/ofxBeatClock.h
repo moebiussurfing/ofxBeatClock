@@ -19,17 +19,18 @@
 #define BPM_MIDI_CLOCK_REFRESH_RATE 200//refresh received MTC by clock. disabled/commented to "realtime" by frame update
 
 
+class ofxBeatClock : public ofxMidiListener {
+    
+//class ofxBeatClock : public ofBaseApp, public ofxMidiListener {
 //class ofApp : public ofBaseApp, public ofxMidiListener {
-class ofxBeatClock : public ofxMidiListener
-
 //class ofxBeatClock
 
-{
+//{
     
 public:
 
-    ofxBeatClock () {}
-    ~ofxBeatClock ();
+//    ofxBeatClock () {}
+//    ~ofxBeatClock ();
 
     
     //-
@@ -78,7 +79,8 @@ public:
     
     //-
     
-#ifdef MODE_ENABLE_BPM_ENGINE
+    //---
+    
     // BPM ENGINE
     
     ofSoundPlayer  mySound1;
@@ -124,7 +126,7 @@ public:
     //unsigned long bpm_beat_TICKER_lastTime;
     bool bpm_beat_TICKER;
     
-#endif
+    //---
     
     void gui_set_BPM();
     
@@ -136,7 +138,7 @@ public:
     
     void gui_Event(ofxUIEventArgs &e);
     
-    void keyPressed(int key);
+//    void keyPressed(int key);
     
     string TTF_message;
     ofTrueTypeFont TTF_small;

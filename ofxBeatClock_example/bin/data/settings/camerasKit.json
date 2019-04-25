@@ -1,0 +1,105 @@
+{
+   "cameras kit" : {
+      "info" : {
+         "arbo" : "arbo name",
+         "author" : "author",
+         "name" : "cameras kit name",
+         "seed" : "seed name"
+      },
+      "settings positional cameras" : [
+         {
+            "cameraPositionX" : 0,
+            "cameraPositionY" : 73,
+            "cameraPositionZ" : -2,
+            "id" : 0,
+            "speed" : 2551,
+            "targetPositionX" : 0,
+            "targetPositionY" : 0,
+            "targetPositionZ" : 0
+         },
+         {
+            "cameraPositionX" : -26,
+            "cameraPositionY" : 32,
+            "cameraPositionZ" : -4,
+            "id" : 1,
+            "speed" : 2526,
+            "targetPositionX" : -2,
+            "targetPositionY" : 12,
+            "targetPositionZ" : -2
+         },
+         {
+            "cameraPositionX" : 14,
+            "cameraPositionY" : 38,
+            "cameraPositionZ" : -61,
+            "id" : 2,
+            "speed" : 1990,
+            "targetPositionX" : 8,
+            "targetPositionY" : -6,
+            "targetPositionZ" : 0
+         },
+         {
+            "cameraPositionX" : -32,
+            "cameraPositionY" : 30,
+            "cameraPositionZ" : 0,
+            "id" : 3,
+            "speed" : 2832,
+            "targetPositionX" : 12,
+            "targetPositionY" : 0,
+            "targetPositionZ" : 0
+         },
+         {
+            "cameraPositionX" : 0,
+            "cameraPositionY" : 34,
+            "cameraPositionZ" : -44,
+            "id" : 4,
+            "speed" : 2347,
+            "targetPositionX" : 12,
+            "targetPositionY" : 0,
+            "targetPositionZ" : 0
+         }
+      ],
+      "settings spheric cameras" : [
+         {
+            "distance" : 73,
+            "id" : 0,
+            "latitude" : 66,
+            "longitude" : 90,
+            "speed" : 2000,
+            "targetHeight" : 21
+         },
+         {
+            "distance" : 67,
+            "id" : 1,
+            "latitude" : 39,
+            "longitude" : 90,
+            "speed" : 2000,
+            "targetHeight" : 15
+         },
+         {
+            "distance" : 72,
+            "id" : 2,
+            "latitude" : 51,
+            "longitude" : 66,
+            "speed" : 2000,
+            "targetHeight" : 14
+         },
+         {
+            "distance" : 67,
+            "id" : 3,
+            "latitude" : 89,
+            "longitude" : 33,
+            "speed" : 2000,
+            "targetHeight" : 8
+         },
+         {
+            "distance" : 100,
+            "id" : 4,
+            "latitude" : 49,
+            "longitude" : 119,
+            "speed" : 2000,
+            "targetHeight" : 0
+         }
+      ]
+   }
+}
+
