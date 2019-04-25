@@ -15,6 +15,9 @@
 
 class ofxBeatClock : public ofxMidiListener {
     
+private:
+    ofPtr<ofxTapMachine> tapMachine;
+    
 public:
     
     //-
@@ -42,7 +45,7 @@ public:
 
     //------------------------------
     
-    // BPM CLOCK
+    // BPM
     
     void setup_MIDI_CLOCK();
     void draw_MIDI_IN_CLOCK();
@@ -84,11 +87,7 @@ public:
 
     //--
     
-    // BPM ENGINE
-    
-    //-
-    
-    //sounds
+    // sounds
     
     ofSoundPlayer  mySound1;
     ofSoundPlayer  mySound2;
@@ -143,6 +142,13 @@ public:
     void Changed_gui_CLOCKER(ofAbstractParameter& e);
     
     //-
+    
+     // TAP TEMPO
+    
+    void barFunc(int &count);
+    void minimFunc(int &count);
+    void crochetFunc(int &count);
+    void draw_Tapper();
     
 
     

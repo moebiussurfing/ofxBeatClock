@@ -41,14 +41,14 @@ void ofxBeatClock::setup()
 {
     //-
     
+    // DRAW STUFF
+    
     TTF_small.load("fonts/mono.ttf", 8);
     TTF_medium.load("fonts/mono.ttf", 12);
     TTF_big.load("fonts/mono.ttf", 18);
     
     metronome_ball_pos.set(400, 700);
     metronome_ball_radius = 25;
-    
-    
     
     //---
     
@@ -63,11 +63,6 @@ void ofxBeatClock::setup()
     mySound2.setMultiPlay(false);
     
     //--
-
-    
-    // 60,000 / BPM = one beat in milliseconds
-    
-    //--
     
     setup_MIDI_CLOCK();
     beatsInBar.addListener(this, &ofxBeatClock::beatsInBar_Changed);
@@ -76,6 +71,15 @@ void ofxBeatClock::setup()
     gui_CLOCKER_setup();
     
     //--
+    
+    // TAP TEMPO
+    
+    tapMachine = make_shared<ofxTapMachine>();
+    ofAddListener(tapMachine->bar.event, this, &ofxBeatClock::barFunc);
+    ofAddListener(tapMachine->minim.event, this, &ofxBeatClock::minimFunc);
+    ofAddListener(tapMachine->crochet.event, this, &ofxBeatClock::crochetFunc);
+    
+    //-
 }
 
 //--------------------------------------------------------------
@@ -136,6 +140,10 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
         if (BPM_Tap_Tempo_TRIG == true)
         {
             ofLogNotice() << "BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
+            
+            tapMachine->tap();
+          
+            
         }
 
     }
@@ -240,6 +248,9 @@ void ofxBeatClock::update()
 void ofxBeatClock::draw()
 {
     draw_MIDI_IN_CLOCK();
+    
+    
+    draw_Tapper();
 }
 
 //--------------------------------------------------------------
@@ -341,7 +352,7 @@ void ofxBeatClock::PLAYER_START()
     
     if (internal_CLOCK)
     {
-
+        tapMachine->toggleStart();
     }
     else
     {
@@ -438,4 +449,51 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
             }
         }
     }
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::barFunc(int &count){
+    cout<<"barCount : "<<count<<endl;
+}
+void ofxBeatClock::minimFunc(int &count){
+    cout<<"minimCount : "<<count<<endl;
+}
+void ofxBeatClock::crochetFunc(int &count){
+    cout<<"crochetCount : "<<count<<endl;
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::draw_Tapper(){
+    
+    ofPushMatrix();
+    ofTranslate(0, 300);
+    
+    ofSetColor(255, 0, 0);
+    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->bar.normalized, 200, 10);
+    
+    ofSetColor(0, 255, 0);
+    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->minim.normalized, 250, 10);
+    
+    ofSetColor( 0, 0, 255);
+    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->crochet.normalized, 300, 10);
+    
+    
+    ofSetColor(255, 255, 0);
+    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->twoBar.normalized, 350, 10);
+    ofSetColor(0, 255, 255);
+    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->fourBar.normalized, 400, 10);
+    
+    
+    string msg="===============[ ofxTapMachine example ]===============\n";
+    msg += "press space bar more than 3 times to get average BPM.\n";
+    msg += "FPS        : " + ofToString(ofGetFrameRate(), 2) + "\n";
+    msg += "BPM        : " + ofToString(tapMachine->getBPM(),2) + "\n";
+    msg += "bar        : " + ofToString(tapMachine->bar.count) + "\n";
+    msg += "minim      : " + ofToString(tapMachine->minim.count) + "\n";
+    msg += "crochet    : " + ofToString(tapMachine->crochet.count) + "\n";
+    msg += "quaver     : " + ofToString(tapMachine->quaver.count) + "\n";
+    
+    ofDrawBitmapStringHighlight(msg, 10, 10);
+    
+    ofPopMatrix();
 }
