@@ -18,6 +18,11 @@ void ofApp::draw(){
 }
 
 //--------------------------------------------------------------
+void ofApp::exit(){
+    CLOCKER.exit();
+}
+
+//--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
 
     
@@ -42,7 +47,7 @@ void ofApp::keyPressed(int key) {
             break;
 
         case 't':
-        case 'T':
+            CLOCKER.BPM_Tap_Tempo_TRIG = true;
             break;
 
          case 'r':
