@@ -86,7 +86,7 @@ public:
     
     void PLAYER_START();
     void PLAYER_STOP();
-
+    // TODO: add switch state..
     
     //---
 
