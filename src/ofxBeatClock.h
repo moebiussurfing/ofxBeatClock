@@ -8,12 +8,13 @@
 #include "ofxMidiClock.h"
 #include "ofxMidiTimecode.h"
 #include "ofxTapMachine.h"
+#include "ofxDawMetro.h"
 
 #define BPM_INIT 120
 #define BPM_MIDI_CLOCK_REFRESH_RATE 200
 //refresh received MTC by clock. disabled/commented to "realtime" by frame update
 
-class ofxBeatClock : public ofxMidiListener {
+class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
     
 private:
     ofPtr<ofxTapMachine> tapMachine;
@@ -45,20 +46,18 @@ public:
 
     //------------------------------
     
-    // BPM
-    
-    void setup_MIDI_CLOCK();
-    void draw_MIDI_IN_CLOCK();
+
     
     //--
     
-    // MIDI CLOCK
+    // MIDI IN CLOCK
     
     ofxMidiIn midiIn_CLOCK;
     ofxMidiMessage midiCLOCK_Message;
-    void newMidiMessage(ofxMidiMessage& eventArgs);
     ofxMidiClock clock; //< clock message parser
 
+    void newMidiMessage(ofxMidiMessage& eventArgs);
+    
     bool clockRunning; //< is the clock sync running?
     unsigned int beats; //< song pos in beats
     double seconds; //< song pos in seconds, computed from beats
@@ -87,15 +86,19 @@ public:
 
     //--
     
-    // sounds
+    // SOUND
     
-    ofSoundPlayer  mySound1;
-    ofSoundPlayer  mySound2;
+    bool ENABLE_sound;//enable sound ticks
+    
+    ofSoundPlayer  tic;
+    ofSoundPlayer  tac;
     
     //-
     
     // INTERNAL CLOCK
-
+    
+    void setup_MIDI_CLOCK();
+    void draw_BPM_CLOCK();
     
     //-
 
@@ -113,17 +116,13 @@ public:
     void PLAYER_START();
     void PLAYER_STOP();
     
-    //-
-    
-    // SOUND
-    
-    bool ENABLE_sound;//enable sound ticks
+
     
     //---
 
     // GUI PARAMS
     
-    void gui_CLOCKER_setup();
+    void setup_Gui_CLOCKER();
     ofxGui gui_CLOCKER;
     ofxGuiContainer* container_controls;
     ofxGuiContainer* container_clocker;
@@ -131,8 +130,8 @@ public:
     ofParameterGroup params_control;
     ofParameter<bool> enable_CLOCK;// enable clock
     ofParameter<bool> PLAYER_state;// player state
-    ofParameter<bool> internal_CLOCK;// enable internal clock
-    ofParameter<bool> ENABLEB_MIDI_CLOCK;// enable midi clock sync
+    ofParameter<bool> ENABLE_INTERNAL_CLOCK;// enable internal clock
+    ofParameter<bool> ENABLE_MIDI_CLOCK;// enable midi clock sync
     
     ofParameterGroup params_clocker;
     ofParameter<float> BPM_value;//tempo bpm global
@@ -150,6 +149,36 @@ public:
     void crochetFunc(int &count);
     void draw_Tapper();
     
+    //-
+    
+    void saveSettings(string path);
+    void loadSettings(string path);
+    string pathSettings;
+    
+    int beatSquare = -1;
+    bool beat_changed = false;
+    
+    //--
+    
+    // DAW METRO
+    
+    void draw_DAW();
+    
+    // overide ofxDawMetro::MetroListener's method if necessary
+    void onBarEvent(int & bar) override;
+    void onBeatEvent(int & beat) override;
+    void onSixteenthEvent(int & sixteenth) override;
+
+    
+    ofxDawMetro metro;
+    
+    ofxGuiContainer* container_daw;
+    ofParameterGroup params_daw;
+    ofParameter<float> DAW_bpm;
+    ofParameter<bool> DAW_active;
+    
+    void Changed_bpm_DAW(float & value);
+    void Changed_DAW_active(bool & value);
 
     
 };

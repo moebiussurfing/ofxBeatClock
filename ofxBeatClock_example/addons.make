@@ -1,4 +1,5 @@
 ofxBeatClock
+ofxDawMetro
 ofxGuiExtended
 ofxMidi
 ofxTapMachine
