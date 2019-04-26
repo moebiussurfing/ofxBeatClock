@@ -30,26 +30,6 @@ public:
     
     //--
     
-    // DRAW STUFF
-    
-    // font
-    
-    string TTF_message;
-    ofTrueTypeFont TTF_small;
-    ofTrueTypeFont TTF_medium;
-    ofTrueTypeFont TTF_big;
-    
-    // ball
-    
-    ofPoint metronome_ball_pos;
-    int metronome_ball_radius;
-
-    //------------------------------
-    
-
-    
-    //--
-    
     // MIDI IN CLOCK
     
     ofxMidiIn midiIn_CLOCK;
@@ -75,23 +55,11 @@ public:
     //-
     
     ofParameter<int> beatsInBar; // compute remainder as # notes within the current bar
-    void beatsInBar_Changed(int & beatsInBar);
+    void Changed_MIDI_beatsInBar(int & beatsInBar);
     int beatsInBar_PRE;
     
     bool bpm_beat_TICKER;
-    
-    //--
-    
-    unsigned long bpm_CheckUpdated_lastTime;
 
-    //--
-    
-    // SOUND
-    
-    bool ENABLE_sound;//enable sound ticks
-    
-    ofSoundPlayer  tic;
-    ofSoundPlayer  tac;
     
     //-
     
@@ -109,13 +77,15 @@ public:
     unsigned long BPM_LAST_Tick_Time_ELLAPSED_PRE;//test
     long ELLAPSED_diff;//test
     
+    
+    unsigned long bpm_CheckUpdated_lastTime;
+    
     //-
     
     // PLAYER MANAGER
     
     void PLAYER_START();
     void PLAYER_STOP();
-    
 
     
     //---
@@ -134,7 +104,7 @@ public:
     ofParameter<bool> ENABLE_MIDI_CLOCK;// enable midi clock sync
     
     ofParameterGroup params_clocker;
-    ofParameter<float> BPM_value;//tempo bpm global
+    ofParameter<float> BPM_Global;//tempo bpm global
     ofParameter<int> BPM_TimeBar;//ms time of 1 bar = 4 beats
     ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig measurements of tap tempo
     
@@ -148,8 +118,29 @@ public:
     void minimFunc(int &count);
     void crochetFunc(int &count);
     void draw_Tapper();
+
+    //--
     
+    // DAW METRO
+    
+    // overide ofxDawMetro::MetroListener's method if necessary
+    void onBarEvent(int & bar) override;
+    void onBeatEvent(int & beat) override;
+    void onSixteenthEvent(int & sixteenth) override;
+    ofxDawMetro metro;
+    
+    ofxGuiContainer* container_daw;
+    ofParameterGroup params_daw;
+    ofParameter<float> DAW_bpm;
+    ofParameter<bool> DAW_active;
+    
+    void Changed_DAW_bpm(float & value);
+    void Changed_DAW_active(bool & value);
+    void draw_DAW();
+
     //-
+    
+    // XML SETTINGS
     
     void saveSettings(string path);
     void loadSettings(string path);
@@ -160,26 +151,31 @@ public:
     
     //--
     
-    // DAW METRO
+    // DRAW STUFF
     
-    void draw_DAW();
+    // FONT
     
-    // overide ofxDawMetro::MetroListener's method if necessary
-    void onBarEvent(int & bar) override;
-    void onBeatEvent(int & beat) override;
-    void onSixteenthEvent(int & sixteenth) override;
-
+    string TTF_message;
+    ofTrueTypeFont TTF_small;
+    ofTrueTypeFont TTF_medium;
+    ofTrueTypeFont TTF_big;
     
-    ofxDawMetro metro;
+    // BALL
     
-    ofxGuiContainer* container_daw;
-    ofParameterGroup params_daw;
-    ofParameter<float> DAW_bpm;
-    ofParameter<bool> DAW_active;
+    ofPoint metronome_ball_pos;
+    int metronome_ball_radius;
     
-    void Changed_bpm_DAW(float & value);
-    void Changed_DAW_active(bool & value);
-
+    //--
+    
+    // SOUND
+    
+    bool ENABLE_sound;//enable sound ticks
+    ofSoundPlayer  tic;
+    ofSoundPlayer  tac;
+    
+    //--
+    
+    bool DAW_SlaveToInternal = true;
     
 };
 

@@ -5,26 +5,35 @@
 //---------------------------
 void ofxBeatClock::setup_Gui_CLOCKER(){
     
+    //-
+    
     int panelW, x, y, padW;
     panelW = 200;
     x = 300;
     y = 10;
     padW = 5;
     
+    //-
+    
     // 1. control
+    
     params_control.setName("CLOCK CONTROL");
     params_control.add(enable_CLOCK.set("ENABLE", true));
     params_control.add(PLAYER_state.set("PLAY", false));
     params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
     params_control.add(ENABLE_MIDI_CLOCK.set("MIDI-IN CLOCK", true));
+    ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_gui_CLOCKER);
+    //-
     
     // 2. monitor
-    params_clocker.setName("BPM CONTROL");
-    params_clocker.add(BPM_value.set("BPM", BPM_INIT, 60, 300));
-    params_clocker.add(BPM_TimeBar.set("ms", 60000 / BPM_value, 1, 5000));
-    params_clocker.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
     
-    //--
+    params_clocker.setName("BPM CONTROL");
+    params_clocker.add(BPM_Global.set("BPM", BPM_INIT, 60, 300));
+    params_clocker.add(BPM_TimeBar.set("ms", 60000 / BPM_Global, 1, 5000));
+    params_clocker.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
+    ofAddListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_gui_CLOCKER);
+
+    //-
     
     // 3. daw metro
     
@@ -33,7 +42,7 @@ void ofxBeatClock::setup_Gui_CLOCKER(){
     //metro.addBarListener(this);
     //metro.addSixteenthListener(this);
     
-    DAW_bpm.addListener(this, &ofxBeatClock::Changed_bpm_DAW);
+    DAW_bpm.addListener(this, &ofxBeatClock::Changed_DAW_bpm);
     DAW_active.addListener(this, &ofxBeatClock::Changed_DAW_active);
     
     params_daw.setName("DAW CONTROL");
@@ -41,7 +50,6 @@ void ofxBeatClock::setup_Gui_CLOCKER(){
     DAW_active.set("Active", false);
     params_daw.add(DAW_bpm);
     params_daw.add(DAW_active);
-    
     
     metro.setBpm(DAW_bpm);
     
@@ -57,15 +65,13 @@ void ofxBeatClock::setup_Gui_CLOCKER(){
     container_daw->setPosition(ofPoint(x + 2 * (panelW + padW), y));
     
     //-
-    
-    
-    ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_gui_CLOCKER);
-    ofAddListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_gui_CLOCKER);
-    
-    //--
+
+    // LOAD LAST SETTINGS
     
     pathSettings = "CLOCKER_settings.xml";//default
     loadSettings(pathSettings);
+    
+    //--
     
     
 }
@@ -101,7 +107,7 @@ void ofxBeatClock::setup()
     // MIDI IN CLOCK
     
     setup_MIDI_CLOCK();
-    beatsInBar.addListener(this, &ofxBeatClock::beatsInBar_Changed);
+    beatsInBar.addListener(this, &ofxBeatClock::Changed_MIDI_beatsInBar);
     
     
     //----
@@ -207,9 +213,9 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
     
     else if (wid == "BPM")
     {
-        ofLogNotice() << "NEW BPM   : " << BPM_value;
+        ofLogNotice() << "NEW BPM   : " << BPM_Global;
         
-        BPM_TimeBar = 60000 / BPM_value;// 60,000 / BPM = one beat in milliseconds
+        BPM_TimeBar = 60000 / BPM_Global;// 60,000 / BPM = one beat in milliseconds
         
         ofLogNotice() << "TIME BEAT : " << BPM_TimeBar << "ms";
         ofLogNotice() << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
@@ -222,7 +228,15 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
         ofLogNotice() << "CLOCK INTERNAL: " << ENABLE_INTERNAL_CLOCK;
         
         if (ENABLE_INTERNAL_CLOCK)
+        {
             ENABLE_MIDI_CLOCK = false;
+        }
+        else
+        {
+            if (PLAYER_state) PLAYER_state = false;
+            if (DAW_active) DAW_active = false;
+        }
+        
     }
     
     else if (wid == "MIDI-IN CLOCK")
@@ -230,7 +244,14 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
         ofLogNotice() << "MIDI-IN CLOCK: " << ENABLE_MIDI_CLOCK;
         
         if (ENABLE_MIDI_CLOCK)
+        {
             ENABLE_INTERNAL_CLOCK = false;
+            
+            //PLAYER_STOP();
+            if (PLAYER_state) PLAYER_state = false;
+            if (DAW_active) DAW_active = false;
+        }
+        
     }
     
     
@@ -250,9 +271,9 @@ void ofxBeatClock::update()
     
     // INTERNAL
     
-    if (ENABLE_INTERNAL_CLOCK){
-        BPM_value = tapMachine->getBPM();
-    }
+//    if (ENABLE_INTERNAL_CLOCK){
+//        BPM_value = tapMachine->getBPM();
+//    }
     
     //------------------------------------------------------------------------
     
@@ -335,6 +356,10 @@ void ofxBeatClock::draw_BPM_CLOCK(){
     int py = 10;
     int paddingAlign = 98;
     
+    //--
+    
+    // TEXT INFO:
+    
     ofPushMatrix();
     
     ofTranslate(px, py);
@@ -344,7 +369,7 @@ void ofxBeatClock::draw_BPM_CLOCK(){
     TTF_small.drawString(TTF_message, 0, interline * i++); i++;
     
     ofTranslate(paddingAlign, 7);
-    TTF_message = ("BPM: " + ofToString(BPM_value));
+    TTF_message = ("BPM: " + ofToString(BPM_Global));
     TTF_small.drawString(TTF_message, 0, interline * i++);
 
     quarters = beats / 4; // convert total # beats to # quarters
@@ -382,17 +407,27 @@ void ofxBeatClock::draw_BPM_CLOCK(){
         
         else if (ENABLE_INTERNAL_CLOCK)
         {
-            if ( (tapMachine->bar.count % 4) >= i )
+            if ( metro.getBeat() > i )
             {
-                //PLAYER_state ? ofSetColor(192) : ofSetColor(32);
-                ofSetColor(192);//for tap mode..
+                PLAYER_state ? ofSetColor(192) : ofSetColor(32);
             }
             
             else
                 ofSetColor(32);
+            
+//            if ( (tapMachine->bar.count % 4) >= i )
+//            {
+//                //PLAYER_state ? ofSetColor(192) : ofSetColor(32);
+//                ofSetColor(192);//for tap mode..
+//            }
+//
+//            else
+//                ofSetColor(32);
         }
         
-        else
+        //-
+        
+        else //disabled both modes
         {
             ofSetColor(32);//black
         }
@@ -435,6 +470,7 @@ void ofxBeatClock::draw_BPM_CLOCK(){
             beatsInBar_PRE = beatsInBar;//test
         }
     }
+    
     else if (ENABLE_INTERNAL_CLOCK && beat_changed)
     {
         beat_changed = false;
@@ -455,6 +491,7 @@ void ofxBeatClock::draw_BPM_CLOCK(){
 void ofxBeatClock::exit()
 {
 
+    PLAYER_state = false;
     saveSettings(pathSettings);
 
     midiIn_CLOCK.closePort();
@@ -469,11 +506,14 @@ void ofxBeatClock::PLAYER_START()//only used in internal mode
     
     if (ENABLE_INTERNAL_CLOCK)
     {
-        ofLogNotice() << "START tap machine";
+        ofLogNotice() << "START";
         
-//        tapMachine->toggleStart();
+        if (!PLAYER_state) PLAYER_state = true;
+        if (!DAW_active) DAW_active = true;
         
-        metro.start();
+        //        tapMachine->toggleStart();
+        
+//        metro.start();
     }
     else
     {
@@ -488,12 +528,15 @@ void ofxBeatClock::PLAYER_STOP()//only used in internal mode
     
     if (ENABLE_INTERNAL_CLOCK)
     {
-        ofLogNotice() << "STOP tap machine";
+        ofLogNotice() << "STOP";
         
-////        if ( tapMachine->isStart() )
-//        tapMachine->toggleStart();
+        if (PLAYER_state) PLAYER_state = false;
+        if (DAW_active) DAW_active = false;
         
-        metro.stop();
+        ////        if ( tapMachine->isStart() )
+        //        tapMachine->toggleStart();
+        
+//        metro.stop();
     }
     else
     {
@@ -503,10 +546,22 @@ void ofxBeatClock::PLAYER_STOP()//only used in internal mode
 
 
 //--------------------------------------------------------------
-void ofxBeatClock::beatsInBar_Changed(int & beatsInBar) {
+void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
     if (beatsInBar != beatsInBar_PRE) {
         ofLogVerbose() << "MIDI IN CLOCK TICK! " << beatsInBar;
         bpm_beat_TICKER = true;
+        
+        // TODO:
+        if (ENABLE_MIDI_CLOCK)
+        {
+            // play tic on the first beat of a bar
+            if (beatsInBar == 1) {
+                tic.play();
+            }
+            else {
+                tac.play();
+            }
+        }
     }
 }
 
@@ -551,7 +606,14 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
                    // this way we can set clockRunning if we've missed a MIDI_START
                    // ie. master was running before we started this example
                     
-                    BPM_value = bpm_CLOCK;
+                    BPM_Global = bpm_CLOCK;
+                    
+                    //-
+                    
+                    if (DAW_SlaveToInternal)
+                        DAW_bpm = bpm_CLOCK;
+                    
+                    //-
                     
                     // transport control
                     
@@ -595,20 +657,20 @@ void ofxBeatClock::draw_Tapper(){
     ofTranslate(0, 300);
     ofPushStyle();
     
-    ofSetColor(255, 0, 0);
-    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->bar.normalized, 200, 10);
-    
-    ofSetColor(0, 255, 0);
-    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->minim.normalized, 250, 10);
-    
-    ofSetColor( 0, 0, 255);
-    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->crochet.normalized, 300, 10);
-    
-    
-    ofSetColor(255, 255, 0);
-    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->twoBar.normalized, 350, 10);
-    ofSetColor(0, 255, 255);
-    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->fourBar.normalized, 400, 10);
+//    ofSetColor(255, 0, 0);
+//    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->bar.normalized, 200, 10);
+//
+//    ofSetColor(0, 255, 0);
+//    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->minim.normalized, 250, 10);
+//
+//    ofSetColor( 0, 0, 255);
+//    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->crochet.normalized, 300, 10);
+//
+//
+//    ofSetColor(255, 255, 0);
+//    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->twoBar.normalized, 350, 10);
+//    ofSetColor(0, 255, 255);
+//    ofDrawCircle(50+(ofGetWidth()-100)*tapMachine->fourBar.normalized, 400, 10);
     
     
     string msg="===============[ ofxTapMachine example ]===============\n";
@@ -656,7 +718,7 @@ void ofxBeatClock::loadSettings(string path)
 }
 
 
-//----
+//--------------------------------------------------------------
 
 // DAW METRO
 
@@ -666,12 +728,16 @@ void ofxBeatClock::onBarEvent(int & bar) {
 
 //--------------------------------------------------------------
 void ofxBeatClock::onBeatEvent(int & beat) {
-    // play tic on the first beat of a bar
-    if (beat == 1) {
-        tic.play();
-    }
-    else {
-        tac.play();
+    
+    if (ENABLE_INTERNAL_CLOCK)
+    {
+        // play tic on the first beat of a bar
+        if (beat == 1) {
+            tic.play();
+        }
+        else {
+            tac.play();
+        }
     }
 }
 
@@ -680,9 +746,13 @@ void ofxBeatClock::onSixteenthEvent(int & sixteenth) {
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::Changed_bpm_DAW(float & value) {
+void ofxBeatClock::Changed_DAW_bpm(float & value) {
     metro.setBpm(value);
     metro.resetTimer();
+    
+    //-
+    
+    BPM_Global = value;
 }
 
 //--------------------------------------------------------------
