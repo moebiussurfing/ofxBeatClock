@@ -258,7 +258,7 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
             //-
             
             // text display
-            BPM_input = "CLOCK INTERNAL";
+            BPM_input = "INTERNAL";
             BPM_name = "'DAW METRO'";
         }
         else
@@ -287,7 +287,7 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
             //-
             
             // TEXT DISPLAY
-            BPM_input = "EXTERNAL MIDI " + ofToString(midiIn_CLOCK.getPort());
+            BPM_input = "EXTERNAL MIDI PORT " + ofToString(midiIn_CLOCK.getPort());
             BPM_name = "'" + ofToString( midiIn_CLOCK.getName() +"'");
         }
         else
@@ -534,7 +534,7 @@ void ofxBeatClock::draw_BPM_CLOCK(){
     
     if (ENABLE_MIDI_CLOCK)
     {
-        if (MIDI_TICKER_Beat == true)
+        if (MIDI_Bang_Beat_Monitor == true)
         {
             if (MIDI_beatsInBar == 1)
                 ofSetColor(ofColor::red);
@@ -543,7 +543,7 @@ void ofxBeatClock::draw_BPM_CLOCK(){
             
             ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
             
-            MIDI_TICKER_Beat = false;
+            MIDI_Bang_Beat_Monitor = false;
             
             beatsInBar_PRE = MIDI_beatsInBar;//test
         }
@@ -600,8 +600,9 @@ void ofxBeatClock::PLAYER_START()//only used in internal mode
         if (!DAW_active) DAW_active = true;
         
         //        tapMachine->toggleStart();
-        
         //        metro.start();
+        
+        isPlaying = PLAYER_state;
     }
     else
     {
@@ -623,8 +624,9 @@ void ofxBeatClock::PLAYER_STOP()//only used in internal mode
         
         ////        if ( tapMachine->isStart() )
         //        tapMachine->toggleStart();
-        
         //        metro.stop();
+        
+        isPlaying = PLAYER_state;
     }
     else
     {
@@ -632,7 +634,23 @@ void ofxBeatClock::PLAYER_STOP()//only used in internal mode
     }
 }
 
-
+//--------------------------------------------------------------
+void ofxBeatClock::PLAYER_TOGGLE()//only used in internal mode
+{
+    ofLogNotice() << "PLAYER_TOGGLE";
+    
+    if (ENABLE_INTERNAL_CLOCK && ENABLE_CLOCKS)
+    {
+        ofLogNotice() << "TOOGLE PLAY";
+        
+        PLAYER_state = !PLAYER_state;
+        isPlaying = PLAYER_state;
+    }
+    else
+    {
+        ofLogNotice() << "skip";
+    }
+}
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
     
@@ -642,13 +660,15 @@ void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
 
         //-
 
+        
+        // TEXT PREVIEW
         BPM_bar = ofToString( MIDI_bars );
         BPM_beat = ofToString( MIDI_beatsInBar );
         BPM_sixteen = " ";
         
         //-
         
-        MIDI_TICKER_Beat = true;
+        MIDI_Bang_Beat_Monitor = true;
 
         if (ENABLE_MIDI_CLOCK && ENABLE_CLOCKS && ENABLE_sound)
         {
