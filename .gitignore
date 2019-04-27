@@ -105,3 +105,14 @@ Desktop.ini
 *.log
 *.sql
 *.sqlite
+ofxBeatClock_example/bin/data/settings/AppSettings.json
+ofxBeatClock_example/bin/data/settings/camerasKit.json
+ofxBeatClock_example/bin/data/settings/camSettings.xml
+ofxBeatClock_example/bin/data/settings/CLOCKER_settings.xml
+ofxBeatClock_example/bin/data/settings/cylsPositions.csv
+ofxBeatClock_example/bin/data/settings/gui_BLINKER.xml
+ofxBeatClock_example/bin/data/settings/gui_CURVE.xml
+ofxBeatClock_example/bin/data/settings/MIDI_Ports.json
+ofxBeatClock_example/bin/data/settings/ofEasyCamSettings.xml
+ofxBeatClock_example/bin/data/sounds/click3.wav
+ofxBeatClock_example/bin/data/sounds/metronome.wav

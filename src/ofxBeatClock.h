@@ -99,7 +99,7 @@ public:
     ofParameter<bool> ENABLE_CLOCKS;// enable clock
     ofParameter<bool> ENABLE_INTERNAL_CLOCK;// enable internal clock
     ofParameter<bool> ENABLE_EXTERNAL_CLOCK;// enable midi clock sync
-    ofParameter<int> MIDI_Port;
+    ofParameter<int> MIDI_Port_SELECT;
     int num_MIDI_Ports = 0;
 
     ofParameterGroup params_clocker;
@@ -201,6 +201,15 @@ public:
     bool Tap_running;
     bool SOUND_wasDisabled = false;// sound disbler to better flow
 
+    //-
+
+    // CHANGE MIDI PORT
+
+    int midiIn_CLOCK_port_OPENED;
+    void setup_MIDI_PORT(int p);
+    int MIDI_Port_PRE = -1;
+
+    //-
 
 };
 
