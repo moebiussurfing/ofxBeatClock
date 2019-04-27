@@ -28,7 +28,7 @@ public:
     void draw();
     void exit();
     
-    //--
+    //-
     
     // MIDI IN CLOCK
     
@@ -62,11 +62,18 @@ public:
     
     //-
     
-    // INTERNAL CLOCK
+    // EXTERNAL CLOCK
     
     void setup_MIDI_CLOCK();
+
+    //-
+
+    // MONITOR
+
     void draw_MONITOR(int x, int y);
     int posMon_x, posMon_Y;
+    void CLOCK_Tick_MONITOR(int beat);
+    bool TRIG_Ball_draw = false;
 
     //-
 
@@ -83,7 +90,7 @@ public:
 
     // GUI
     
-    void setup_Gui_CLOCKER();
+    void setup_Gui();
     ofxGui gui_CLOCKER;
     ofxGuiContainer* container_controls;
     ofxGuiContainer* container_clocker;
@@ -107,14 +114,14 @@ public:
     
     //-
     
-     // TAP TEMPO
+    // TAP TEMPO
     
     void barFunc(int &count);
     void minimFunc(int &count);
     void crochetFunc(int &count);
     void draw_Tapper();
 
-    //--
+    //-
     
     // DAW METRO
     
@@ -124,14 +131,13 @@ public:
     void onSixteenthEvent(int & sixteenth) override;
     ofxDawMetro metro;
     
-    ofxGuiContainer* container_daw;
     ofParameterGroup params_daw;
     ofParameter<float> DAW_bpm;
     ofParameter<bool> DAW_active;
-    
     void Changed_DAW_bpm(float & value);
     void Changed_DAW_active(bool & value);
-    void draw_BigClockTime(int x, int y);
+
+    ofxGuiContainer* container_daw;
 
     //-
     
@@ -140,13 +146,10 @@ public:
     void saveSettings(string path);
     void loadSettings(string path);
     string pathSettings;
-    
-    int beatSquare = -1;
-    bool beat_changed = false;
-    
-    //--
-    
-    // DRAW STUFF
+
+    //-
+
+    // DRAW STUFF:
     
     // FONT
     
@@ -154,13 +157,15 @@ public:
     ofTrueTypeFont TTF_small;
     ofTrueTypeFont TTF_medium;
     ofTrueTypeFont TTF_big;
-    
+
+    //-
+
     // BALL
     
     ofPoint metronome_ball_pos;
     int metronome_ball_radius;
     
-    //--
+    //-
     
     // SOUND
     
@@ -168,29 +173,30 @@ public:
     ofSoundPlayer tic;
     ofSoundPlayer tac;
     
-    //--
-    
-    bool DAW_SlaveToInternal = true;
-    
     //-
+
+    // STRINGS FOR MONITOR DRAWING
     
-    // strings for monitor drawing
-    
-    string BPM_input;
-    string BPM_name;
-    string BPM_bar;
-    string BPM_beat;
-    string BPM_sixteen;
-    
+    string BPM_input_str;
+    string BPM_name_str;
+    string BPM_bar_str;
+    string BPM_beat_str;
+    string BPM_sixteen_str;
+
+    int BPM_beat_current;
+
     //-
     
     // API
-    
-    
+
+    void draw_BigClockTime(int x, int y);
+
     void PLAYER_START();
     void PLAYER_STOP();
     void PLAYER_TOGGLE();
     bool isPlaying;
+
+    //-
 
 };
 
