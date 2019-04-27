@@ -65,8 +65,9 @@ public:
     // INTERNAL CLOCK
     
     void setup_MIDI_CLOCK();
-    void draw_BPM_CLOCK();
-    
+    void draw_MONITOR(int x, int y);
+    int posMon_x, posMon_Y;
+
     //-
 
     // REFRESH FEQUENCY
@@ -95,14 +96,14 @@ public:
     ofParameter<bool> PLAYER_state;// player state
     ofParameter<bool> ENABLE_CLOCKS;// enable clock
     ofParameter<bool> ENABLE_INTERNAL_CLOCK;// enable internal clock
-    ofParameter<bool> ENABLE_MIDI_CLOCK;// enable midi clock sync
+    ofParameter<bool> ENABLE_EXTERNAL_CLOCK;// enable midi clock sync
     
     ofParameterGroup params_clocker;
     ofParameter<float> BPM_Global;//tempo bpm global
     ofParameter<int> BPM_TimeBar;//ms time of 1 bar = 4 beats
     ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig measurements of tap tempo
     
-    void Changed_gui_CLOCKER(ofAbstractParameter& e);
+    void Changed_Params(ofAbstractParameter& e);
     
     //-
     
