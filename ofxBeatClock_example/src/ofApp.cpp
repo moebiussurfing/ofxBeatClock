@@ -41,7 +41,7 @@ void ofApp::keyPressed(int key) {
             break;
 
         case 't':
-            CLOCKER.BPM_Tap_Tempo_TRIG = true;
+            CLOCKER.Tap_Trig();
             break;
 
          case 'r':
