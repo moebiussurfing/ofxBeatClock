@@ -967,16 +967,27 @@ void ofxBeatClock::onSixteenthEvent(int & sixteenth) {
     }
 }
 
-//---------------------------
+//--------------------------------------------------------------
 
 // TAP MACHINE
 
 //--------------------------------------------------------------
-vvoid ofxBeatClock::Tap_Trig()
+void ofxBeatClock::Tap_Trig()
 {
     if (ENABLE_INTERNAL_CLOCK)
     {
         Tap_running = true;
+
+        //-
+
+        // disable sound to better flow
+        if (tapCount == 0 && ENABLE_sound)
+        {
+            ENABLE_sound = false;
+            SOUND_wasDisabled = true;
+        }
+
+        //-
 
         int time = ofGetElapsedTimeMillis();
         tapCount++;
@@ -993,11 +1004,21 @@ vvoid ofxBeatClock::Tap_Trig()
 
             ofLogNotice(">TAP<" )<< "NEW Tap BPM: " << Tap_BPM;
 
+            // TODO: target bpm could be tweened..
+
             //-
 
             intervals.clear();
             tapCount = 0;
             Tap_running = false;
+
+            //-
+
+            if (SOUND_wasDisabled)// sound disbler to better flow
+            {
+                ENABLE_sound = true;
+                SOUND_wasDisabled = false;
+            }
 
             //-
 
@@ -1021,6 +1042,14 @@ void ofxBeatClock::Tap_update()
 
         tapCount = 0;
         Tap_running = false;
+
+        //-
+
+        if (SOUND_wasDisabled)// sound disbler to better flow
+        {
+            ENABLE_sound = true;
+            SOUND_wasDisabled = false;
+        }
     }
 }
 
