@@ -338,7 +338,6 @@
 		F0E85E664C7587AAB23E59EC /* Element.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Element.h; path = ../../../addons/ofxGuiExtended/src/DOM/Element.h; sourceTree = SOURCE_ROOT; };
 		F634AA6CA2E3C60F3B87B59A /* ofxRtMidiIn.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxRtMidiIn.cpp; path = ../../../addons/ofxMidi/src/desktop/ofxRtMidiIn.cpp; sourceTree = SOURCE_ROOT; };
 		F6D7BAB1E6F21D1BF7F843CE /* Types.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Types.h; path = ../../../addons/ofxGuiExtended/src/DOM/Types.h; sourceTree = SOURCE_ROOT; };
-		F7646FF71550E309D72651B0 /* ofxTapMachine.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxTapMachine.h; path = ../../../addons/ofxTapMachine/src/ofxTapMachine.h; sourceTree = SOURCE_ROOT; };
 		F9E4BC31293B5855C601FB91 /* ofxGuiLabel.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxGuiLabel.cpp; path = ../../../addons/ofxGuiExtended/src/controls/ofxGuiLabel.cpp; sourceTree = SOURCE_ROOT; };
 		FA2D677A6EFF993302049105 /* ofxDOMLayoutHelper.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxDOMLayoutHelper.h; path = ../../../addons/ofxGuiExtended/src/view/ofxDOMLayoutHelper.h; sourceTree = SOURCE_ROOT; };
 		FBA5972DB851B40B420049F6 /* ofxBeatClock.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxBeatClock.h; path = ../../../addons/ofxBeatClock/src/ofxBeatClock.h; sourceTree = SOURCE_ROOT; };
@@ -517,7 +516,6 @@
 				BF6053A09BFCD6CD44316200 /* ofxDawMetro */,
 				DFCCF8BDC58AFA44D27F9F11 /* ofxGuiExtended */,
 				2413C01760B1811BED0F502D /* ofxMidi */,
-				E9B33EBD241FB3842700BD4C /* ofxTapMachine */,
 				1F4FB5C423662B96ADFDCC0B /* ofxXmlSettings */,
 			);
 			name = addons;
@@ -867,22 +865,6 @@
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
-		};
-		E9B33EBD241FB3842700BD4C /* ofxTapMachine */ = {
-			isa = PBXGroup;
-			children = (
-				F094E66979E2EDEE20CAA5E3 /* src */,
-			);
-			name = ofxTapMachine;
-			sourceTree = "<group>";
-		};
-		F094E66979E2EDEE20CAA5E3 /* src */ = {
-			isa = PBXGroup;
-			children = (
-				F7646FF71550E309D72651B0 /* ofxTapMachine.h */,
-			);
-			name = src;
-			sourceTree = "<group>";
 		};
 		F0AD07976D10BFA469C92DAA /* controls */ = {
 			isa = PBXGroup;

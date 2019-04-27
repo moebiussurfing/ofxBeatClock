@@ -7,7 +7,6 @@
 #include "ofxMidi.h"
 #include "ofxMidiClock.h"
 #include "ofxMidiTimecode.h"
-#include "ofxTapMachine.h"
 #include "ofxDawMetro.h"
 
 #define BPM_INIT 120
@@ -15,10 +14,7 @@
 //refresh received MTC by clock. disabled/commented to "realtime" by frame update
 
 class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
-    
-private:
-    ofPtr<ofxTapMachine> tapMachine;
-    
+
 public:
     
     //-
@@ -112,15 +108,6 @@ public:
     ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig measurements of tap tempo
     
     void Changed_Params(ofAbstractParameter& e);
-    
-    //-
-    
-    // TAP TEMPO
-    
-    void barFunc(int &count);
-    void minimFunc(int &count);
-    void crochetFunc(int &count);
-    void draw_Tapper();
 
     //-
     
@@ -204,8 +191,15 @@ public:
 
     //-
 
-    bool bTap_Trig = false;
+    // TAP BPM
+
     void Tap_Trig();
+    void Tap_update();
+    int tapCount, lastTime, avgBarMillis;
+    float Tap_BPM;
+    vector<int> intervals;
+    bool Tap_running;
+
 
 };
 
