@@ -58,7 +58,7 @@ public:
     void Changed_MIDI_beatsInBar(int & beatsInBar);
     int beatsInBar_PRE;
     
-    bool bpm_beat_TICKER;
+    bool MIDI_TICKER_Beat;
 
     
     //-
@@ -169,7 +169,7 @@ public:
     
     // SOUND
     
-    bool ENABLE_sound = true;//enable sound ticks
+    ofParameter<bool> ENABLE_sound;//enable sound ticks
     ofSoundPlayer tic;
     ofSoundPlayer tac;
     
