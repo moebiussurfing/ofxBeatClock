@@ -57,8 +57,7 @@ public:
     ofParameter<int> MIDI_beatsInBar; // compute remainder as # notes within the current bar
     void Changed_MIDI_beatsInBar(int & beatsInBar);
     int beatsInBar_PRE;//not required
-    
-    bool MIDI_Bang_Beat_Monitor;
+
     
     //-
     
@@ -73,7 +72,7 @@ public:
     void draw_MONITOR(int x, int y);
     int posMon_x, posMon_Y;
     void CLOCK_Tick_MONITOR(int beat);
-    bool TRIG_Ball_draw = false;
+    bool TRIG_Ball_draw ;
 
     //-
 
@@ -104,7 +103,9 @@ public:
     ofParameter<bool> ENABLE_CLOCKS;// enable clock
     ofParameter<bool> ENABLE_INTERNAL_CLOCK;// enable internal clock
     ofParameter<bool> ENABLE_EXTERNAL_CLOCK;// enable midi clock sync
-    
+    ofParameter<int> MIDI_Port;
+    int num_MIDI_Ports = 0;
+
     ofParameterGroup params_clocker;
     ofParameter<float> BPM_Global;//tempo bpm global
     ofParameter<int> BPM_TimeBar;//ms time of 1 bar = 4 beats
@@ -195,6 +196,12 @@ public:
     void PLAYER_STOP();
     void PLAYER_TOGGLE();
     bool isPlaying;
+    void setPosition_Draw(int x, int y);
+    void setPosition_Gui(int x, int y, int w);
+
+    // gui
+    int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
+
 
     //-
 
