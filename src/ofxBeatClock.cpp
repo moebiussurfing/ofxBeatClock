@@ -76,14 +76,13 @@ void ofxBeatClock::setup()
     //-
     
     // 3.1
-    
+
     // TAP TEMPO
-    
-    tapMachine = make_shared<ofxTapMachine>();
-    ofAddListener(tapMachine->bar.event, this, &ofxBeatClock::barFunc);
-    ofAddListener(tapMachine->minim.event, this, &ofxBeatClock::minimFunc);
-    ofAddListener(tapMachine->crochet.event, this, &ofxBeatClock::crochetFunc);
-    
+
+    Tap_running = false;
+    tapCount = 0;
+    intervals.clear();
+
     //-
     
     // 3.2
@@ -97,7 +96,7 @@ void ofxBeatClock::setup()
     
     DAW_bpm.addListener(this, &ofxBeatClock::Changed_DAW_bpm);
     DAW_active.addListener(this, &ofxBeatClock::Changed_DAW_active);
-    DAW_bpm.set("BPM", 120, 30, 240);
+    DAW_bpm.set("BPM", BPM_INIT, 30, 240);
     DAW_active.set("Active", false);
     
     params_daw.setName("DAW CONTROL");
@@ -117,7 +116,7 @@ void ofxBeatClock::setup()
     TRIG_Ball_draw = false;
 }
 
-//---------------------------
+//--------------------------------------------------------------
 void ofxBeatClock::setup_Gui(){
 
     //-
@@ -180,6 +179,7 @@ void ofxBeatClock::setup_Gui(){
     }
 }
 
+//--------------------------------------------------------------
 void ofxBeatClock::setPosition_Gui(int _x, int _y, int _w)
 {
     gui_Panel_W = _w;
@@ -241,9 +241,15 @@ void ofxBeatClock::setup_MIDI_CLOCK()
 //--------------------------------------------------------------
 void ofxBeatClock::update()
 {
+    //-
 
-    //------------------------------------------------------------------------
-    
+    // TAP
+
+    if (Tap_running)
+        Tap_update();
+
+    //--
+
     // MIDI CLOCK
     
     // read bpm with a clock refresh or every frame if not defined time-clock-refresh:
@@ -306,9 +312,6 @@ void ofxBeatClock::update()
 void ofxBeatClock::draw()
 {
     draw_MONITOR(posMon_x, posMon_Y);
-    
-    draw_Tapper();
-    
 }
 
 //--------------------------------------------------------------
@@ -511,7 +514,9 @@ void ofxBeatClock::exit()
     saveSettings(pathSettings);
 
     //--
-    
+
+    // EXTERNAL
+
     midiIn_CLOCK.closePort();
     midiIn_CLOCK.removeListener(this);
     MIDI_beatsInBar.removeListener(this, &ofxBeatClock::Changed_MIDI_beatsInBar);
@@ -526,13 +531,10 @@ void ofxBeatClock::exit()
     DAW_bpm.removeListener(this, &ofxBeatClock::Changed_DAW_bpm);
     DAW_active.removeListener(this, &ofxBeatClock::Changed_DAW_active);
 
-    ofRemoveListener(tapMachine->bar.event, this, &ofxBeatClock::barFunc);
-    ofRemoveListener(tapMachine->minim.event, this, &ofxBeatClock::minimFunc);
-    ofRemoveListener(tapMachine->crochet.event, this, &ofxBeatClock::crochetFunc);
+    //-
 }
 
 //--------------------------------------------------------
-
 void ofxBeatClock::PLAYER_START()//only used in internal mode
 {
     ofLogNotice() << "PLAYER_START";
@@ -627,13 +629,13 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 
     else if (wid == "TAP" && BPM_Tap_Tempo_TRIG)
     {
-        if (BPM_Tap_Tempo_TRIG == true)
+        if ( (BPM_Tap_Tempo_TRIG == true) && (ENABLE_INTERNAL_CLOCK) )
         {
             BPM_Tap_Tempo_TRIG = false; //should be button
 
             ofLogNotice() << "BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
 
-            tapMachine->tap();
+            Tap_Trig();
         }
     }
 
@@ -664,7 +666,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 
     else if (wid == "BPM")
     {
-        //        ofLogNotice() << "NEW BPM   : " << BPM_Global;
+        //ofLogNotice() << "NEW BPM   : " << BPM_Global;
 
         BPM_TimeBar = 60000 / BPM_Global;// 60,000 / BPM = one beat in milliseconds
                                          //
@@ -770,7 +772,6 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
         //        }
     }
 }
-
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
@@ -903,49 +904,6 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
 }
 
 //--------------------------------------------------------------
-
-// TAP TEMPO
-
-void ofxBeatClock::barFunc(int &count){
-    cout<<"barCount : "<<count<<endl;
-}
-void ofxBeatClock::minimFunc(int &count){
-    cout<<"minimCount : "<<count<<endl;
-}
-void ofxBeatClock::crochetFunc(int &count){
-    cout<<"crochetCount : "<<count<<endl;
-}
-
-//--------------------------------------------------------------
-void ofxBeatClock::draw_Tapper(){
-    
-    ofPushMatrix();
-    ofTranslate(0, 300);
-    ofPushStyle();
-
-    string msg="===============[ ofxTapMachine example ]===============\n";
-    
-    msg += "press space bar more than 3 times to get average BPM.\n";
-//    msg += "FPS        : " + ofToString(ofGetFrameRate(), 2) + "\n";
-    msg += "BPM        : " + ofToString(tapMachine->getBPM(),2) + "\n";
-
-//    msg += "bar        : " + ofToString(tapMachine->bar.count) + "\n";
-//    msg += "minim      : " + ofToString(tapMachine->minim.count) + "\n";
-//    msg += "crochet    : " + ofToString(tapMachine->crochet.count) + "\n";
-//    msg += "quaver     : " + ofToString(tapMachine->quaver.count) + "\n";
-    
-    msg += "bar        : " + ofToString(tapMachine->bar.count % 4) + "\n";
-    msg += "minim      : " + ofToString(tapMachine->minim.count % 8) + "\n";
-    msg += "crochet    : " + ofToString(tapMachine->crochet.count % 16) + "\n";
-    msg += "quaver     : " + ofToString(tapMachine->quaver.count % 32) + "\n";
-    
-    ofDrawBitmapStringHighlight(msg, 10, 10);
-    
-    ofPopStyle();
-    ofPopMatrix();
-}
-
-//--------------------------------------------------------------
 void ofxBeatClock::saveSettings(string path)
 {
     pathSettings = path;//store default
@@ -965,7 +923,6 @@ void ofxBeatClock::loadSettings(string path)
     ofXml settings;
     settings.load(path);
     ofDeserialize(settings, params_control);
-
 }
 
 //--------------------------------------------------------------
@@ -1011,9 +968,59 @@ void ofxBeatClock::onSixteenthEvent(int & sixteenth) {
 }
 
 //---------------------------
-void ofxBeatClock::Tap_Trig()
-{
-    ofLogNotice() << "TAP TRIG";
 
+// TAP MACHINE
+
+//--------------------------------------------------------------
+vvoid ofxBeatClock::Tap_Trig()
+{
+    if (ENABLE_INTERNAL_CLOCK)
+    {
+        Tap_running = true;
+
+        int time = ofGetElapsedTimeMillis();
+        tapCount++;
+        ofLogNotice(">TAP<") <<  "TRIG: " << tapCount;
+
+        intervals.push_back(time - lastTime);
+        lastTime = time;
+
+        if (tapCount>3)
+        {
+            intervals.erase(intervals.begin());
+            avgBarMillis = accumulate(intervals.begin(), intervals.end(), 0) / intervals.size();
+            Tap_BPM = 60 * 1000 / (float)avgBarMillis;
+
+            ofLogNotice(">TAP<" )<< "NEW Tap BPM: " << Tap_BPM;
+
+            //-
+
+            intervals.clear();
+            tapCount = 0;
+            Tap_running = false;
+
+            //-
+
+            // SET BPM
+
+            DAW_bpm = Tap_BPM;
+
+            //-
+        }
+    }
+}
+
+//---------------------------
+void ofxBeatClock::Tap_update()
+{
+    int time = ofGetElapsedTimeMillis();
+    if( intervals.size() > 0 && (time - lastTime > 3000) )
+    {
+        ofLogVerbose(">TAP<") << "TIMEOUT: clear tap logs";
+        intervals.clear();
+
+        tapCount = 0;
+        Tap_running = false;
+    }
 }
 
