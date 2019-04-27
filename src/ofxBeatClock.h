@@ -202,8 +202,10 @@ public:
     // gui
     int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
 
-
     //-
+
+    bool bTap_Trig = false;
+    void Tap_Trig();
 
 };
 

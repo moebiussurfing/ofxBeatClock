@@ -239,164 +239,6 @@ void ofxBeatClock::setup_MIDI_CLOCK()
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
-{
-    string wid = e.getName();
-//    ofLogNotice() << "Changed_gui_CLOCKER '" << wid << "': " << e;
-    
-    if (wid == " ")
-    {
-
-    }
-    
-    else if (wid == "TAP" && BPM_Tap_Tempo_TRIG)
-    {
-        if (BPM_Tap_Tempo_TRIG == true)
-        {
-            BPM_Tap_Tempo_TRIG = false; //should be button
-            
-            ofLogNotice() << "BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
-            
-            tapMachine->tap();
-        }
-    }
-    
-    else if (wid == "PLAY")
-    {
-        ofLogNotice() << "PLAYER_state: " << PLAYER_state;
-
-        // clocks are disabled or using external midi clock. dont need playing, just to be enabled
-        
-        if ( (ENABLE_EXTERNAL_CLOCK || !ENABLE_CLOCKS || !ENABLE_INTERNAL_CLOCK)  && PLAYER_state )
-        {
-            PLAYER_state = false; //skip and restore to false the play button
-        }
-       
-        else if (ENABLE_CLOCKS && ENABLE_INTERNAL_CLOCK)
-        {
-            if (PLAYER_state == true) //play
-            {
-                PLAYER_START();
-            }
-            
-            else //stop
-            {
-                PLAYER_STOP();
-            }
-        }
-    }
-    
-    else if (wid == "BPM")
-    {
-//        ofLogNotice() << "NEW BPM   : " << BPM_Global;
-        
-        BPM_TimeBar = 60000 / BPM_Global;// 60,000 / BPM = one beat in milliseconds
-//
-//        ofLogNotice() << "TIME BEAT : " << BPM_TimeBar << "ms";
-//        ofLogNotice() << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
-    }
-    
-    else if (wid == "INTERNAL")
-    {
-        ofLogNotice() << "CLOCK INTERNAL: " << ENABLE_INTERNAL_CLOCK;
-        
-        if (ENABLE_INTERNAL_CLOCK)
-        {
-            ENABLE_EXTERNAL_CLOCK = false;
-            
-            //-
-            
-            // TEXT DISPLAY
-            BPM_input_str = "INTERNAL";
-            BPM_name_str = "";
-        }
-        else
-        {
-            if (PLAYER_state) PLAYER_state = false;
-            if (DAW_active) DAW_active = false;
-            
-            // TEXT DISPLAY
-            BPM_bar_str = "0";
-            BPM_beat_str = "0";
-            BPM_sixteen_str = "0";
-
-            if(!ENABLE_INTERNAL_CLOCK)
-            {
-                // TEXT DISPLAY
-                BPM_input_str = "NONE";
-                BPM_name_str = "";
-            }
-        }
-    }
-    
-    else if (wid == "EXTERNAL")
-    {
-        ofLogNotice() << "CLOCK EXTERNAL MIDI-IN: " << ENABLE_EXTERNAL_CLOCK;
-        
-        if (ENABLE_EXTERNAL_CLOCK)
-        {
-            ENABLE_INTERNAL_CLOCK = false;
-
-            if (PLAYER_state) PLAYER_state = false;
-            if (DAW_active) DAW_active = false;
-            
-            //-
-            
-            // TEXT DISPLAY
-            BPM_input_str = "EXTERNAL" ;
-            BPM_name_str = "MIDI PORT: ";
-            BPM_name_str += ofToString( midiIn_CLOCK.getPort() );
-            BPM_name_str += " - '" + midiIn_CLOCK.getName() + "'";
-        }
-        else
-        {
-            // TEXT DISPLAY
-            BPM_bar_str = "0";
-            BPM_beat_str = "0";
-            BPM_sixteen_str = "0";
-
-            if(!ENABLE_EXTERNAL_CLOCK)
-            {
-                // TEXT DISPLAY
-                BPM_input_str = "NONE";
-                BPM_name_str = "";
-            }
-        }
-    }
-    
-    else if (wid == "ENABLE")
-    {
-        ofLogNotice() << "ENABLE: " << ENABLE_CLOCKS;
-        
-        if (!ENABLE_CLOCKS)
-        {
-            if (ENABLE_EXTERNAL_CLOCK)
-            {
-                ENABLE_EXTERNAL_CLOCK = false;
-            }
-            
-            if (ENABLE_INTERNAL_CLOCK)
-            {
-                ENABLE_INTERNAL_CLOCK = false;
-            }
-            
-            //PLAYER_STOP();
-            if (PLAYER_state) PLAYER_state = false;
-            if (DAW_active) DAW_active = false;
-        }
-        
-//        else if (ENABLE_CLOCKS)
-//        {
-//            if (!ENABLE_INTERNAL_CLOCK)
-//            {
-//                ENABLE_INTERNAL_CLOCK = true;
-//            }
-//        }
-    }
-}
-
-
-//--------------------------------------------------------------
 void ofxBeatClock::update()
 {
 
@@ -635,6 +477,23 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
 }
 
 //--------------------------------------------------------------
+void ofxBeatClock::draw_BigClockTime(int x, int y){
+
+    // BIG LETTERS:
+
+    // TODO: PERFORMANCE: reduce number of drawings..
+
+    {
+        std::string timePos =
+        ofToString(BPM_bar_str, 3, ' ') + " : " +
+        ofToString(BPM_beat_str) + " : " +
+        ofToString(BPM_sixteen_str);
+
+        TTF_big.drawString(timePos, x, y);
+    }
+}
+
+//--------------------------------------------------------------
 void ofxBeatClock::setPosition_Draw(int x, int y){
     posMon_x = x;
     posMon_Y = y;
@@ -756,6 +615,164 @@ void ofxBeatClock::CLOCK_Tick_MONITOR(int beat)
 }
 
 //--------------------------------------------------------------
+void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
+{
+    string wid = e.getName();
+    //    ofLogNotice() << "Changed_gui_CLOCKER '" << wid << "': " << e;
+
+    if (wid == " ")
+    {
+
+    }
+
+    else if (wid == "TAP" && BPM_Tap_Tempo_TRIG)
+    {
+        if (BPM_Tap_Tempo_TRIG == true)
+        {
+            BPM_Tap_Tempo_TRIG = false; //should be button
+
+            ofLogNotice() << "BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
+
+            tapMachine->tap();
+        }
+    }
+
+    else if (wid == "PLAY")
+    {
+        ofLogNotice() << "PLAYER_state: " << PLAYER_state;
+
+        // clocks are disabled or using external midi clock. dont need playing, just to be enabled
+
+        if ( (ENABLE_EXTERNAL_CLOCK || !ENABLE_CLOCKS || !ENABLE_INTERNAL_CLOCK)  && PLAYER_state )
+        {
+            PLAYER_state = false; //skip and restore to false the play button
+        }
+
+        else if (ENABLE_CLOCKS && ENABLE_INTERNAL_CLOCK)
+        {
+            if (PLAYER_state == true) //play
+            {
+                PLAYER_START();
+            }
+
+            else //stop
+            {
+                PLAYER_STOP();
+            }
+        }
+    }
+
+    else if (wid == "BPM")
+    {
+        //        ofLogNotice() << "NEW BPM   : " << BPM_Global;
+
+        BPM_TimeBar = 60000 / BPM_Global;// 60,000 / BPM = one beat in milliseconds
+                                         //
+                                         //        ofLogNotice() << "TIME BEAT : " << BPM_TimeBar << "ms";
+                                         //        ofLogNotice() << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
+    }
+
+    else if (wid == "INTERNAL")
+    {
+        ofLogNotice() << "CLOCK INTERNAL: " << ENABLE_INTERNAL_CLOCK;
+
+        if (ENABLE_INTERNAL_CLOCK)
+        {
+            ENABLE_EXTERNAL_CLOCK = false;
+
+            //-
+
+            // TEXT DISPLAY
+            BPM_input_str = "INTERNAL";
+            BPM_name_str = "";
+        }
+        else
+        {
+            if (PLAYER_state) PLAYER_state = false;
+            if (DAW_active) DAW_active = false;
+
+            // TEXT DISPLAY
+            BPM_bar_str = "0";
+            BPM_beat_str = "0";
+            BPM_sixteen_str = "0";
+
+            if(!ENABLE_INTERNAL_CLOCK)
+            {
+                // TEXT DISPLAY
+                BPM_input_str = "NONE";
+                BPM_name_str = "";
+            }
+        }
+    }
+
+    else if (wid == "EXTERNAL")
+    {
+        ofLogNotice() << "CLOCK EXTERNAL MIDI-IN: " << ENABLE_EXTERNAL_CLOCK;
+
+        if (ENABLE_EXTERNAL_CLOCK)
+        {
+            ENABLE_INTERNAL_CLOCK = false;
+
+            if (PLAYER_state) PLAYER_state = false;
+            if (DAW_active) DAW_active = false;
+
+            //-
+
+            // TEXT DISPLAY
+            BPM_input_str = "EXTERNAL" ;
+            BPM_name_str = "MIDI PORT: ";
+            BPM_name_str += ofToString( midiIn_CLOCK.getPort() );
+            BPM_name_str += " - '" + midiIn_CLOCK.getName() + "'";
+        }
+        else
+        {
+            // TEXT DISPLAY
+            BPM_bar_str = "0";
+            BPM_beat_str = "0";
+            BPM_sixteen_str = "0";
+
+            if(!ENABLE_EXTERNAL_CLOCK)
+            {
+                // TEXT DISPLAY
+                BPM_input_str = "NONE";
+                BPM_name_str = "";
+            }
+        }
+    }
+
+    else if (wid == "ENABLE")
+    {
+        ofLogNotice() << "ENABLE: " << ENABLE_CLOCKS;
+
+        if (!ENABLE_CLOCKS)
+        {
+            if (ENABLE_EXTERNAL_CLOCK)
+            {
+                ENABLE_EXTERNAL_CLOCK = false;
+            }
+
+            if (ENABLE_INTERNAL_CLOCK)
+            {
+                ENABLE_INTERNAL_CLOCK = false;
+            }
+
+            //PLAYER_STOP();
+            if (PLAYER_state) PLAYER_state = false;
+            if (DAW_active) DAW_active = false;
+        }
+
+        //        else if (ENABLE_CLOCKS)
+        //        {
+        //            if (!ENABLE_INTERNAL_CLOCK)
+        //            {
+        //                ENABLE_INTERNAL_CLOCK = true;
+        //            }
+        //        }
+    }
+}
+
+
+//--------------------------------------------------------------
 void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
 
     // this function trigs when any midi tick (beatsInBar) updating, so we need to filter if (we want beat or 16th..) has changed.
@@ -779,6 +796,29 @@ void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
         beatsInBar_PRE = beatsInBar;
     }
 }
+
+//--------------------------------------------------------------
+void ofxBeatClock::Changed_DAW_bpm(float & value) {
+    metro.setBpm(value);
+    metro.resetTimer();
+
+    //-
+
+    BPM_Global = value;
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::Changed_DAW_active(bool & value) {
+    if (value)
+    {
+        metro.start();
+    }
+    else
+    {
+        metro.stop();
+    }
+}
+
 
 //--------------------------------------------------------------
 void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
@@ -970,41 +1010,10 @@ void ofxBeatClock::onSixteenthEvent(int & sixteenth) {
     }
 }
 
-//--------------------------------------------------------------
-void ofxBeatClock::Changed_DAW_bpm(float & value) {
-    metro.setBpm(value);
-    metro.resetTimer();
-    
-    //-
-    
-    BPM_Global = value;
+//---------------------------
+void ofxBeatClock::Tap_Trig()
+{
+    ofLogNotice() << "TAP TRIG";
+
 }
 
-//--------------------------------------------------------------
-void ofxBeatClock::Changed_DAW_active(bool & value) {
-    if (value)
-    {
-        metro.start();
-    }
-    else
-    {
-        metro.stop();
-    }
-}
-
-//--------------------------------------------------------------
-void ofxBeatClock::draw_BigClockTime(int x, int y){
-    
-    // BIG LETTERS:
-    
-    // TODO: PERFORMANCE: reduce number of drawings..
-    
-        {
-            std::string timePos =
-            ofToString(BPM_bar_str, 3, ' ') + " : " +
-            ofToString(BPM_beat_str) + " : " +
-            ofToString(BPM_sixteen_str);
-    
-            TTF_big.drawString(timePos, x, y);
-        }
-}
