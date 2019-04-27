@@ -101,7 +101,7 @@ void ofxBeatClock::setup()
     
     params_daw.setName("INTERNAL BPM");
     params_daw.add(DAW_bpm);
-//    params_daw.add(DAW_active);
+    //    params_daw.add(DAW_active);
 
     metro.setBpm(DAW_bpm);
     
@@ -286,40 +286,12 @@ void ofxBeatClock::update()
     //--
     
     // BPM ENGINE:
-    
-//    // TODO: SE ESTA USANDO EN DOS LUGARES LA VARIABLE FLAG!!
-//    if (BPM_gotBeat == true)
-//    {
-//        //----
-//
-//        BPM_LAST_Tick_Time_ELLAPSED_PRE = BPM_LAST_Tick_Time_ELLAPSED;
-//        BPM_LAST_Tick_Time_ELLAPSED = ofGetElapsedTimeMillis() - BPM_LAST_Tick_Time_LAST;//test
-//        BPM_LAST_Tick_Time_LAST = ofGetElapsedTimeMillis();//test
-//        ELLAPSED_diff = BPM_LAST_Tick_Time_ELLAPSED_PRE - BPM_LAST_Tick_Time_ELLAPSED;
-//
-//        //----
-//
-//        if (bpm.barIndex == 0)
-//        {
-//            if (ENABLE_sound)
-//                mySound1.play();
-//
-//            //ofLogNotice() << "| ! BEAT ! |";
-//            ofLogNotice() << "| ! BEAT ! | " << BPM_LAST_Tick_Time_ELLAPSED << " | " << ELLAPSED_diff;//test
-//        }
-//
-//        else
-//        {
-//            if (ENABLE_sound)
-//                mySound2.play();
-//
-//            //ofLogNotice() << "|   BEAT   |";
-//            ofLogNotice() << "|   BEAT   | " << BPM_LAST_Tick_Time_ELLAPSED << " | " << ELLAPSED_diff;//test
-//        }
-//
-//        BPM_gotBeat = false;
-//    }
-    
+
+//BPM_LAST_Tick_Time_ELLAPSED_PRE = BPM_LAST_Tick_Time_ELLAPSED;
+//BPM_LAST_Tick_Time_ELLAPSED = ofGetElapsedTimeMillis() - BPM_LAST_Tick_Time_LAST;//test
+//BPM_LAST_Tick_Time_LAST = ofGetElapsedTimeMillis();//test
+//ELLAPSED_diff = BPM_LAST_Tick_Time_ELLAPSED_PRE - BPM_LAST_Tick_Time_ELLAPSED;
+
     //-
 
     ofSoundUpdate();
@@ -634,14 +606,13 @@ void ofxBeatClock::CLOCK_Tick_MONITOR(int beat)
             }
         }
     }
-
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 {
     string wid = e.getName();
-    //    ofLogNotice() << "Changed_gui_CLOCKER '" << wid << "': " << e;
+    //ofLogNotice() << "Changed_gui_CLOCKER '" << wid << "': " << e;
 
     if (wid == " ")
     {
@@ -856,7 +827,6 @@ void ofxBeatClock::Changed_DAW_active(bool & value) {
         metro.stop();
     }
 }
-
 
 //--------------------------------------------------------------
 void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {

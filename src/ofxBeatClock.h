@@ -10,6 +10,7 @@
 #include "ofxDawMetro.h"
 
 #define BPM_INIT 120
+
 #define BPM_MIDI_CLOCK_REFRESH_RATE 200
 //refresh received MTC by clock. disabled/commented to "realtime" by frame update
 
