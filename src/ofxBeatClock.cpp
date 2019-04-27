@@ -51,9 +51,9 @@ void ofxBeatClock::setup()
     TTF_medium.load("fonts/mono.ttf", 12);
     TTF_big.load("fonts/mono.ttf", 18);
     
-    metronome_ball_pos.set(400, 700);
-    metronome_ball_radius = 25;
-    
+//    metronome_ball_pos.set(400, 700);
+//    metronome_ball_radius = 25;
+
     //---
     
     // SOUNDS
@@ -259,7 +259,7 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
             
             // text display
             BPM_input = "INTERNAL";
-            BPM_name = "'DAW METRO'";
+            BPM_name = "";
         }
         else
         {
@@ -287,8 +287,10 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
             //-
             
             // TEXT DISPLAY
-            BPM_input = "EXTERNAL MIDI PORT " + ofToString(midiIn_CLOCK.getPort());
-            BPM_name = "'" + ofToString( midiIn_CLOCK.getName() +"'");
+            BPM_input = "EXTERNAL" ;
+            BPM_name = "MIDI PORT ";
+            BPM_name += ofToString( midiIn_CLOCK.getPort() );
+            BPM_name += " '" + midiIn_CLOCK.getName() + "'";
         }
         else
         {
@@ -410,31 +412,30 @@ void ofxBeatClock::draw()
     
     draw_Tapper();
     
-    draw_DAW();
+
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::draw_BPM_CLOCK(){
     
-    int interline = 10; // line heigh
-    int i = 0;
     int px = 10;
     int py = 20;
+    int padToSquares = 0;
+    int padToBigTime = 0;
+    int padToBall = 10;
+
+    int interline = 10; // line heigh
+    int squaresW = 50;//squares beats size
+    metronome_ball_radius = 25;
+
     int paddingAlign = 0;
+    int i = 0;
+
+    bool SHOW_moreInfo = false;
     
     //--
     
     // 2. TEXT INFO:
-    
-//    if (ENABLE_INTERNAL_CLOCK)
-//    {
-//
-//    }
-//
-//    else if(ENABLE_MIDI_CLOCK)
-//    {
-//        
-//    }
     
     ofPushMatrix();
     ofTranslate(px, py);
@@ -442,37 +443,56 @@ void ofxBeatClock::draw_BPM_CLOCK(){
     TTF_message = "CLOCK: " + BPM_input ;
     TTF_small.drawString(TTF_message, 0, interline * i++);
     
-    TTF_message = ofToString(BPM_name);
+    TTF_message = ofToString( BPM_name );
     TTF_small.drawString(TTF_message, 0, interline * i++); i++;
-    
-    //ofTranslate(paddingAlign, 7);
-    
-    TTF_message = ("BPM : " + ofToString( BPM_Global ));
-    TTF_small.drawString(TTF_message, 0, interline * i++);
-    
-    TTF_message = ("BAR : " + BPM_bar );
-    TTF_small.drawString(TTF_message, 0, interline * i++);
-    
-    TTF_message = ("BEAT: " + BPM_beat );
-    TTF_small.drawString(TTF_message, 0, interline * i++);
-    
-    TTF_message = ("16th: " + BPM_sixteen );
-    TTF_small.drawString(TTF_message, 0, interline * i++);
+
+    py = py + (interline * (i+2));// acumulate heigh distance
+
+    //-
+
+    if (SHOW_moreInfo)
+    {
+        //ofTranslate(paddingAlign, 7);
+
+        TTF_message = ("BPM : " + ofToString( BPM_Global ));
+        TTF_small.drawString(TTF_message, 0, interline * i++);
+        
+        TTF_message = ("BAR : " + BPM_bar );
+        TTF_small.drawString(TTF_message, 0, interline * i++);
+        
+        TTF_message = ("BEAT: " + BPM_beat );
+        TTF_small.drawString(TTF_message, 0, interline * i++);
+        
+        TTF_message = ("16th: " + BPM_sixteen );
+        TTF_small.drawString(TTF_message, 0, interline * i++);
+
+        //-
+
+        py = py + (interline * i);// acumulate heigh distance
+    }
     
     ofPopMatrix();
-    
+
+    //--
+
+    py += padToBigTime;
+    draw_BigClockTime(px, py);
+    py = py + (TTF_big.getSize());// acumulate heigh distance
+
     //--
     
     // 2. BEATS SQUARES
     
-    py += 95;
-    int w = 50;//squares beats size
+    py += padToSquares;
     
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++)
+    {
         ofPushStyle();
         
         //--
-        
+
+        // DEFINE SQUARE COORS:
+
         if (ENABLE_MIDI_CLOCK)
         {
             if (i <= (MIDI_beatsInBar - 1))
@@ -491,16 +511,9 @@ void ofxBeatClock::draw_BPM_CLOCK(){
             }
             
             else
+            {
                 ofSetColor(32);
-            
-//            if ( (tapMachine->bar.count % 4) >= i )
-//            {
-//                //PLAYER_state ? ofSetColor(192) : ofSetColor(32);
-//                ofSetColor(192);//for tap mode..
-//            }
-//
-//            else
-//                ofSetColor(32);
+            }
         }
         
         //-
@@ -511,22 +524,33 @@ void ofxBeatClock::draw_BPM_CLOCK(){
         }
         
         //--
-        
-        
+
+        // DRAW SQUARES
+
         ofFill();
-        ofDrawRectangle(px + i * w, py, w, w);
+        ofDrawRectangle(px + i * squaresW, py, squaresW, squaresW); //border
+
         ofNoFill();
         ofSetColor(8);
-        ofSetLineWidth(2);//border
-        ofDrawRectangle(px + i * w, py, w, w);
-        
+        ofSetLineWidth(2);
+        ofDrawRectangle(px + i * squaresW, py, squaresW, squaresW); //filled
+
         ofPopStyle();
+
     }
-    
+
+    //-
+
+    py = py + (squaresW);// acumulate heigh distance
+
     //--
-    
+
     // 3. TICK BALL:
-    
+
+    py += padToBall + metronome_ball_radius;
+    metronome_ball_pos.x = px + metronome_ball_radius;
+    metronome_ball_pos.y = py;
+
     ofPushStyle();
     
     ofSetColor(16); // ball background
@@ -536,15 +560,15 @@ void ofxBeatClock::draw_BPM_CLOCK(){
     {
         if (MIDI_Bang_Beat_Monitor == true)
         {
+            MIDI_Bang_Beat_Monitor = false;
+
             if (MIDI_beatsInBar == 1)
                 ofSetColor(ofColor::red);
             else
                 ofSetColor(ofColor::white);
             
             ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
-            
-            MIDI_Bang_Beat_Monitor = false;
-            
+
             beatsInBar_PRE = MIDI_beatsInBar;//test
         }
     }
@@ -562,7 +586,12 @@ void ofxBeatClock::draw_BPM_CLOCK(){
     }
     
     ofPopStyle();
-    
+
+    //-
+
+    py = py + (2 * metronome_ball_radius);// acumulate heigh distance
+    px = px - metronome_ball_radius;
+
     //-
 }
 
@@ -599,9 +628,6 @@ void ofxBeatClock::PLAYER_START()//only used in internal mode
         if (!PLAYER_state) PLAYER_state = true;
         if (!DAW_active) DAW_active = true;
         
-        //        tapMachine->toggleStart();
-        //        metro.start();
-        
         isPlaying = PLAYER_state;
     }
     else
@@ -621,10 +647,7 @@ void ofxBeatClock::PLAYER_STOP()//only used in internal mode
         
         if (PLAYER_state) PLAYER_state = false;
         if (DAW_active) DAW_active = false;
-        
-        ////        if ( tapMachine->isStart() )
-        //        tapMachine->toggleStart();
-        //        metro.stop();
+
         
         isPlaying = PLAYER_state;
     }
@@ -651,17 +674,18 @@ void ofxBeatClock::PLAYER_TOGGLE()//only used in internal mode
         ofLogNotice() << "skip";
     }
 }
+
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
-    
+
+    // this functions trigs when any midi updating, so we need to filter if beat (or 16th..) has changed.
+
     if (beatsInBar != beatsInBar_PRE)
     {
         ofLogVerbose() << "MIDI-IN CLOCK TICK! " << beatsInBar;
 
         //-
 
-        
-        // TEXT PREVIEW
         BPM_bar = ofToString( MIDI_bars );
         BPM_beat = ofToString( MIDI_beatsInBar );
         BPM_sixteen = " ";
@@ -682,7 +706,6 @@ void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
         }
     }
 }
-
 
 //--------------------------------------------------------------
 void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
@@ -723,9 +746,7 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
             
             switch (message.status)
             {
-                    // compute seconds and bpm live, you may or may not always need this
-                    // which is why it is not integrated into the ofxMidiClock parser class
-                    
+
                 case MIDI_TIME_CLOCK:
                     MIDI_seconds = MIDI_clock.getSeconds();
                     MIDI_CLOCK_bpm += (MIDI_clock.getBpm() - MIDI_CLOCK_bpm) / 5;
@@ -906,11 +927,7 @@ void ofxBeatClock::Changed_DAW_active(bool & value) {
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::draw_DAW(){
-
-    int x, y;
-    x = 10;
-    y = 200;
+void ofxBeatClock::draw_BigClockTime(int x, int y){
     
     // BIG LETTERS:
     

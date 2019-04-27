@@ -56,10 +56,9 @@ public:
     
     ofParameter<int> MIDI_beatsInBar; // compute remainder as # notes within the current bar
     void Changed_MIDI_beatsInBar(int & beatsInBar);
-    int beatsInBar_PRE;
+    int beatsInBar_PRE;//not required
     
     bool MIDI_Bang_Beat_Monitor;
-
     
     //-
     
@@ -77,20 +76,20 @@ public:
     unsigned long BPM_LAST_Tick_Time_ELLAPSED_PRE;//test
     long ELLAPSED_diff;//test
     
-    
     unsigned long bpm_CheckUpdated_lastTime;
     
     //-
 
-    
-    //---
-
-    // GUI PARAMS
+    // GUI
     
     void setup_Gui_CLOCKER();
     ofxGui gui_CLOCKER;
     ofxGuiContainer* container_controls;
     ofxGuiContainer* container_clocker;
+    
+    //-
+    
+    // PARAMS
     
     ofParameterGroup params_control;
     ofParameter<bool> PLAYER_state;// player state
@@ -131,7 +130,7 @@ public:
     
     void Changed_DAW_bpm(float & value);
     void Changed_DAW_active(bool & value);
-    void draw_DAW();
+    void draw_BigClockTime(int x, int y);
 
     //-
     
@@ -174,7 +173,8 @@ public:
     
     //-
     
-    // strings for drawing
+    // strings for monitor drawing
+    
     string BPM_input;
     string BPM_name;
     string BPM_bar;
