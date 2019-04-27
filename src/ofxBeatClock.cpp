@@ -467,6 +467,7 @@ void ofxBeatClock::draw()
 void ofxBeatClock::draw_MONITOR(int px, int py){
 
     // heigh paddings
+
     int padToSquares = 0;
     int padToBigTime = 0;
     int padToBall = 10;
@@ -527,8 +528,6 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
 
     //--
 
-    //TODO: should reduce and improve to use the same beat triggers/states for both external/internal clocks..
-    
     // 2. BEATS SQUARES
     
     py += padToSquares;
@@ -541,29 +540,21 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
 
         // DEFINE SQUARE COLORS:
 
-        if (ENABLE_EXTERNAL_CLOCK)
+        if ( ENABLE_CLOCKS & (ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK) )
         {
-            if (i <= (MIDI_beatsInBar - 1))
-                clockRunning ? ofSetColor(192) : ofSetColor(32);
+            if (i <= (BPM_beat_current - 1))
+            {
+                if (ENABLE_INTERNAL_CLOCK)
+                    PLAYER_state ? ofSetColor(192) : ofSetColor(32);
+
+                else if (ENABLE_EXTERNAL_CLOCK)
+                    clockRunning ? ofSetColor(192) : ofSetColor(32);
+            }
+
             else
                 ofSetColor(32);
         }
-        
-        //--
-        
-        else if (ENABLE_INTERNAL_CLOCK)
-        {
-            if ( metro.getBeat() > i )
-            {
-                PLAYER_state ? ofSetColor(192) : ofSetColor(32);
-            }
-            
-            else
-            {
-                ofSetColor(32);
-            }
-        }
-        
+
         //-
         
         else //disabled both modes
@@ -584,6 +575,8 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
         ofDrawRectangle(px + i * squaresW, py, squaresW, squaresW); //filled
 
         ofPopStyle();
+
+        //--
 
     }
 
@@ -606,7 +599,7 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
 
     //-
 
-    if (ENABLE_EXTERNAL_CLOCK)
+    if ( ENABLE_CLOCKS && ( ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK ) )
     {
         if ( TRIG_Ball_draw )
         {
@@ -618,30 +611,11 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
                 ofSetColor(ofColor::white);
             
             ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
-
-            //-
-
-            beatsInBar_PRE = MIDI_beatsInBar;//to test if changed
         }
     }
 
     //-
 
-    else if (ENABLE_INTERNAL_CLOCK)
-    {
-        if ( TRIG_Ball_draw )
-        {
-            TRIG_Ball_draw = false;
-
-            if (BPM_beat_current == 1)
-                ofSetColor(ofColor::red);
-            else
-                ofSetColor(ofColor::white);
-
-            ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
-        }
-    }
-    
     ofPopStyle();
 
     //-
@@ -767,7 +741,6 @@ void ofxBeatClock::CLOCK_Tick_MONITOR(int beat)
 
 }
 
-
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
 
@@ -781,14 +754,15 @@ void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
         //-
 
         BPM_bar_str = ofToString( MIDI_bars );
-        BPM_beat_str = ofToString( MIDI_beatsInBar );
+        BPM_beat_str = ofToString( beatsInBar );
+        BPM_beat_current = beatsInBar;//MIDI_beatsInBar = beatsInBar
         BPM_sixteen_str = " ";//TODO: should compute too..
-
-        BPM_beat_current = MIDI_beatsInBar;
 
         //-
         
-        CLOCK_Tick_MONITOR(beatsInBar);
+        CLOCK_Tick_MONITOR(BPM_beat_current);
+
+        beatsInBar_PRE = beatsInBar;
     }
 }
 
