@@ -118,9 +118,9 @@ void ofxBeatClock::setup()
     params_control.setName("CLOCK CONTROL");
     params_control.add(ENABLE_CLOCKS.set("ENABLE", true));
     params_control.add(PLAYER_state.set("PLAY", false));
-    params_control.add(ENABLE_INTERNAL_CLOCK.set("CLOCK INTERNAL", false));
-    params_control.add(ENABLE_EXTERNAL_CLOCK.set("CLOCK EXTERNAL", true));
-    params_control.add(ENABLE_sound.set("TICK SOUND", false));
+    params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
+    params_control.add(ENABLE_EXTERNAL_CLOCK.set("EXTERNAL", true));
+    params_control.add(ENABLE_sound.set("TICK", false));
     ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
     //-
     
@@ -276,7 +276,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 //        ofLogNotice() << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
     }
     
-    else if (wid == "CLOCK INTERNAL")
+    else if (wid == "INTERNAL")
     {
         ofLogNotice() << "CLOCK INTERNAL: " << ENABLE_INTERNAL_CLOCK;
         
@@ -309,7 +309,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
         }
     }
     
-    else if (wid == "CLOCK EXTERNAL")
+    else if (wid == "EXTERNAL")
     {
         ofLogNotice() << "CLOCK EXTERNAL MIDI-IN: " << ENABLE_EXTERNAL_CLOCK;
         
