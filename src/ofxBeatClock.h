@@ -199,6 +199,7 @@ public:
     float Tap_BPM;
     vector<int> intervals;
     bool Tap_running;
+    bool SOUND_wasDisabled = false;// sound disbler to better flow
 
 
 };
