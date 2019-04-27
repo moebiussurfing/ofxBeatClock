@@ -34,8 +34,34 @@ void ofxBeatClock::setup_Gui_CLOCKER(){
     loadSettings(pathSettings);
     
     //--
-    
-    
+
+    // init state just in cas not open correCt
+
+    if (ENABLE_INTERNAL_CLOCK)
+    {
+        ENABLE_EXTERNAL_CLOCK = false;
+
+        //-
+
+        // TEXT DISPLAY
+        BPM_input = "INTERNAL";
+        BPM_name = "";
+    }
+    else if (ENABLE_EXTERNAL_CLOCK)
+    {
+        ENABLE_INTERNAL_CLOCK = false;
+
+        if (PLAYER_state) PLAYER_state = false;
+        if (DAW_active) DAW_active = false;
+
+        //-
+
+        // TEXT DISPLAY
+        BPM_input = "EXTERNAL" ;
+        BPM_name = "MIDI PORT: ";
+        BPM_name += ofToString( midiIn_CLOCK.getPort() );
+        BPM_name += " - '" + midiIn_CLOCK.getName() + "'";
+    }
 }
 
 //--------------------------------------------------------------
@@ -50,9 +76,12 @@ void ofxBeatClock::setup()
     TTF_small.load("fonts/mono.ttf", 8);
     TTF_medium.load("fonts/mono.ttf", 12);
     TTF_big.load("fonts/mono.ttf", 18);
-    
-//    metronome_ball_pos.set(400, 700);
-//    metronome_ball_radius = 25;
+
+    //--
+
+    // MONITOR:
+    posMon_x = 10;
+    posMon_Y = 10;
 
     //---
     
@@ -82,7 +111,7 @@ void ofxBeatClock::setup()
    
     //-
     
-    // INTERNAL CLOCK
+    // CONTROL AND INTERNAL CLOCK
     
     // 1. control
     
@@ -90,9 +119,9 @@ void ofxBeatClock::setup()
     params_control.add(ENABLE_CLOCKS.set("ENABLE", true));
     params_control.add(PLAYER_state.set("PLAY", false));
     params_control.add(ENABLE_INTERNAL_CLOCK.set("CLOCK INTERNAL", false));
-    params_control.add(ENABLE_MIDI_CLOCK.set("CLOCK EXTERNAL", true));
+    params_control.add(ENABLE_EXTERNAL_CLOCK.set("CLOCK EXTERNAL", true));
     params_control.add(ENABLE_sound.set("TICK SOUND", false));
-    ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_gui_CLOCKER);
+    ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
     //-
     
     // 2. monitor
@@ -101,7 +130,7 @@ void ofxBeatClock::setup()
     params_clocker.add(BPM_Global.set("BPM", BPM_INIT, 60, 300));
     params_clocker.add(BPM_TimeBar.set("BAR ms", 60000 / BPM_Global, 1, 5000));
     params_clocker.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
-    ofAddListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_gui_CLOCKER);
+    ofAddListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
     
     //-
     
@@ -118,7 +147,7 @@ void ofxBeatClock::setup()
     
     // 3.2
     
-    // daw metro
+    // DAW METRO
     
     // add bar/beat/sixteenth listener on demand
     metro.addBeatListener(this);
@@ -190,7 +219,7 @@ void ofxBeatClock::setup_MIDI_CLOCK()
 
 
 //--------------------------------------------------------------
-void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
+void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 {
     string wid = e.getName();
 //    ofLogNotice() << "Changed_gui_CLOCKER '" << wid << "': " << e;
@@ -218,7 +247,7 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
 
         // clocks are disabled or using external midi clock. dont need playing, just to be enabled
         
-        if ( (ENABLE_MIDI_CLOCK || !ENABLE_CLOCKS || !ENABLE_INTERNAL_CLOCK)  && PLAYER_state )
+        if ( (ENABLE_EXTERNAL_CLOCK || !ENABLE_CLOCKS || !ENABLE_INTERNAL_CLOCK)  && PLAYER_state )
         {
             PLAYER_state = false; //skip and restore to false the play button
         }
@@ -253,11 +282,11 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
         
         if (ENABLE_INTERNAL_CLOCK)
         {
-            ENABLE_MIDI_CLOCK = false;
+            ENABLE_EXTERNAL_CLOCK = false;
             
             //-
             
-            // text display
+            // TEXT DISPLAY
             BPM_input = "INTERNAL";
             BPM_name = "";
         }
@@ -270,14 +299,21 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
             BPM_bar = "0";
             BPM_beat = "0";
             BPM_sixteen = "0";
+
+            if(!ENABLE_INTERNAL_CLOCK)
+            {
+                // TEXT DISPLAY
+                BPM_input = "NONE";
+                BPM_name = "";
+            }
         }
     }
     
     else if (wid == "CLOCK EXTERNAL")
     {
-        ofLogNotice() << "CLOCK EXTERNAL MIDI-IN: " << ENABLE_MIDI_CLOCK;
+        ofLogNotice() << "CLOCK EXTERNAL MIDI-IN: " << ENABLE_EXTERNAL_CLOCK;
         
-        if (ENABLE_MIDI_CLOCK)
+        if (ENABLE_EXTERNAL_CLOCK)
         {
             ENABLE_INTERNAL_CLOCK = false;
 
@@ -288,9 +324,9 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
             
             // TEXT DISPLAY
             BPM_input = "EXTERNAL" ;
-            BPM_name = "MIDI PORT ";
+            BPM_name = "MIDI PORT: ";
             BPM_name += ofToString( midiIn_CLOCK.getPort() );
-            BPM_name += " '" + midiIn_CLOCK.getName() + "'";
+            BPM_name += " - '" + midiIn_CLOCK.getName() + "'";
         }
         else
         {
@@ -298,6 +334,13 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
             BPM_bar = "0";
             BPM_beat = "0";
             BPM_sixteen = "0";
+
+            if(!ENABLE_EXTERNAL_CLOCK)
+            {
+                // TEXT DISPLAY
+                BPM_input = "NONE";
+                BPM_name = "";
+            }
         }
     }
     
@@ -307,9 +350,9 @@ void ofxBeatClock::Changed_gui_CLOCKER(ofAbstractParameter& e) // patch change
         
         if (!ENABLE_CLOCKS)
         {
-            if (ENABLE_MIDI_CLOCK)
+            if (ENABLE_EXTERNAL_CLOCK)
             {
-                ENABLE_MIDI_CLOCK = false;
+                ENABLE_EXTERNAL_CLOCK = false;
             }
             
             if (ENABLE_INTERNAL_CLOCK)
@@ -408,27 +451,24 @@ void ofxBeatClock::update()
 //--------------------------------------------------------------
 void ofxBeatClock::draw()
 {
-    draw_BPM_CLOCK();
+    draw_MONITOR(posMon_x, posMon_Y);
     
     draw_Tapper();
     
-
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::draw_BPM_CLOCK(){
-    
-    int px = 10;
-    int py = 20;
+void ofxBeatClock::draw_MONITOR(int px, int py){
+
+    // heigh paddings
     int padToSquares = 0;
     int padToBigTime = 0;
     int padToBall = 10;
 
-    int interline = 10; // line heigh
     int squaresW = 50;//squares beats size
-    metronome_ball_radius = 25;
+    metronome_ball_radius = 30;
 
-    int paddingAlign = 0;
+    int interline = 11; // line heigh
     int i = 0;
 
     bool SHOW_moreInfo = false;
@@ -491,9 +531,9 @@ void ofxBeatClock::draw_BPM_CLOCK(){
         
         //--
 
-        // DEFINE SQUARE COORS:
+        // DEFINE SQUARE COLORS:
 
-        if (ENABLE_MIDI_CLOCK)
+        if (ENABLE_EXTERNAL_CLOCK)
         {
             if (i <= (MIDI_beatsInBar - 1))
                 clockRunning ? ofSetColor(192) : ofSetColor(32);
@@ -556,7 +596,7 @@ void ofxBeatClock::draw_BPM_CLOCK(){
     ofSetColor(16); // ball background
     ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
     
-    if (ENABLE_MIDI_CLOCK)
+    if (ENABLE_EXTERNAL_CLOCK)
     {
         if (MIDI_Bang_Beat_Monitor == true)
         {
@@ -599,8 +639,9 @@ void ofxBeatClock::draw_BPM_CLOCK(){
 void ofxBeatClock::exit()
 {
 
+    // default desired settings when it will opened
     PLAYER_state = false;
-    if (!ENABLE_INTERNAL_CLOCK && !ENABLE_MIDI_CLOCK)
+    if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_CLOCK)
         ENABLE_INTERNAL_CLOCK = true;
     
     saveSettings(pathSettings);
@@ -609,10 +650,21 @@ void ofxBeatClock::exit()
     
     midiIn_CLOCK.closePort();
     midiIn_CLOCK.removeListener(this);
-    
+
+    MIDI_beatsInBar.removeListener(this, &ofxBeatClock::Changed_MIDI_beatsInBar);
+
     //-
     
-    // TODO: remove listeners
+    // remove listeners
+    ofRemoveListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
+    ofRemoveListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
+
+    DAW_bpm.removeListener(this, &ofxBeatClock::Changed_DAW_bpm);
+    DAW_active.removeListener(this, &ofxBeatClock::Changed_DAW_active);
+
+    ofRemoveListener(tapMachine->bar.event, this, &ofxBeatClock::barFunc);
+    ofRemoveListener(tapMachine->minim.event, this, &ofxBeatClock::minimFunc);
+    ofRemoveListener(tapMachine->crochet.event, this, &ofxBeatClock::crochetFunc);
 }
 
 //--------------------------------------------------------
@@ -694,7 +746,7 @@ void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
         
         MIDI_Bang_Beat_Monitor = true;
 
-        if (ENABLE_MIDI_CLOCK && ENABLE_CLOCKS && ENABLE_sound)
+        if (ENABLE_EXTERNAL_CLOCK && ENABLE_CLOCKS && ENABLE_sound)
         {
             // play tic on the first beat of a bar
             if (beatsInBar == 1) {
@@ -710,7 +762,7 @@ void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
 //--------------------------------------------------------------
 void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
     
-    if ( ENABLE_MIDI_CLOCK && ENABLE_CLOCKS )
+    if ( ENABLE_EXTERNAL_CLOCK && ENABLE_CLOCKS )
     {
         // 1. MIDI CLOCK:
         
