@@ -31,15 +31,7 @@ void ofApp::keyPressed(int key) {
     switch (key) {
 
         case ' ':
-//            if ( CLOCKER.PLAYER_state == false )
-//            {
-//                CLOCKER.PLAYER_state = true;
-//                
-//            }
-//            else
-//            {
-//                CLOCKER.PLAYER_state = false;
-//            }
+            CLOCKER.PLAYER_TOGGLE();
             break;
 
         case '-':

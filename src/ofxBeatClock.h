@@ -58,7 +58,7 @@ public:
     void Changed_MIDI_beatsInBar(int & beatsInBar);
     int beatsInBar_PRE;
     
-    bool MIDI_TICKER_Beat;
+    bool MIDI_Bang_Beat_Monitor;
 
     
     //-
@@ -81,12 +81,7 @@ public:
     unsigned long bpm_CheckUpdated_lastTime;
     
     //-
-    
-    // PLAYER MANAGER
-    
-    void PLAYER_START();
-    void PLAYER_STOP();
-    // TODO: add switch state..
+
     
     //---
 
@@ -187,6 +182,14 @@ public:
     string BPM_sixteen;
     
     //-
+    
+    // API
+    
+    
+    void PLAYER_START();
+    void PLAYER_STOP();
+    void PLAYER_TOGGLE();
+    bool isPlaying;
 
 };
 
