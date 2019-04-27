@@ -1,69 +1,6 @@
 
 #include "ofxBeatClock.h"
 
-
-//---------------------------
-void ofxBeatClock::setup_Gui(){
-    
-    //-
-    
-    int panelW, x, y, padW;
-    panelW = 200;
-    x = 300;
-    y = 10;
-    padW = 5;
-    
-    
-    
-    //--
-    
-    container_controls = gui_CLOCKER.addGroup(params_control);
-    container_controls->setPosition(ofPoint(x, y));
-    
-    container_clocker = gui_CLOCKER.addGroup(params_clocker);
-    container_clocker->setPosition(ofPoint(x + (panelW + padW), y));
-    
-    container_daw = gui_CLOCKER.addGroup(params_daw);
-    container_daw->setPosition(ofPoint(x + 2 * (panelW + padW), y));
-    
-    //-
-
-    // LOAD LAST SETTINGS
-    
-    pathSettings = "CLOCKER_settings.xml";//default
-    loadSettings(pathSettings);
-    
-    //--
-
-    // init state just in cas not open correCt
-
-    if (ENABLE_INTERNAL_CLOCK)
-    {
-        ENABLE_EXTERNAL_CLOCK = false;
-
-        //-
-
-        // TEXT DISPLAY
-        BPM_input_str = "INTERNAL";
-        BPM_name_str = "";
-    }
-    else if (ENABLE_EXTERNAL_CLOCK)
-    {
-        ENABLE_INTERNAL_CLOCK = false;
-
-        if (PLAYER_state) PLAYER_state = false;
-        if (DAW_active) DAW_active = false;
-
-        //-
-
-        // TEXT DISPLAY
-        BPM_input_str = "EXTERNAL" ;
-        BPM_name_str = "MIDI PORT: ";
-        BPM_name_str += ofToString( midiIn_CLOCK.getPort() );
-        BPM_name_str += " - '" + midiIn_CLOCK.getName() + "'";
-    }
-}
-
 //--------------------------------------------------------------
 void ofxBeatClock::setup()
 {
@@ -79,7 +16,9 @@ void ofxBeatClock::setup()
 
     //--
 
-    // MONITOR:
+    // MONITOR
+
+    // default pos
     posMon_x = 10;
     posMon_Y = 10;
 
@@ -117,11 +56,13 @@ void ofxBeatClock::setup()
     
     params_control.setName("CLOCK CONTROL");
     params_control.add(ENABLE_CLOCKS.set("ENABLE", true));
-    params_control.add(PLAYER_state.set("PLAY", false));
     params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
+    params_control.add(PLAYER_state.set("PLAY", false));
     params_control.add(ENABLE_EXTERNAL_CLOCK.set("EXTERNAL", true));
+    params_control.add(MIDI_Port.set("MIDI PORT", 0, 0, num_MIDI_Ports));
     params_control.add(ENABLE_sound.set("TICK", false));
     ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
+
     //-
     
     // 2. monitor
@@ -165,9 +106,86 @@ void ofxBeatClock::setup()
     
     metro.setBpm(DAW_bpm);
     
-    //-----
+    //--
     
     setup_Gui();
+    setPosition_Gui(300, 50, 200);
+    setPosition_Draw(300, 500);
+
+    //--
+
+    TRIG_Ball_draw = false;
+}
+
+//---------------------------
+void ofxBeatClock::setup_Gui(){
+
+    //-
+
+    // GUI POSITION AND SIZE
+
+    // default config. to be setted after with .setPosition_Gui
+
+    gui_Panel_W = 200;
+    gui_Panel_posX = 300;
+    gui_Panel_posY = 10;
+    gui_Panel_padW = 5;
+
+    //--
+
+    container_controls = gui_CLOCKER.addGroup(params_control);
+    container_controls->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
+
+    container_daw = gui_CLOCKER.addGroup(params_daw);
+    container_daw->setPosition(ofPoint(gui_Panel_posX + 1 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
+
+    container_clocker = gui_CLOCKER.addGroup(params_clocker);
+    container_clocker->setPosition(ofPoint(gui_Panel_posX + 2 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
+
+    //-
+
+    // LOAD LAST SETTINGS
+
+    pathSettings = "CLOCKER_settings.xml";//default
+    loadSettings(pathSettings);
+
+    //--
+
+    // init state just in cas not open correCt
+
+    if (ENABLE_INTERNAL_CLOCK)
+    {
+        ENABLE_EXTERNAL_CLOCK = false;
+
+        //-
+
+        // TEXT DISPLAY
+        BPM_input_str = "INTERNAL";
+        BPM_name_str = "";
+    }
+    else if (ENABLE_EXTERNAL_CLOCK)
+    {
+        ENABLE_INTERNAL_CLOCK = false;
+
+        if (PLAYER_state) PLAYER_state = false;
+        if (DAW_active) DAW_active = false;
+
+        //-
+
+        // TEXT DISPLAY
+        BPM_input_str = "EXTERNAL" ;
+        BPM_name_str = "MIDI PORT: ";
+        BPM_name_str += ofToString( midiIn_CLOCK.getPort() );
+        BPM_name_str += " - '" + midiIn_CLOCK.getName() + "'";
+    }
+}
+
+void ofxBeatClock::setPosition_Gui(int _x, int _y, int _w)
+{
+    gui_Panel_W = _w;
+    gui_Panel_posX = _x;
+    gui_Panel_posY = _y;
+    gui_Panel_padW = 5;
 }
 
 //--------------------------------------------------------------
@@ -181,6 +199,9 @@ void ofxBeatClock::setup_MIDI_CLOCK()
     ofSetLogLevel("ofxMidiClock", OF_LOG_NOTICE);
     
     midiIn_CLOCK.listInPorts();
+    num_MIDI_Ports = midiIn_CLOCK.getNumInPorts();
+    ofLogNotice() << "NUM MIDI-IN PORTS:" << num_MIDI_Ports;
+
     //midiIn_CLOCK.openPort(7);
     int midi_IN_Clock_PortSelected = 0;
     midiIn_CLOCK.openPort(midi_IN_Clock_PortSelected);
@@ -205,7 +226,7 @@ void ofxBeatClock::setup_MIDI_CLOCK()
     clockRunning = false; //< is the clock sync running?
     MIDI_beats = 0; //< song pos in beats
     MIDI_seconds = 0; //< song pos in seconds, computed from beats
-    MIDI_CLOCK_bpm = 120; //< song tempo in bpm, computed from clock length
+    MIDI_CLOCK_bpm = BPM_INIT; //< song tempo in bpm, computed from clock length
 
     //bpm_CLOCK.addListener(this, &ofxBeatClock::bpm_CLOCK_Changed);
     
@@ -216,7 +237,6 @@ void ofxBeatClock::setup_MIDI_CLOCK()
     //-
     
 }
-
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
@@ -379,15 +399,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 //--------------------------------------------------------------
 void ofxBeatClock::update()
 {
-    
-    //-
-    
-    // INTERNAL
-    
-//    if (ENABLE_INTERNAL_CLOCK){
-//        BPM_value = tapMachine->getBPM();
-//    }
-    
+
     //------------------------------------------------------------------------
     
     // MIDI CLOCK
@@ -445,12 +457,6 @@ void ofxBeatClock::update()
     
     //-
 
-    if (MIDI_Bang_Beat_Monitor)
-    {
-        //MIDI_Bang_Beat_Monitor = true;
-    }
-
-
     ofSoundUpdate();
 }
 
@@ -466,20 +472,23 @@ void ofxBeatClock::draw()
 //--------------------------------------------------------------
 void ofxBeatClock::draw_MONITOR(int px, int py){
 
+    //-
+
     // heigh paddings
 
     int padToSquares = 0;
     int padToBigTime = 0;
     int padToBall = 10;
-
     int squaresW = 50;//squares beats size
     metronome_ball_radius = 30;
-
     int interline = 11; // line heigh
-    int i = 0;
 
     bool SHOW_moreInfo = false;
-    
+
+    //-
+
+    int i = 0;
+
     //--
     
     // 2. TEXT INFO:
@@ -577,7 +586,6 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
         ofPopStyle();
 
         //--
-
     }
 
     //-
@@ -627,6 +635,12 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
 }
 
 //--------------------------------------------------------------
+void ofxBeatClock::setPosition_Draw(int x, int y){
+    posMon_x = x;
+    posMon_Y = y;
+}
+
+//--------------------------------------------------------------
 void ofxBeatClock::exit()
 {
 
@@ -641,12 +655,12 @@ void ofxBeatClock::exit()
     
     midiIn_CLOCK.closePort();
     midiIn_CLOCK.removeListener(this);
-
     MIDI_beatsInBar.removeListener(this, &ofxBeatClock::Changed_MIDI_beatsInBar);
 
     //-
     
     // remove listeners
+
     ofRemoveListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
     ofRemoveListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
 
