@@ -4,6 +4,7 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofBackground(0);
+    ofSetFrameRate(60);
     
     CLOCKER.setup();
 }
@@ -30,15 +31,15 @@ void ofApp::keyPressed(int key) {
     switch (key) {
 
         case ' ':
-            if ( CLOCKER.PLAYER_state == false )
-            {
-                CLOCKER.PLAYER_state = true;
-                
-            }
-            else
-            {
-                CLOCKER.PLAYER_state = false;
-            }
+//            if ( CLOCKER.PLAYER_state == false )
+//            {
+//                CLOCKER.PLAYER_state = true;
+//                
+//            }
+//            else
+//            {
+//                CLOCKER.PLAYER_state = false;
+//            }
             break;
 
         case '-':

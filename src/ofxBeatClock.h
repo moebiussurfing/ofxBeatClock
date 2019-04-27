@@ -34,14 +34,14 @@ public:
     
     ofxMidiIn midiIn_CLOCK;
     ofxMidiMessage midiCLOCK_Message;
-    ofxMidiClock clock; //< clock message parser
+    ofxMidiClock MIDI_clock; //< clock message parser
 
     void newMidiMessage(ofxMidiMessage& eventArgs);
     
     bool clockRunning; //< is the clock sync running?
-    unsigned int beats; //< song pos in beats
-    double seconds; //< song pos in seconds, computed from beats
-    double bpm_CLOCK; //< song tempo in bpm, computed from clock length
+    unsigned int MIDI_beats; //< song pos in beats
+    double MIDI_seconds; //< song pos in seconds, computed from beats
+    double MIDI_CLOCK_bpm; //< song tempo in bpm, computed from clock length
     
     //float bpm_CLOCK; //< song tempo in bpm, computed from clock length
     //void bpm_CLOCK_Changed(double & bpm_CLOCK);//listener for tempo changes
@@ -49,12 +49,12 @@ public:
     
     // a MIDI beat is a 16th note, so do a little math to convert to a time signature:
     // 4/4 -> 4 notes per bar & quarter note = 1 beat, add 1 to count from 1 instead of 0
-    int quarters; // convert total # beats to # quarters
-    int bars; // compute # of bars
+    int MIDI_quarters; // convert total # beats to # quarters
+    int MIDI_bars; // compute # of bars
     
     //-
     
-    ofParameter<int> beatsInBar; // compute remainder as # notes within the current bar
+    ofParameter<int> MIDI_beatsInBar; // compute remainder as # notes within the current bar
     void Changed_MIDI_beatsInBar(int & beatsInBar);
     int beatsInBar_PRE;
     
@@ -98,8 +98,8 @@ public:
     ofxGuiContainer* container_clocker;
     
     ofParameterGroup params_control;
-    ofParameter<bool> enable_CLOCK;// enable clock
     ofParameter<bool> PLAYER_state;// player state
+    ofParameter<bool> ENABLE_CLOCKS;// enable clock
     ofParameter<bool> ENABLE_INTERNAL_CLOCK;// enable internal clock
     ofParameter<bool> ENABLE_MIDI_CLOCK;// enable midi clock sync
     
@@ -169,13 +169,24 @@ public:
     
     // SOUND
     
-    bool ENABLE_sound;//enable sound ticks
-    ofSoundPlayer  tic;
-    ofSoundPlayer  tac;
+    bool ENABLE_sound = true;//enable sound ticks
+    ofSoundPlayer tic;
+    ofSoundPlayer tac;
     
     //--
     
     bool DAW_SlaveToInternal = true;
     
+    //-
+    
+    // strings for drawing
+    string BPM_input;
+    string BPM_name;
+    string BPM_bar;
+    string BPM_beat;
+    string BPM_sixteen;
+    
+    //-
+
 };
 
