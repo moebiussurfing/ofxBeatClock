@@ -59,7 +59,7 @@ void ofxBeatClock::setup()
     params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
     params_control.add(PLAYER_state.set("PLAY", false));
     params_control.add(ENABLE_EXTERNAL_CLOCK.set("EXTERNAL", true));
-    params_control.add(MIDI_Port.set("MIDI PORT", 0, 0, num_MIDI_Ports));
+    params_control.add(MIDI_Port_SELECT.set("MIDI PORT", 0, 0, num_MIDI_Ports-1));
     params_control.add(ENABLE_sound.set("TICK", false));
     ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
 
@@ -99,10 +99,10 @@ void ofxBeatClock::setup()
     DAW_bpm.set("BPM", BPM_INIT, 30, 240);
     DAW_active.set("Active", false);
     
-    params_daw.setName("DAW CONTROL");
+    params_daw.setName("INTERNAL BPM");
     params_daw.add(DAW_bpm);
-    params_daw.add(DAW_active);
-    
+//    params_daw.add(DAW_active);
+
     metro.setBpm(DAW_bpm);
     
     //--
@@ -145,7 +145,7 @@ void ofxBeatClock::setup_Gui(){
 
     // LOAD LAST SETTINGS
 
-    pathSettings = "CLOCKER_settings.xml";//default
+    pathSettings = "settings/CLOCKER_settings.xml";//default
     loadSettings(pathSettings);
 
     //--
@@ -193,41 +193,40 @@ void ofxBeatClock::setup_MIDI_CLOCK()
 {
     
     // EXTERNAL MIDI CLOCK:
-    
-    ofLogNotice() << "==================================================";
-    ofLogNotice() << "\t MIDI CLOCK IN:";
-    ofSetLogLevel("ofxMidiClock", OF_LOG_NOTICE);
-    
-    midiIn_CLOCK.listInPorts();
-    num_MIDI_Ports = midiIn_CLOCK.getNumInPorts();
-    ofLogNotice() << "NUM MIDI-IN PORTS:" << num_MIDI_Ports;
+    ofSetLogLevel("MIDI PORT", OF_LOG_NOTICE);
 
-    //midiIn_CLOCK.openPort(7);
-    int midi_IN_Clock_PortSelected = 0;
-    midiIn_CLOCK.openPort(midi_IN_Clock_PortSelected);
-    //midiIn_CLOCK.openVirtualPort(midi_IN_Clock_PortSelected);
+    ofLogNotice("MIDI PORT") << "==================================================";
+
+    ofLogNotice("MIDI PORT") << "== setup_MIDI_CLOCK";
+
+    ofLogNotice("MIDI PORT") << "LIST PORTS:";
+    midiIn_CLOCK.listInPorts();
+
+    num_MIDI_Ports = midiIn_CLOCK.getNumInPorts();
+    ofLogNotice("MIDI PORT") << "NUM MIDI-IN PORTS:" << num_MIDI_Ports;
+
+    midiIn_CLOCK_port_OPENED = 0;
+    midiIn_CLOCK.openPort(midiIn_CLOCK_port_OPENED);
+
+    //--
     
-    // --------------------------------------------------------------------
-    
-    //midiIn_CLOCK.openPort("loopMIDI Port 1 7");
-    //ofLogNotice() << "PORT NAME " << midiIn_CLOCK.getInPortName(7);
-    
-    ofLogNotice() << "\t connected to MIDI CLOCK IN port: " << midiIn_CLOCK.getPort();
-    ofLogNotice() << "==================================================";
+    ofLogNotice("MIDI PORT") << "connected to MIDI CLOCK IN port: " << midiIn_CLOCK.getPort();
+
+    ofLogNotice("MIDI PORT") << "==================================================";
     
     // TODO: IGNORE SYSX
-    midiIn_CLOCK.ignoreTypes(true, // sysex  <-- don't ignore timecode messages!
+    midiIn_CLOCK.ignoreTypes(
+                             true, // sysex  <-- don't ignore timecode messages!
                              false, // timing <-- don't ignore clock messages!
-                             true); // sensing
-    
-    // add ofxBeatClock as a listener
+                             true
+                             ); // sensing
+
     midiIn_CLOCK.addListener(this);
     
     clockRunning = false; //< is the clock sync running?
     MIDI_beats = 0; //< song pos in beats
     MIDI_seconds = 0; //< song pos in seconds, computed from beats
     MIDI_CLOCK_bpm = BPM_INIT; //< song tempo in bpm, computed from clock length
-
     //bpm_CLOCK.addListener(this, &ofxBeatClock::bpm_CLOCK_Changed);
     
     //-
@@ -235,7 +234,25 @@ void ofxBeatClock::setup_MIDI_CLOCK()
     MIDI_beatsInBar.addListener(this, &ofxBeatClock::Changed_MIDI_beatsInBar);
     
     //-
-    
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::setup_MIDI_PORT(int p)
+{
+    ofLogNotice("MIDI PORT") << "== setup_MIDI_PORT";
+
+    midiIn_CLOCK.closePort();
+    midiIn_CLOCK_port_OPENED = p;
+    midiIn_CLOCK.openPort(midiIn_CLOCK_port_OPENED);
+    ofLogNotice("MIDI PORT") << "PORT NAME " << midiIn_CLOCK.getInPortName(p);
+
+    // TEXT DISPLAY
+    BPM_input_str = "EXTERNAL" ;
+    BPM_name_str = "MIDI PORT: ";
+    BPM_name_str += ofToString( midiIn_CLOCK.getPort() );
+    BPM_name_str += " - '" + midiIn_CLOCK.getName() + "'";
+
+    ofLogNotice("MIDI PORT") << "connected to MIDI CLOCK IN port: " << midiIn_CLOCK.getPort();
 }
 
 //--------------------------------------------------------------
@@ -372,7 +389,7 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
         py = py + (interline * i);// acumulate heigh distance
     }
     
-    ofPopMatrix();
+    ofPopMatrix();//TODO: pop could be at function ending
 
     //--
 
@@ -441,6 +458,8 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
 
     // 3. TICK BALL:
 
+    // TODO: alpha tick could be tweened to better heartbeat feeling..
+
     py += padToBall + metronome_ball_radius;
     metronome_ball_pos.x = px + metronome_ball_radius;
     metronome_ball_pos.y = py;
@@ -477,6 +496,8 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
     px = px - metronome_ball_radius;
 
     //-
+
+//    ofPopMatrix();
 }
 
 //--------------------------------------------------------------
@@ -669,9 +690,9 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
         //ofLogNotice() << "NEW BPM   : " << BPM_Global;
 
         BPM_TimeBar = 60000 / BPM_Global;// 60,000 / BPM = one beat in milliseconds
-                                         //
-                                         //        ofLogNotice() << "TIME BEAT : " << BPM_TimeBar << "ms";
-                                         //        ofLogNotice() << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
+
+         //ofLogNotice() << "TIME BEAT : " << BPM_TimeBar << "ms";
+         //ofLogNotice() << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
     }
 
     else if (wid == "INTERNAL")
@@ -771,6 +792,22 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
         //            }
         //        }
     }
+
+    else if (wid == "MIDI PORT")
+    {
+        if (MIDI_Port_PRE != MIDI_Port_SELECT)
+        {
+            MIDI_Port_PRE = MIDI_Port_SELECT;
+
+            ofLogNotice("MIDI PORT") << "== GUI SELECTED PORT";
+
+            ofLogNotice("MIDI PORT") << "LIST PORTS:";
+            midiIn_CLOCK.listInPorts();
+
+            ofLogNotice("MIDI PORT") << "OPENING PORT: " << MIDI_Port_SELECT;
+            setup_MIDI_PORT (MIDI_Port_SELECT);
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -781,7 +818,7 @@ void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
 
     if (beatsInBar != beatsInBar_PRE)
     {
-        ofLogVerbose() << "MIDI-IN CLOCK TICK! " << beatsInBar;
+        ofLogVerbose() << "MIDI-IN CLOCK BEAT TICK! " << beatsInBar;
 
         //-
 

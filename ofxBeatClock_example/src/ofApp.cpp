@@ -34,11 +34,11 @@ void ofApp::keyPressed(int key) {
             CLOCKER.PLAYER_TOGGLE();
             break;
 
-        case '-':
-            break;
-
-        case '+':
-            break;
+//        case '-':
+//            break;
+//
+//        case '+':
+//            break;
 
         case 't':
             CLOCKER.Tap_Trig();
