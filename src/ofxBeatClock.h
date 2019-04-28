@@ -11,6 +11,11 @@
 
 #define BPM_INIT 120
 
+#define ENABLE_PATTERN_LIMITING//comment to disable
+#define PATTERN_STEP_BAR_LIMIT 4
+#define PATTERN_STEP_BEAT_LIMIT 16
+
+
 #define BPM_MIDI_CLOCK_REFRESH_RATE 200
 //refresh received MTC by clock. disabled/commented to "realtime" by frame update
 
@@ -87,10 +92,13 @@ public:
     // GUI
     
     void setup_Gui();
+
     ofxGui gui_CLOCKER;
     ofxGuiContainer* container_controls;
     ofxGuiContainer* container_clocker;
-    
+
+    ofxGuiContainer* container;
+
     //-
     
     // PARAMS
@@ -164,15 +172,25 @@ public:
     
     //-
 
-    // STRINGS FOR MONITOR DRAWING
+    // CURRENT BPM CLOCK VALUES
+
+    // TODO: could be nice to add listener system
     
-    string BPM_input_str;
-    string BPM_name_str;
+    ofParameter<int> BPM_bar_current;
+    ofParameter<int> BPM_beat_current;
+    ofParameter<int> BPM_16th_current;
+
+    // STRINGS FOR MONITOR DRAWING
+
     string BPM_bar_str;
     string BPM_beat_str;
-    string BPM_sixteen_str;
+    string BPM_16th_str;
 
-    int BPM_beat_current;
+    string BPM_input_str;//internal/external
+    string BPM_name_str;//midi in port
+    //-
+
+
 
     //-
     
@@ -211,6 +229,12 @@ public:
     int MIDI_Port_PRE = -1;
 
     //-
+
+    // STEP LIMITING:
+    // we dont need to use long song patterns
+    bool ENABLE_pattern_limits;
+    int pattern_BEAT_limit;
+    int pattern_BAR_limit;
 
 };
 
