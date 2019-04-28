@@ -174,8 +174,8 @@ public:
 
     // CURRENT BPM CLOCK VALUES
 
-    // TODO: could be nice to add listener system
-    
+    // TODO: could be nice to add listener system..
+
     ofParameter<int> BPM_bar_current;
     ofParameter<int> BPM_beat_current;
     ofParameter<int> BPM_16th_current;
@@ -188,9 +188,6 @@ public:
 
     string BPM_input_str;//internal/external
     string BPM_name_str;//midi in port
-    //-
-
-
 
     //-
     

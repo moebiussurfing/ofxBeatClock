@@ -173,6 +173,9 @@ void ofxBeatClock::setup_Gui(){
 
     // LOAD LAST SETTINGS
 
+    // add extra settings to group after gui creation, to include in xml settings
+    params_control.add(DAW_bpm);
+
     pathSettings = "settings/CLOCKER_settings.xml";//default
     loadSettings(pathSettings);
 
@@ -182,7 +185,7 @@ void ofxBeatClock::setup_Gui(){
 
     //--
 
-    // init state just in cas not open correCt
+    // init state just in cas not open correct
 
     if (ENABLE_INTERNAL_CLOCK)
     {
@@ -311,7 +314,7 @@ void ofxBeatClock::update()
     if (ofGetElapsedTimeMillis() - bpm_CheckUpdated_lastTime >= BPM_MIDI_CLOCK_REFRESH_RATE)
     {
 #endif
-        //ofLogNotice() << "BPM UPDATED" << ofGetElapsedTimeMillis() - bpm_CheckUpdated_lastTime;
+        //ofLogNotice("ofxBeatClock") << "BPM UPDATED" << ofGetElapsedTimeMillis() - bpm_CheckUpdated_lastTime;
         
         //-
         
@@ -574,11 +577,11 @@ void ofxBeatClock::exit()
 //--------------------------------------------------------
 void ofxBeatClock::PLAYER_START()//only used in internal mode
 {
-    ofLogNotice() << "PLAYER_START";
+    ofLogNotice("ofxBeatClock") << "PLAYER_START";
     
     if (ENABLE_INTERNAL_CLOCK && ENABLE_CLOCKS)
     {
-        ofLogNotice() << "START";
+        ofLogNotice("ofxBeatClock") << "START";
         
         if (!PLAYER_state) PLAYER_state = true;
         if (!DAW_active) DAW_active = true;
@@ -587,18 +590,18 @@ void ofxBeatClock::PLAYER_START()//only used in internal mode
     }
     else
     {
-        ofLogNotice() << "skip";
+        ofLogNotice("ofxBeatClock") << "skip";
     }
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::PLAYER_STOP()//only used in internal mode
 {
-    ofLogNotice() << "PLAYER_STOP";
+    ofLogNotice("ofxBeatClock") << "PLAYER_STOP";
     
     if (ENABLE_INTERNAL_CLOCK && ENABLE_CLOCKS)
     {
-        ofLogNotice() << "STOP";
+        ofLogNotice("ofxBeatClock") << "STOP";
         
         if (PLAYER_state) PLAYER_state = false;
         if (DAW_active) DAW_active = false;
@@ -608,25 +611,25 @@ void ofxBeatClock::PLAYER_STOP()//only used in internal mode
     }
     else
     {
-        ofLogNotice() << "skip";
+        ofLogNotice("ofxBeatClock") << "skip";
     }
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::PLAYER_TOGGLE()//only used in internal mode
 {
-    ofLogNotice() << "PLAYER_TOGGLE";
+    ofLogNotice("ofxBeatClock") << "PLAYER_TOGGLE";
     
     if (ENABLE_INTERNAL_CLOCK && ENABLE_CLOCKS)
     {
-        ofLogNotice() << "TOOGLE PLAY";
+        ofLogNotice("ofxBeatClock") << "TOOGLE PLAY";
         
         PLAYER_state = !PLAYER_state;
         isPlaying = PLAYER_state;
     }
     else
     {
-        ofLogNotice() << "skip";
+        ofLogNotice("ofxBeatClock") << "skip";
     }
 }
 
@@ -656,7 +659,7 @@ void ofxBeatClock::CLOCK_Tick_MONITOR(int beat)
 void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 {
     string wid = e.getName();
-    //ofLogNotice() << "Changed_gui_CLOCKER '" << wid << "': " << e;
+    //ofLogNotice("ofxBeatClock") << "Changed_gui_CLOCKER '" << wid << "': " << e;
 
     if (wid == " ")
     {
@@ -669,7 +672,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
         {
             BPM_Tap_Tempo_TRIG = false; //should be button
 
-            ofLogNotice() << "BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
+            ofLogNotice("ofxBeatClock") << "BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
 
             Tap_Trig();
         }
@@ -677,7 +680,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 
     else if (wid == "PLAY")
     {
-        ofLogNotice() << "PLAYER_state: " << PLAYER_state;
+        ofLogNotice("ofxBeatClock") << "PLAYER_state: " << PLAYER_state;
 
         // clocks are disabled or using external midi clock. dont need playing, just to be enabled
 
@@ -702,17 +705,17 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 
     else if (wid == "BPM")
     {
-        //ofLogNotice() << "NEW BPM   : " << BPM_Global;
+        //ofLogNotice("ofxBeatClock") << "NEW BPM   : " << BPM_Global;
 
         BPM_TimeBar = 60000 / BPM_Global;// 60,000 / BPM = one beat in milliseconds
 
-         //ofLogNotice() << "TIME BEAT : " << BPM_TimeBar << "ms";
-         //ofLogNotice() << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
+         //ofLogNotice("ofxBeatClock") << "TIME BEAT : " << BPM_TimeBar << "ms";
+         //ofLogNotice("ofxBeatClock") << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
     }
 
     else if (wid == "INTERNAL")
     {
-        ofLogNotice() << "CLOCK INTERNAL: " << ENABLE_INTERNAL_CLOCK;
+        ofLogNotice("ofxBeatClock") << "CLOCK INTERNAL: " << ENABLE_INTERNAL_CLOCK;
 
         if (ENABLE_INTERNAL_CLOCK)
         {
@@ -745,7 +748,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 
     else if (wid == "EXTERNAL")
     {
-        ofLogNotice() << "CLOCK EXTERNAL MIDI-IN: " << ENABLE_EXTERNAL_CLOCK;
+        ofLogNotice("ofxBeatClock") << "CLOCK EXTERNAL MIDI-IN: " << ENABLE_EXTERNAL_CLOCK;
 
         if (ENABLE_EXTERNAL_CLOCK)
         {
@@ -780,7 +783,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 
     else if (wid == "ENABLE")
     {
-        ofLogNotice() << "ENABLE: " << ENABLE_CLOCKS;
+        ofLogNotice("ofxBeatClock") << "ENABLE: " << ENABLE_CLOCKS;
 
         if (!ENABLE_CLOCKS)
         {
@@ -840,7 +843,7 @@ void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
 
     if (MIDI_beatsInBar != beatsInBar_PRE)
     {
-        ofLogVerbose() << "MIDI-IN CLOCK BEAT TICK! " << beatsInBar;
+        ofLogVerbose("ofxBeatClock") << "MIDI-IN CLOCK BEAT TICK! " << beatsInBar;
 
         //-
 
@@ -1019,7 +1022,7 @@ void ofxBeatClock::loadSettings(string path)
 //--------------------------------------------------------------
 void ofxBeatClock::onBarEvent(int & bar) {
     
-    ofLogVerbose() << "DAW METRO - BAR: " << bar;
+    ofLogVerbose("ofxBeatClock") << "DAW METRO - BAR: " << bar;
     
     if (ENABLE_CLOCKS && ENABLE_INTERNAL_CLOCK)
     {
@@ -1039,7 +1042,7 @@ void ofxBeatClock::onBarEvent(int & bar) {
 //--------------------------------------------------------------
 void ofxBeatClock::onBeatEvent(int & beat) {
 
-    ofLogVerbose() << "DAW METRO - BEAT: " << beat;
+    ofLogVerbose("ofxBeatClock") << "DAW METRO - BEAT: " << beat;
     
     if (ENABLE_CLOCKS && ENABLE_INTERNAL_CLOCK)
     {
@@ -1064,7 +1067,7 @@ void ofxBeatClock::onBeatEvent(int & beat) {
 //--------------------------------------------------------------
 void ofxBeatClock::onSixteenthEvent(int & sixteenth) {
     
-    ofLogVerbose() << "DAW METRO - 16th: " << sixteenth;
+    ofLogVerbose("ofxBeatClock") << "DAW METRO - 16th: " << sixteenth;
     
     if (ENABLE_CLOCKS && ENABLE_INTERNAL_CLOCK)
     {
