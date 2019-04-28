@@ -10,9 +10,9 @@ void ofxBeatClock::setup()
     
     // DRAW STUFF
     
-    TTF_small.load("fonts/mono.ttf", 8);
-    TTF_medium.load("fonts/mono.ttf", 12);
-    TTF_big.load("fonts/mono.ttf", 18);
+    TTF_small.load("assets/fonts/mono.ttf", 8);
+    TTF_medium.load("assets/fonts/mono.ttf", 12);
+    TTF_big.load("assets/fonts/mono.ttf", 18);
 
     //--
 
@@ -33,14 +33,20 @@ void ofxBeatClock::setup()
     tac.load("sounds/click2.wav");
     tac.setVolume(0.25f);
     tac.setMultiPlay(false);
-    
+
+    //-
+
+    // DRAW BALL TRIGGER
+
+    TRIG_Ball_draw = false;
+
     //-
     
     // TEXT DISPLAY
     
     BPM_bar_str = "0";
     BPM_beat_str = "0";
-    BPM_sixteen_str = "0";
+    BPM_16th_str = "0";
     
     //--
     
@@ -101,7 +107,7 @@ void ofxBeatClock::setup()
     
     params_daw.setName("INTERNAL BPM");
     params_daw.add(DAW_bpm);
-    //    params_daw.add(DAW_active);
+    //params_daw.add(DAW_active);
 
     metro.setBpm(DAW_bpm);
     
@@ -113,7 +119,21 @@ void ofxBeatClock::setup()
 
     //--
 
-    TRIG_Ball_draw = false;
+    // PATTERN LIMITING. (VS LONG SONG MODE)
+
+#ifdef ENABLE_PATTERN_LIMITING
+    ENABLE_pattern_limits = true;
+#else
+    pattern_limits = false;
+#endif
+
+    if (ENABLE_pattern_limits)
+    {
+        pattern_BEAT_limit = PATTERN_STEP_BEAT_LIMIT;
+        pattern_BAR_limit = PATTERN_STEP_BAR_LIMIT;
+    }
+
+    //--
 }
 
 //--------------------------------------------------------------
@@ -133,13 +153,21 @@ void ofxBeatClock::setup_Gui(){
     //--
 
     container_controls = gui_CLOCKER.addGroup(params_control);
-    container_controls->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
-
     container_daw = gui_CLOCKER.addGroup(params_daw);
-    container_daw->setPosition(ofPoint(gui_Panel_posX + 1 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
-
     container_clocker = gui_CLOCKER.addGroup(params_clocker);
+
+    // individual
+    container_controls->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
+    container_daw->setPosition(ofPoint(gui_Panel_posX + 1 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
     container_clocker->setPosition(ofPoint(gui_Panel_posX + 2 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
+
+
+//    // foldered
+//    container = gui_CLOCKER.addGroup();
+//
+//    container->addGroup(container_controls);
+//    container->addGroup(container_daw);
+//    container->addGroup(container_clocker);
 
     //-
 
@@ -147,6 +175,10 @@ void ofxBeatClock::setup_Gui(){
 
     pathSettings = "settings/CLOCKER_settings.xml";//default
     loadSettings(pathSettings);
+
+    ofLogNotice("ofxBeatClock") << "LOAD SETTINGS";
+    ofLogNotice("ofxBeatClock") << pathSettings;
+
 
     //--
 
@@ -186,6 +218,11 @@ void ofxBeatClock::setPosition_Gui(int _x, int _y, int _w)
     gui_Panel_posX = _x;
     gui_Panel_posY = _y;
     gui_Panel_padW = 5;
+
+    // individual
+    container_controls->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
+    container_daw->setPosition(ofPoint(gui_Panel_posX + 1 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
+    container_clocker->setPosition(ofPoint(gui_Panel_posX + 2 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
 }
 
 //--------------------------------------------------------------
@@ -300,6 +337,8 @@ void ofxBeatClock::update()
 //--------------------------------------------------------------
 void ofxBeatClock::draw()
 {
+    //TODO: improve performance with fbo drawing
+
     draw_MONITOR(posMon_x, posMon_Y);
 }
 
@@ -353,7 +392,7 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
         TTF_message = ("BEAT: " + BPM_beat_str );
         TTF_small.drawString(TTF_message, 0, interline * i++);
         
-        TTF_message = ("16th: " + BPM_sixteen_str );
+        TTF_message = ("16th: " + BPM_16th_str );
         TTF_small.drawString(TTF_message, 0, interline * i++);
 
         //-
@@ -483,7 +522,7 @@ void ofxBeatClock::draw_BigClockTime(int x, int y){
         std::string timePos =
         ofToString(BPM_bar_str, 3, ' ') + " : " +
         ofToString(BPM_beat_str) + " : " +
-        ofToString(BPM_sixteen_str);
+        ofToString(BPM_16th_str);
 
         TTF_big.drawString(timePos, x, y);
     }
@@ -498,6 +537,11 @@ void ofxBeatClock::setPosition_Draw(int x, int y){
 //--------------------------------------------------------------
 void ofxBeatClock::exit()
 {
+    ofLogNotice("ofxBeatClock") << "exit";
+
+//    ofLogNotice("ofxBeatClock") << ofSetDataPathRoot();
+//    ofLogNotice("ofxBeatClock") << ofRestoreWorkingDirectoryToDefault();
+//    ofRestoreWorkingDirectoryToDefault();
 
     // default desired settings when it will opened
     PLAYER_state = false;
@@ -688,7 +732,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
             // TEXT DISPLAY
             BPM_bar_str = "0";
             BPM_beat_str = "0";
-            BPM_sixteen_str = "0";
+            BPM_16th_str = "0";
 
             if(!ENABLE_INTERNAL_CLOCK)
             {
@@ -723,7 +767,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
             // TEXT DISPLAY
             BPM_bar_str = "0";
             BPM_beat_str = "0";
-            BPM_sixteen_str = "0";
+            BPM_16th_str = "0";
 
             if(!ENABLE_EXTERNAL_CLOCK)
             {
@@ -787,22 +831,55 @@ void ofxBeatClock::Changed_MIDI_beatsInBar(int & beatsInBar) {
     // this function trigs when any midi tick (beatsInBar) updating, so we need to filter if (we want beat or 16th..) has changed.
     // problem is maybe that beat param refresh when do not changes too, jus because it's accesed..
 
-    if (beatsInBar != beatsInBar_PRE)
+    if (ENABLE_pattern_limits)
+    {
+        MIDI_beatsInBar = beatsInBar % pattern_BEAT_limit;
+    }
+
+    //-
+
+    if (MIDI_beatsInBar != beatsInBar_PRE)
     {
         ofLogVerbose() << "MIDI-IN CLOCK BEAT TICK! " << beatsInBar;
 
         //-
 
-        BPM_bar_str = ofToString( MIDI_bars );
-        BPM_beat_str = ofToString( beatsInBar );
-        BPM_beat_current = beatsInBar;//MIDI_beatsInBar = beatsInBar
-        BPM_sixteen_str = " ";//TODO: should compute too..
+        if (ENABLE_pattern_limits)
+        {
+            BPM_beat_current = MIDI_beatsInBar;
+            BPM_beat_str = ofToString( BPM_beat_current );
+            BPM_bar_current = MIDI_bars %  pattern_BAR_limit;
+            BPM_bar_str = ofToString( BPM_bar_current );
+            BPM_16th_current = 0;//TODO: should compute too..
+            BPM_16th_str = ofToString( BPM_16th_current );
+        }
+        else
+        {
+            BPM_beat_current = MIDI_beatsInBar;
+            BPM_beat_str = ofToString( BPM_beat_current );
+            BPM_bar_current = MIDI_bars;
+            BPM_bar_str = ofToString( BPM_bar_current );
+            BPM_16th_current = 0;//TODO: should compute too..
+            BPM_16th_str = ofToString( BPM_16th_current );
+        }
 
         //-
+
+        // TRIG BALL DRAWING AND SOUND TICKER
         
         CLOCK_Tick_MONITOR(BPM_beat_current);
 
-        beatsInBar_PRE = beatsInBar;
+//        if (pattern_limits)
+//        {
+//            beatsInBar_PRE = beatsInBar;
+//        }
+//        else
+//        {
+
+        beatsInBar_PRE = MIDI_beatsInBar;
+
+//        }
+
     }
 }
 
@@ -913,19 +990,22 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
 //--------------------------------------------------------------
 void ofxBeatClock::saveSettings(string path)
 {
-    pathSettings = path;//store default
-    
+//    pathSettings = path;//store default
+
     // save settings
     ofXml settings;
     ofSerialize(settings, params_control);
     settings.save(path);
+
+    ofLogNotice("ofxBeatClock") << "saved settings";
+    ofLogNotice("ofxBeatClock") << path;
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::loadSettings(string path)
 {
-    pathSettings = path;//store default
-    
+//    pathSettings = path;//store default
+
     // load settings
     ofXml settings;
     settings.load(path);
@@ -943,7 +1023,16 @@ void ofxBeatClock::onBarEvent(int & bar) {
     
     if (ENABLE_CLOCKS && ENABLE_INTERNAL_CLOCK)
     {
-        BPM_bar_str = ofToString(bar);
+        if (ENABLE_pattern_limits)
+        {
+            BPM_bar_current = bar % pattern_BAR_limit;
+        }
+        else
+        {
+            BPM_bar_current = bar;
+        }
+
+        BPM_bar_str = ofToString( BPM_bar_current );
     }
 }
 
@@ -954,12 +1043,21 @@ void ofxBeatClock::onBeatEvent(int & beat) {
     
     if (ENABLE_CLOCKS && ENABLE_INTERNAL_CLOCK)
     {
-        BPM_beat_str = ofToString(beat);
-        BPM_beat_current = beat;
+        if (ENABLE_pattern_limits)
+        {
+            BPM_beat_current = beat % pattern_BEAT_limit;//limited to 16 beats
+
+        }
+        else
+        {
+            BPM_beat_current = beat;
+        }
+
+        BPM_beat_str = ofToString(BPM_beat_current);
 
         //-
 
-        CLOCK_Tick_MONITOR(beat);
+        CLOCK_Tick_MONITOR( BPM_beat_current );
     }
 }
 
@@ -970,7 +1068,8 @@ void ofxBeatClock::onSixteenthEvent(int & sixteenth) {
     
     if (ENABLE_CLOCKS && ENABLE_INTERNAL_CLOCK)
     {
-        BPM_sixteen_str = ofToString(sixteenth);
+        BPM_16th_current = sixteenth;
+        BPM_16th_str = ofToString( BPM_16th_current );
     }
 }
 
@@ -1029,7 +1128,7 @@ void ofxBeatClock::Tap_Trig()
 
             //-
 
-            // SET BPM
+            // SET OBTAINED BPM
 
             DAW_bpm = Tap_BPM;
 

@@ -2,5 +2,4 @@ ofxBeatClock
 ofxDawMetro
 ofxGuiExtended
 ofxMidi
-ofxTapMachine
 ofxXmlSettings
