@@ -7,78 +7,160 @@ void ofxBeatClock::setup()
     ofSetLogLevel(OF_LOG_VERBOSE);
     
     //-
-    
-    // DRAW STUFF
-    
-    TTF_small.load("assets/fonts/mono.ttf", 8);
-    TTF_medium.load("assets/fonts/mono.ttf", 12);
-    TTF_big.load("assets/fonts/mono.ttf", 18);
+
+    // GUI POSITION AND SIZE
+
+    // default config. to be setted after with .setPosition_Gui
+
+    gui_Panel_W = 200;
+    gui_Panel_posX = 300;
+    gui_Panel_posY = 10;
+    gui_Panel_padW = 5;
 
     //--
 
-    // MONITOR
+    myTTF = "assets/fonts/PragmataProR_0822.ttf";
+    sizeTTF = 10; //font size affects sliders heigh too
+    //    ofTrueTypeFont::setGlobalDpi(72);
 
-    // default pos
-    posMon_x = 10;
-    posMon_Y = 10;
-
-    //---
-    
-    // SOUNDS
-    
-    tic.load("sounds/click1.wav");
-    tic.setVolume(1.0f);
-    tic.setMultiPlay(false);
-    
-    tac.load("sounds/click2.wav");
-    tac.setVolume(0.25f);
-    tac.setMultiPlay(false);
-
-    //-
-
-    // DRAW BALL TRIGGER
-
-    TRIG_Ball_draw = false;
-
-    //-
-    
-    // TEXT DISPLAY
-    
-    BPM_bar_str = "0";
-    BPM_beat_str = "0";
-    BPM_16th_str = "0";
-    
     //--
-    
-    // EXTERNAL MIDI IN CLOCK
-    
-    setup_MIDI_CLOCK();
-   
-    //-
+
+    ofJson conf_Cont =
+    {
+        {"direction", "vertical"},
+    };
+
+    ofJson confg_Sliders =
+    {
+        //{"type" , "fullsize"},
+        //{"show-header", false},
+        {"height", (int)(sizeTTF * 2.0)},
+    };
+
+    ofJson confg_Button =
+    {
+        {"type" , "fullsize"},
+//        {"height", (int)(sizeTTF * 2.0)},
+        {"text-align", "center"},
+    };
+
+    //--
     
     // CONTROL AND INTERNAL CLOCK
     
-    // 1. control
+    // 1. CONTROL
     
     params_control.setName("CLOCK CONTROL");
     params_control.add(ENABLE_CLOCKS.set("ENABLE", true));
+    params_control.add(ENABLE_sound.set("TICK", false));
     params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
     params_control.add(PLAYER_state.set("PLAY", false));
+    params_control.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
     params_control.add(ENABLE_EXTERNAL_CLOCK.set("EXTERNAL", true));
     params_control.add(MIDI_Port_SELECT.set("MIDI PORT", 0, 0, num_MIDI_Ports-1));
-    params_control.add(ENABLE_sound.set("TICK", false));
-    ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
 
     //-
     
-    // 2. monitor
+    // 2. MONITOR
     
-    params_clocker.setName("BPM CONTROL");
+    params_clocker.setName("BPM TARGET");
     params_clocker.add(BPM_Global.set("BPM", BPM_INIT, 60, 300));
     params_clocker.add(BPM_TimeBar.set("BAR ms", 60000 / BPM_Global, 1, 5000));
-    params_clocker.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
+
+    //-
+
+    // 3. DAW METRO
+
+    // add bar/beat/sixteenth listener on demand
+    metro.addBeatListener(this);
+    metro.addBarListener(this);
+    metro.addSixteenthListener(this);
+
+    DAW_bpm.addListener(this, &ofxBeatClock::Changed_DAW_bpm);
+    DAW_active.addListener(this, &ofxBeatClock::Changed_DAW_active);
+    DAW_bpm.set("BPM", BPM_INIT, 30, 300);
+    DAW_active.set("Active", false);
+
+    params_daw.setName("INTERNAL BPM");
+    params_daw.add(DAW_bpm);
+    //params_daw.add(DAW_active);
+
+    metro.setBpm(DAW_bpm);
+
+    //--
+
+    container_controls = gui_CLOCKER.addGroup(params_control);
+    container_daw = gui_CLOCKER.addGroup(params_daw);
+    container_clocker = gui_CLOCKER.addGroup(params_clocker);
+
+    //--
+
+    //custom settings
+
+    (container_controls->getFloatSlider("BPM"))->setPrecision(3);
+    (container_controls->getFloatSlider("BPM"))->setConfig(confg_Sliders);
+
+    (container_clocker->getFloatSlider("BPM"))->setPrecision(2);
+    (container_clocker->getFloatSlider("BPM"))->setConfig(confg_Sliders);
+
+    (container_controls->getToggle("PLAY"))->setHeight(50);
+    (container_controls->getToggle("PLAY"))->setConfig(confg_Button);
+    (container_controls->getToggle("PLAY"))->setConfig(confg_Button);
+
+    (container_controls->getToggle("TAP"))->setHeight(25);
+    (container_controls->getToggle("TAP"))->setConfig(confg_Button);
+    (container_controls->getToggle("TAP"))->setConfig(confg_Button);
+
+    //-
+
+    // GUI FONT
+
+    gui_CLOCKER.setConfig(
+          {
+              {"font-family", myTTF},
+              {"font-size", sizeTTF},
+          });
+
+    //-
+
+    // LISTENERS
+
+    ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
     ofAddListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
-    
+
+    //-
+
+    // LOAD LAST SETTINGS
+
+    // add extra settings to group after gui creation, to include in xml settings
+    params_control.add(DAW_bpm);
+
+    pathSettings = "settings/CLOCKER_settings.xml";//default
+    loadSettings(pathSettings);
+
+    ofLogNotice("ofxBeatClock") << "LOAD SETTINGS";
+    ofLogNotice("ofxBeatClock") << pathSettings;
+
+
+
+    //--
+
+    // POSITIONS
+
+    // individual
+    container_controls->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
+    container_daw->setPosition(ofPoint(gui_Panel_posX + 1 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
+    container_clocker->setPosition(ofPoint(gui_Panel_posX + 2 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
+
+
+    //    // nested foldered
+    //    container = gui_CLOCKER.addGroup();
+    //
+    //    container->addGroup(container_controls);
+    //    container->addGroup(container_daw);
+    //    container->addGroup(container_clocker);
+    //--
+
     //-
     
     // 3.1
@@ -90,32 +172,59 @@ void ofxBeatClock::setup()
     intervals.clear();
 
     //-
-    
-    // 3.2
-    
-    // DAW METRO
-    
-    // add bar/beat/sixteenth listener on demand
-    metro.addBeatListener(this);
-    metro.addBarListener(this);
-    metro.addSixteenthListener(this);
-    
-    DAW_bpm.addListener(this, &ofxBeatClock::Changed_DAW_bpm);
-    DAW_active.addListener(this, &ofxBeatClock::Changed_DAW_active);
-    DAW_bpm.set("BPM", BPM_INIT, 30, 240);
-    DAW_active.set("Active", false);
-    
-    params_daw.setName("INTERNAL BPM");
-    params_daw.add(DAW_bpm);
-    //params_daw.add(DAW_active);
 
-    metro.setBpm(DAW_bpm);
-    
+    // EXTERNAL MIDI IN CLOCK
+
+    setup_MIDI_CLOCK();
+
+
     //--
-    
+
     setup_Gui();
     setPosition_Gui(300, 50, 200);
     setPosition_Draw(300, 500);
+
+    //--
+
+    // DRAW STUFF
+
+    TTF_small.load("assets/fonts/mono.ttf", 8);
+    TTF_medium.load("assets/fonts/mono.ttf", 12);
+    TTF_big.load("assets/fonts/mono.ttf", 18);
+    
+    //--
+
+    // MONITOR
+
+    // default pos
+    posMon_x = 10;
+    posMon_Y = 10;
+
+    //---
+
+    // SOUNDS
+
+    tic.load("sounds/click1.wav");
+    tic.setVolume(1.0f);
+    tic.setMultiPlay(false);
+
+    tac.load("sounds/click2.wav");
+    tac.setVolume(0.25f);
+    tac.setMultiPlay(false);
+
+    //-
+
+    // DRAW BALL TRIGGER
+
+    TRIG_Ball_draw = false;
+
+    //-
+
+    // TEXT DISPLAY
+
+    BPM_bar_str = "0";
+    BPM_beat_str = "0";
+    BPM_16th_str = "0";
 
     //--
 
@@ -139,50 +248,6 @@ void ofxBeatClock::setup()
 //--------------------------------------------------------------
 void ofxBeatClock::setup_Gui(){
 
-    //-
-
-    // GUI POSITION AND SIZE
-
-    // default config. to be setted after with .setPosition_Gui
-
-    gui_Panel_W = 200;
-    gui_Panel_posX = 300;
-    gui_Panel_posY = 10;
-    gui_Panel_padW = 5;
-
-    //--
-
-    container_controls = gui_CLOCKER.addGroup(params_control);
-    container_daw = gui_CLOCKER.addGroup(params_daw);
-    container_clocker = gui_CLOCKER.addGroup(params_clocker);
-
-    // individual
-    container_controls->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
-    container_daw->setPosition(ofPoint(gui_Panel_posX + 1 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
-    container_clocker->setPosition(ofPoint(gui_Panel_posX + 2 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
-
-
-//    // foldered
-//    container = gui_CLOCKER.addGroup();
-//
-//    container->addGroup(container_controls);
-//    container->addGroup(container_daw);
-//    container->addGroup(container_clocker);
-
-    //-
-
-    // LOAD LAST SETTINGS
-
-    // add extra settings to group after gui creation, to include in xml settings
-    params_control.add(DAW_bpm);
-
-    pathSettings = "settings/CLOCKER_settings.xml";//default
-    loadSettings(pathSettings);
-
-    ofLogNotice("ofxBeatClock") << "LOAD SETTINGS";
-    ofLogNotice("ofxBeatClock") << pathSettings;
-
-
     //--
 
     // init state just in cas not open correct
@@ -197,6 +262,7 @@ void ofxBeatClock::setup_Gui(){
         BPM_input_str = "INTERNAL";
         BPM_name_str = "";
     }
+
     else if (ENABLE_EXTERNAL_CLOCK)
     {
         ENABLE_INTERNAL_CLOCK = false;
@@ -1086,7 +1152,6 @@ void ofxBeatClock::onSixteenthEvent(int & sixteenth) {
 //--------------------------------------------------------------
 void ofxBeatClock::RESET_clockValues()
 {
-
     metro.stop();
     metro.resetTimer();
 
@@ -1096,7 +1161,6 @@ void ofxBeatClock::RESET_clockValues()
     BPM_beat_str = ofToString( BPM_beat_current );
     BPM_bar_str = ofToString( BPM_bar_current );
     BPM_16th_str = ofToString( BPM_16th_current );
-
 }
 
 //--------------------------------------------------------------
