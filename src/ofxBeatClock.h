@@ -113,9 +113,11 @@ public:
 
     ofParameterGroup params_clocker;
     ofParameter<float> BPM_Global;//tempo bpm global
-    ofParameter<int> BPM_TimeBar;//ms time of 1 bar = 4 beats
+    ofParameter<int> BPM_GLOBAL_TimeBar;//ms time of 1 bar = 4 beats
+
     ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig measurements of tap tempo
-    
+//    ofParameter<void> BPM_Tap_Tempo_button;//trig measurements of tap tempo
+
     void Changed_Params(ofAbstractParameter& e);
 
     //-
