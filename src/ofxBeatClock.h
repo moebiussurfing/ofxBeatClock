@@ -97,7 +97,9 @@ public:
     ofxGuiContainer* container_controls;
     ofxGuiContainer* container_clocker;
 
-    ofxGuiContainer* container;
+//    ofxGuiContainer* container;
+
+    ofxGuiPanel* panel;
 
     //-
     
