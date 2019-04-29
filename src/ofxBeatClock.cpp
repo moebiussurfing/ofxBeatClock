@@ -91,8 +91,14 @@ void ofxBeatClock::setup()
 
     //--
 
-    container_controls = gui_CLOCKER.addGroup(params_control);
-    container_clocker = gui_CLOCKER.addGroup(params_clocker);
+    // PANEL
+
+    panel = gui_CLOCKER.addPanel("BEAT CLOCK", conf_Cont);
+    container_controls = panel->addGroup(params_control);
+    container_clocker = panel->addGroup(params_clocker);
+
+//    container_controls = gui_CLOCKER.addGroup(params_control);
+//    container_clocker = gui_CLOCKER.addGroup(params_clocker);
 
     //--
 
@@ -111,8 +117,8 @@ void ofxBeatClock::setup()
 
     (container_controls->getToggle("TAP"))->setHeight(25);
     (container_controls->getToggle("TAP"))->setConfig(confg_Button);
-//    (container_controls->getButton("TAP"))->setHeight(25);
-//    (container_controls->getButton("TAP"))->setConfig(confg_Button);
+    //    (container_controls->getButton("TAP"))->setHeight(25);
+    //    (container_controls->getButton("TAP"))->setConfig(confg_Button);
 
     //-
 
@@ -144,29 +150,10 @@ void ofxBeatClock::setup()
     pathSettings = "settings/CLOCKER_settings.xml";//default
     loadSettings(pathSettings);
 
+
+
     //--
 
-    // POSITIONS
-
-    // individual
-
-    setPosition_Gui(gui_Panel_posX, gui_Panel_posY, gui_Panel_W);
-
-//    container_controls->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
-//    container_clocker->setPosition(ofPoint(gui_Panel_posX + 2 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
-
-
-    //    // nested foldered
-
-    //    container = gui_CLOCKER.addGroup();
-    //
-    //    container->addGroup(container_controls);
-    //    container->addGroup(container_daw);
-    //    container->addGroup(container_clocker);
-    //--
-
-    //-
-    
     // 3.1
 
     // TAP TEMPO
@@ -185,8 +172,16 @@ void ofxBeatClock::setup()
     //--
 
     setup_Gui();
-    setPosition_Gui(300, 50, 200);
-    setPosition_Draw(300, 500);
+
+    //--
+
+    // POSITIONS
+
+    setPosition_Gui(gui_Panel_posX, gui_Panel_posY, gui_Panel_W);
+    setPosition_Draw(gui_Panel_posX - 200, gui_Panel_posY);
+
+//    setPosition_Gui(300, 50, 200);
+//    setPosition_Draw(300, 10);
 
     //--
 
@@ -292,9 +287,7 @@ void ofxBeatClock::setPosition_Gui(int _x, int _y, int _w)
     gui_Panel_posY = _y;
     gui_Panel_padW = 5;
 
-    // individual
-    container_controls->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
-    container_clocker->setPosition(ofPoint(gui_Panel_posX + 2 * (gui_Panel_W + gui_Panel_padW), gui_Panel_posY));
+    panel->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
 }
 
 //--------------------------------------------------------------
