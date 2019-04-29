@@ -10,11 +10,9 @@
 #include "ofxDawMetro.h"
 
 #define BPM_INIT 120
-
-#define ENABLE_PATTERN_LIMITING//comment to disable
+#define ENABLE_PATTERN_LIMITING//comment to disable: to long song mode
 #define PATTERN_STEP_BAR_LIMIT 4
 #define PATTERN_STEP_BEAT_LIMIT 16
-
 
 #define BPM_MIDI_CLOCK_REFRESH_RATE 200
 //refresh received MTC by clock. disabled/commented to "realtime" by frame update
@@ -96,10 +94,7 @@ public:
     ofxGui gui_CLOCKER;
     ofxGuiContainer* container_controls;
     ofxGuiContainer* container_clocker;
-
-//    ofxGuiContainer* container;
-
-    ofxGuiPanel* panel;
+    ofxGuiGroup* group_transport;//nested folder
 
     //-
     
@@ -208,7 +203,7 @@ public:
     void setPosition_Draw(int x, int y);
     void setPosition_Gui(int x, int y, int w);
 
-    // gui
+    // gui screen settings
     int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
 
     //-
