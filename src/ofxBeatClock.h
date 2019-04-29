@@ -235,5 +235,12 @@ public:
     int pattern_BEAT_limit;
     int pattern_BAR_limit;
 
+    //--
+
+    string myTTF;// gui font path
+    int sizeTTF;
+//    ofTrueTypeFont myFont;
+//    int fontSize = 10;
+
 };
 
