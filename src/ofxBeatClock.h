@@ -174,6 +174,8 @@ public:
 
     // CURRENT BPM CLOCK VALUES
 
+    void RESET_clockValues();
+
     // TODO: could be nice to add listener system..
 
     ofParameter<int> BPM_bar_current;
