@@ -586,7 +586,7 @@ void ofxBeatClock::PLAYER_START()//only used in internal mode
         if (!PLAYER_state) PLAYER_state = true;
         if (!DAW_active) DAW_active = true;
         
-        isPlaying = PLAYER_state;
+        isPlaying = true;
     }
     else
     {
@@ -606,8 +606,11 @@ void ofxBeatClock::PLAYER_STOP()//only used in internal mode
         if (PLAYER_state) PLAYER_state = false;
         if (DAW_active) DAW_active = false;
 
-        
-        isPlaying = PLAYER_state;
+        isPlaying = false;
+
+        RESET_clockValues();
+
+
     }
     else
     {
@@ -993,6 +996,11 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
 //--------------------------------------------------------------
 void ofxBeatClock::saveSettings(string path)
 {
+    //ofToDataPath( "dreadlock_ride2.wav"
+    // many debugger (included gdb and xcode) change the base path
+    // when you run your app in debug mode
+    // so the best is to use an absolute path
+    
 //    pathSettings = path;//store default
 
     // save settings
@@ -1056,7 +1064,7 @@ void ofxBeatClock::onBeatEvent(int & beat) {
             BPM_beat_current = beat;
         }
 
-        BPM_beat_str = ofToString(BPM_beat_current);
+        BPM_beat_str = ofToString( BPM_beat_current );
 
         //-
 
@@ -1074,6 +1082,21 @@ void ofxBeatClock::onSixteenthEvent(int & sixteenth) {
         BPM_16th_current = sixteenth;
         BPM_16th_str = ofToString( BPM_16th_current );
     }
+}
+//--------------------------------------------------------------
+void ofxBeatClock::RESET_clockValues()
+{
+
+    metro.stop();
+    metro.resetTimer();
+
+    BPM_bar_current = 0;
+    BPM_beat_current = 0;
+    BPM_16th_current = 0;
+    BPM_beat_str = ofToString( BPM_beat_current );
+    BPM_bar_str = ofToString( BPM_bar_current );
+    BPM_16th_str = ofToString( BPM_16th_current );
+
 }
 
 //--------------------------------------------------------------
