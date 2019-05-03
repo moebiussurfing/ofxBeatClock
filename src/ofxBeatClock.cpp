@@ -200,10 +200,10 @@ void ofxBeatClock::setup_Gui(){
     container_controls = group_transport->addGroup(params_control);
 
     group_INTERNAL = group_transport->addGroup("INTERNAL CLOCK", conf_Cont);
-    group_EXTERNENAL = group_transport->addGroup("EXTERNAL CLOCK", conf_Cont);
+    group_EXTERNAL = group_transport->addGroup("EXTERNAL CLOCK", conf_Cont);
 
     group_INTERNAL->add(params_INTERNAL);
-    group_EXTERNENAL->add(params_EXTERNAL);
+    group_EXTERNAL->add(params_EXTERNAL);
 
     //-
 
@@ -303,17 +303,6 @@ void ofxBeatClock::setup_Gui(){
 
 //     container_clocker->setminimize();
 //     group_INTERNAL->maximize();
-}
-
-//--------------------------------------------------------------
-void ofxBeatClock::setPosition_Gui(int _x, int _y, int _w)
-{
-    gui_Panel_W = _w;
-    gui_Panel_posX = _x;
-    gui_Panel_posY = _y;
-    gui_Panel_padW = 5;
-
-    group_transport->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
 }
 
 //--------------------------------------------------------------
@@ -610,6 +599,17 @@ void ofxBeatClock::draw_BigClockTime(int x, int y){
 }
 
 //--------------------------------------------------------------
+void ofxBeatClock::setPosition_Gui(int _x, int _y, int _w)
+{
+    gui_Panel_W = _w;
+    gui_Panel_posX = _x;
+    gui_Panel_posY = _y;
+    gui_Panel_padW = 5;
+
+    group_transport->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
+}
+
+//--------------------------------------------------------------
 void ofxBeatClock::setPosition_Squares(int x, int y, int w){
     pos_Squares_x = x;
     pos_Squares_y = y;
@@ -871,7 +871,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
             BPM_name_str += ofToString( midiIn_CLOCK.getPort() );
             BPM_name_str += " - '" + midiIn_CLOCK.getName() + "'";
 
-            group_EXTERNENAL->maximize();
+            group_EXTERNAL->maximize();
         }
         else
         {
@@ -891,7 +891,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 
             if (!ENABLE_INTERNAL_CLOCK) ENABLE_INTERNAL_CLOCK = true;
 
-            group_EXTERNENAL->minimize();
+            group_EXTERNAL->minimize();
         }
     }
 
