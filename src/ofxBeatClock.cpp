@@ -126,11 +126,11 @@ void ofxBeatClock::setup()
 
     // SOUNDS
 
-    tic.load("sounds/click1.wav");
+    tic.load("assets/sounds/click1.wav");
     tic.setVolume(1.0f);
     tic.setMultiPlay(false);
 
-    tac.load("sounds/click2.wav");
+    tac.load("assets/sounds/click2.wav");
     tac.setVolume(0.25f);
     tac.setMultiPlay(false);
 
@@ -265,7 +265,9 @@ void ofxBeatClock::setup_Gui(){
     ofLogNotice("ofxBeatClock") << "LOAD SETTINGS";
     ofLogNotice("ofxBeatClock") << pathSettings;
 
-    pathSettings = "settings/CLOCKER_settings.xml";//default
+//    pathSettings = "settings/CLOCKER_settings.xml";//default
+    pathSettings = "assets/settings/CLOCKER_settings.xml";//default
+
     loadSettings(pathSettings);
 
     //--
@@ -301,8 +303,7 @@ void ofxBeatClock::setup_Gui(){
 
     //--
 
-//     container_clocker->setminimize();
-//     group_INTERNAL->maximize();
+     group_transport->minimize();
 }
 
 //--------------------------------------------------------------
