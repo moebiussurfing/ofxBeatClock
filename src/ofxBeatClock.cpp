@@ -300,6 +300,9 @@ void ofxBeatClock::setup_Gui(){
     }
 
     //--
+
+//     container_clocker->setminimize();
+//     group_INTERNAL->maximize();
 }
 
 //--------------------------------------------------------------
