@@ -143,6 +143,8 @@ public:
 
     ofxGuiContainer* container_daw;
 
+    void set_DAW_bpm(float bpm);//to set bpm from outside
+
     //-
     
     // XML SETTINGS
