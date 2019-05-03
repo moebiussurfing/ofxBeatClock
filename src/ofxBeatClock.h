@@ -94,12 +94,12 @@ public:
     void setup_Gui();
 
     ofxGui gui_CLOCKER;
-    ofxGuiContainer* container_controls;
+    ofxGuiContainer* container_controls;//TODO: switch to groups to minimize..
     ofxGuiContainer* container_clocker;
     ofxGuiGroup* group_transport;//nested folder
 
     ofxGuiGroup* group_INTERNAL;
-    ofxGuiGroup* group_EXTERNENAL;
+    ofxGuiGroup* group_EXTERNAL;
 
     ofParameterGroup params_INTERNAL;
     ofParameterGroup params_EXTERNAL;
