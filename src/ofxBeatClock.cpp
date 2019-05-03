@@ -1284,3 +1284,8 @@ void ofxBeatClock::Tap_update()
     }
 }
 
+//--------------------------------------------------------------
+void ofxBeatClock::set_DAW_bpm(float bpm)
+{
+    DAW_bpm = bpm;
+}
