@@ -37,18 +37,20 @@ void ofxBeatClock::setup()
     // 2. CONTROL
     
     params_control.setName("TRANSPORT");
-    params_control.add(ENABLE_CLOCKS.set("ENABLE", true));
     params_control.add(DAW_bpm.set("BPM", BPM_INIT, 30, 300));
-    params_control.add(ENABLE_sound.set("TICK", false));
+    params_control.add(ENABLE_CLOCKS.set("ENABLE", true));
     params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
-    params_control.add(PLAYER_state.set("PLAY", false));
-
-    params_control.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
-    //    BPM_Tap_Tempo_TRIG = false;
-    //    params_control.add(BPM_Tap_Tempo_button.set("TAP"));
-
     params_control.add(ENABLE_EXTERNAL_CLOCK.set("EXTERNAL", true));
-    params_control.add(MIDI_Port_SELECT.set("MIDI PORT", 0, 0, num_MIDI_Ports-1));
+    params_control.add(ENABLE_sound.set("TICK", false));
+
+    params_INTERNAL.setName("INTERNAL CLOCK");
+    params_INTERNAL.add(PLAYER_state.set("PLAY", false));
+    params_INTERNAL.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
+    //    BPM_Tap_Tempo_TRIG = false;
+    //    params_INTERNAL(BPM_Tap_Tempo_button.set("TAP"));
+
+    params_EXTERNAL.setName("EXTERNAL CLOCK");
+    params_EXTERNAL.add(MIDI_Port_SELECT.set("MIDI PORT", 0, 0, num_MIDI_Ports-1));
 
     //-
     
@@ -67,6 +69,17 @@ void ofxBeatClock::setup()
     tapCount = 0;
     intervals.clear();
 
+    //-
+
+    // POSITIONS
+
+    // default config. to be setted after with .setPosition_Gui
+
+    gui_Panel_W = 200;
+    gui_Panel_posX = 5;
+    gui_Panel_posY = 5;
+    gui_Panel_padW = 5;
+
     //--
 
     // TRANSPORT GUI
@@ -75,11 +88,8 @@ void ofxBeatClock::setup()
 
     //-
 
-    // POSITIONS
-
     // default positions
     setPosition_Gui(gui_Panel_posX, gui_Panel_posY, gui_Panel_W);
-    setPosition_Draw(gui_Panel_posX - 200, gui_Panel_posY);
 
     //--
 
@@ -91,11 +101,20 @@ void ofxBeatClock::setup()
     
     //-
 
-    // MONITOR BALL
+    // MONITOR DEFAULT POS
 
-    // default pos
-    posMon_x = 10;
-    posMon_Y = 10;
+    // squares
+    pos_Squares_x = 10;
+    pos_Squares_y = 600;
+    pos_Squares_w = 200;
+
+    // ball
+    pos_Ball_x = 500;
+    pos_Ball_y = 750;
+    pos_Ball_w = 50;
+
+    setPosition_Squares(pos_Squares_x, pos_Squares_y, pos_Squares_w);
+    setPosition_Ball(pos_Ball_x, pos_Ball_y, pos_Ball_w);
 
     //-
 
@@ -148,13 +167,6 @@ void ofxBeatClock::setup_Gui(){
 
     // GUI POSITION AND SIZE
 
-    // default config. to be setted after with .setPosition_Gui
-
-    gui_Panel_W = 200;
-    gui_Panel_posX = 300;
-    gui_Panel_posY = 10;
-    gui_Panel_padW = 5;
-
     //--
 
     myTTF = "assets/fonts/PragmataProR_0822.ttf";
@@ -170,7 +182,7 @@ void ofxBeatClock::setup_Gui(){
 
     ofJson confg_Sliders =
     {
-        {"height", (int)(sizeTTF * 2.0)},
+        {"height", (int)(sizeTTF * 2.25)},
     };
 
     ofJson confg_Button =
@@ -186,7 +198,18 @@ void ofxBeatClock::setup_Gui(){
 
     group_transport = gui_CLOCKER.addGroup("BEAT CLOCK", conf_Cont);
     container_controls = group_transport->addGroup(params_control);
+
+    group_INTERNAL = group_transport->addGroup("INTERNAL CLOCK", conf_Cont);
+    group_EXTERNENAL = group_transport->addGroup("EXTERNAL CLOCK", conf_Cont);
+
+    group_INTERNAL->add(params_INTERNAL);
+    group_EXTERNENAL->add(params_EXTERNAL);
+
+    //-
+
     container_clocker = group_transport->addGroup(params_clocker);
+
+    //-
 
     //    container_controls = gui_CLOCKER.addGroup(params_control);
     //    container_clocker = gui_CLOCKER.addGroup(params_clocker);
@@ -202,14 +225,14 @@ void ofxBeatClock::setup_Gui(){
     (container_clocker->getFloatSlider("GLOBAL BPM"))->setConfig(confg_Sliders);
     (container_clocker->getIntSlider("BAR ms"))->setConfig(confg_Sliders);
 
-    (container_controls->getToggle("PLAY"))->setHeight(50);
-    (container_controls->getToggle("PLAY"))->setConfig(confg_Button);
-    (container_controls->getToggle("PLAY"))->setConfig(confg_Button);
+    (group_INTERNAL->getToggle("PLAY"))->setHeight(50);
+    (group_INTERNAL->getToggle("PLAY"))->setConfig(confg_Button);
+    (group_INTERNAL->getToggle("PLAY"))->setConfig(confg_Button);
 
-    (container_controls->getToggle("TAP"))->setHeight(25);
-    (container_controls->getToggle("TAP"))->setConfig(confg_Button);
-    //    (container_controls->getButton("TAP"))->setHeight(25);
-    //    (container_controls->getButton("TAP"))->setConfig(confg_Button);
+    (group_INTERNAL->getToggle("TAP"))->setHeight(25);
+    (group_INTERNAL->getToggle("TAP"))->setConfig(confg_Button);
+    //    (group_INTERNAL->getButton("TAP"))->setHeight(25);
+    //    (group_INTERNAL->getButton("TAP"))->setConfig(confg_Button);
 
     //-
 
@@ -225,6 +248,11 @@ void ofxBeatClock::setup_Gui(){
     // LISTENERS
 
     ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
+
+    ofAddListener(params_INTERNAL.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
+
+    ofAddListener(params_EXTERNAL.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
+
     ofAddListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
 
     //-
@@ -399,11 +427,12 @@ void ofxBeatClock::draw()
 {
     //TODO: improve performance with fbo drawing
 
-    draw_MONITOR(posMon_x, posMon_Y);
+    draw_SQUARES(pos_Squares_x, pos_Squares_y, pos_Squares_w);
+    draw_BALL(pos_Ball_x, pos_Ball_y, pos_Ball_w);
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::draw_MONITOR(int px, int py){
+void ofxBeatClock::draw_SQUARES(int px, int py, int w){
 
     //-
 
@@ -411,9 +440,9 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
 
     int padToSquares = 0;
     int padToBigTime = 0;
-    int padToBall = 10;
-    int squaresW = 50;//squares beats size
-    metronome_ball_radius = 30;
+    int squaresW;//squares beats size
+    squaresW = w / 4;
+
     int interline = 11; // line heigh
 
     bool SHOW_moreInfo = false;
@@ -520,23 +549,23 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
 
         //--
     }
+}
 
-    //-
-
-    py = py + (squaresW);// acumulate heigh distance
-
-    //--
+//--------------------------------------------------------------
+void ofxBeatClock::draw_BALL(int px, int py, int w){
 
     // 3. TICK BALL:
 
     // TODO: alpha tick could be tweened to better heartbeat feeling..
+    metronome_ball_radius = w;
+    int padToBall = 10;
 
     py += padToBall + metronome_ball_radius;
     metronome_ball_pos.x = px + metronome_ball_radius;
     metronome_ball_pos.y = py;
 
     ofPushStyle();
-    
+
     ofSetColor(16); // ball background
     ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
 
@@ -552,23 +581,12 @@ void ofxBeatClock::draw_MONITOR(int px, int py){
                 ofSetColor(ofColor::red);
             else
                 ofSetColor(ofColor::white);
-            
+
             ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
         }
     }
 
-    //-
-
     ofPopStyle();
-
-    //-
-
-    py = py + (2 * metronome_ball_radius);// acumulate heigh distance
-    px = px - metronome_ball_radius;
-
-    //-
-
-//    ofPopMatrix();
 }
 
 //--------------------------------------------------------------
@@ -589,9 +607,17 @@ void ofxBeatClock::draw_BigClockTime(int x, int y){
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::setPosition_Draw(int x, int y){
-    posMon_x = x;
-    posMon_Y = y;
+void ofxBeatClock::setPosition_Squares(int x, int y, int w){
+    pos_Squares_x = x;
+    pos_Squares_y = y;
+    pos_Squares_w = w;
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::setPosition_Ball(int x, int y, int w){
+    pos_Ball_x = x;
+    pos_Ball_y = y;
+    pos_Ball_w = w;
 }
 
 //--------------------------------------------------------------
@@ -794,6 +820,9 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
             // TEXT DISPLAY
             BPM_input_str = "INTERNAL";
             BPM_name_str = "";
+
+            group_INTERNAL->maximize();
+
         }
         else
         {
@@ -811,6 +840,12 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
                 BPM_input_str = "NONE";
                 BPM_name_str = "";
             }
+
+            //-
+
+            if (!ENABLE_EXTERNAL_CLOCK) ENABLE_EXTERNAL_CLOCK = true;
+
+            group_INTERNAL->minimize();
         }
     }
 
@@ -832,6 +867,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
             BPM_name_str = "MIDI PORT: ";
             BPM_name_str += ofToString( midiIn_CLOCK.getPort() );
             BPM_name_str += " - '" + midiIn_CLOCK.getName() + "'";
+
+            group_EXTERNENAL->maximize();
         }
         else
         {
@@ -846,6 +883,12 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
                 BPM_input_str = "NONE";
                 BPM_name_str = "";
             }
+
+            //-
+
+            if (!ENABLE_INTERNAL_CLOCK) ENABLE_INTERNAL_CLOCK = true;
+
+            group_EXTERNENAL->minimize();
         }
     }
 
@@ -855,17 +898,6 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 
         if (!ENABLE_CLOCKS)
         {
-//            if (ENABLE_EXTERNAL_CLOCK)
-//            {
-//                ENABLE_EXTERNAL_CLOCK = false;
-//            }
-
-//            if (ENABLE_INTERNAL_CLOCK)
-//            {
-//                ENABLE_INTERNAL_CLOCK = false;
-//            }
-
-            //PLAYER_STOP();
             if (PLAYER_state) PLAYER_state = false;
             if (DAW_active) DAW_active = false;
         }
@@ -877,14 +909,6 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
         {
             ENABLE_INTERNAL_CLOCK = true;//default state when enabling clocks
         }
-
-        //        else if (ENABLE_CLOCKS)
-        //        {
-        //            if (!ENABLE_INTERNAL_CLOCK)
-        //            {
-        //                ENABLE_INTERNAL_CLOCK = true;
-        //            }
-        //        }
     }
 
     else if (wid == "MIDI PORT")

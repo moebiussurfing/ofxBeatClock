@@ -42,13 +42,6 @@ public:
     unsigned int MIDI_beats; //< song pos in beats
     double MIDI_seconds; //< song pos in seconds, computed from beats
     double MIDI_CLOCK_bpm; //< song tempo in bpm, computed from clock length
-    
-    //float bpm_CLOCK; //< song tempo in bpm, computed from clock length
-    //void bpm_CLOCK_Changed(double & bpm_CLOCK);//listener for tempo changes
-    //void bpm_CLOCK_Changed(float & bpm_CLOCK);//listener for tempo changes
-    
-    // a MIDI beat is a 16th note, so do a little math to convert to a time signature:
-    // 4/4 -> 4 notes per bar & quarter note = 1 beat, add 1 to count from 1 instead of 0
     int MIDI_quarters; // convert total # beats to # quarters
     int MIDI_bars; // compute # of bars
     
@@ -69,8 +62,17 @@ public:
 
     // MONITOR
 
-    void draw_MONITOR(int x, int y);
-    int posMon_x, posMon_Y;
+    void setPosition_Squares(int x, int y, int w);
+    void setPosition_Ball(int x, int y, int w);
+
+    //squares
+    void draw_SQUARES(int x, int y, int w);
+    int pos_Squares_x, pos_Squares_y, pos_Squares_w;
+
+    //tick ball
+    void draw_BALL(int x, int y, int w);
+    int pos_Ball_x, pos_Ball_y, pos_Ball_w;
+
     void CLOCK_Tick_MONITOR(int beat);
     bool TRIG_Ball_draw ;
 
@@ -95,6 +97,12 @@ public:
     ofxGuiContainer* container_controls;
     ofxGuiContainer* container_clocker;
     ofxGuiGroup* group_transport;//nested folder
+
+    ofxGuiGroup* group_INTERNAL;
+    ofxGuiGroup* group_EXTERNENAL;
+
+    ofParameterGroup params_INTERNAL;
+    ofParameterGroup params_EXTERNAL;
 
     //-
     
@@ -200,7 +208,6 @@ public:
     void PLAYER_STOP();
     void PLAYER_TOGGLE();
     bool isPlaying;
-    void setPosition_Draw(int x, int y);
     void setPosition_Gui(int x, int y, int w);
 
     // gui screen settings
