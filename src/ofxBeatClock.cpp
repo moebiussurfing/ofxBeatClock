@@ -8,13 +8,13 @@ void ofxBeatClock::setup()
 
     //--
 
-    // EXTERNAL MIDI IN CLOCK
+#pragma mark - EXTERNAL MIDI IN CLOCK
 
     setup_MIDI_CLOCK();//should be defined before rest of gui to list midi ports being included on gui
 
     //--
     
-    // CONTROL AND INTERNAL CLOCK
+#pragma mark - CONTROL AND INTERNAL CLOCK
 
     //-
 
@@ -54,7 +54,7 @@ void ofxBeatClock::setup()
 
     //-
     
-    // 3. MONITOR GLOBAL TARGET
+#pragma mark - 3. MONITOR GLOBAL TARGET
 
     // this smoothed (or maybe slower refreshed than fps) clock will be sended to target sequencer outside the class. see BPM_MIDI_CLOCK_REFRESH_RATE.
     params_clocker.setName("BPM TARGET");
@@ -71,7 +71,7 @@ void ofxBeatClock::setup()
 
     //-
 
-    // POSITIONS
+#pragma mark - POSITIONS
 
     // default config. to be setted after with .setPosition_Gui
 
@@ -93,7 +93,7 @@ void ofxBeatClock::setup()
 
     //--
 
-    // DRAW STUFF
+#pragma mark - DRAW STUFF
 
     TTF_small.load("assets/fonts/mono.ttf", 8);
     TTF_medium.load("assets/fonts/mono.ttf", 12);
@@ -124,7 +124,7 @@ void ofxBeatClock::setup()
 
     //---
 
-    // SOUNDS
+#pragma mark - SOUNDS
 
     tic.load("assets/sounds/click1.wav");
     tic.setVolume(1.0f);
@@ -366,6 +366,8 @@ void ofxBeatClock::setup_MIDI_PORT(int p)
     ofLogNotice("MIDI PORT") << "connected to MIDI CLOCK IN port: " << midiIn_CLOCK.getPort();
 }
 
+#pragma mark - UPDATE
+
 //--------------------------------------------------------------
 void ofxBeatClock::update()
 {
@@ -414,6 +416,8 @@ void ofxBeatClock::update()
     //-
 
 }
+
+#pragma mark - DRAW
 
 //--------------------------------------------------------------
 void ofxBeatClock::draw()
@@ -599,6 +603,8 @@ void ofxBeatClock::draw_BigClockTime(int x, int y){
     }
 }
 
+#pragma mark - SET POSITIONS
+
 //--------------------------------------------------------------
 void ofxBeatClock::setPosition_Gui(int _x, int _y, int _w)
 {
@@ -660,6 +666,8 @@ void ofxBeatClock::exit()
 
     //-
 }
+
+#pragma mark - PLAYER MANAGER
 
 //--------------------------------------------------------
 void ofxBeatClock::PLAYER_START()//only used in internal mode
@@ -744,6 +752,8 @@ void ofxBeatClock::CLOCK_Tick_MONITOR(int beat)
         }
     }
 }
+
+#pragma mark - CHANGED LISTENERS
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
@@ -1012,6 +1022,8 @@ void ofxBeatClock::Changed_DAW_active(bool & value) {
     }
 }
 
+#pragma mark - MIDI MESSAGE
+
 //--------------------------------------------------------------
 void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
     
@@ -1094,6 +1106,8 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
     }
 }
 
+#pragma mark - XML SETTINGS
+
 //--------------------------------------------------------------
 void ofxBeatClock::saveSettings(string path)
 {
@@ -1126,7 +1140,7 @@ void ofxBeatClock::loadSettings(string path)
 
 //--------------------------------------------------------------
 
-// INTERNAL CLOCK - DAW METRO
+#pragma mark - INTERNAL CLOCK - DAW METRO
 
 //--------------------------------------------------------------
 void ofxBeatClock::onBarEvent(int & bar) {
@@ -1200,7 +1214,7 @@ void ofxBeatClock::RESET_clockValues()
 
 //--------------------------------------------------------------
 
-// TAP MACHINE
+#pragma mark - TAP MACHINE
 
 //--------------------------------------------------------------
 void ofxBeatClock::Tap_Trig()
