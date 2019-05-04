@@ -29,8 +29,8 @@ public:
     void exit();
     
     //-
-    
-    // MIDI IN CLOCK
+
+#pragma mark - MIDI IN CLOCK
     
     ofxMidiIn midiIn_CLOCK;
     ofxMidiMessage midiCLOCK_Message;
@@ -54,13 +54,13 @@ public:
     
     //-
     
-    // EXTERNAL CLOCK
+#pragma mark - EXTERNAL CLOCK
     
     void setup_MIDI_CLOCK();
 
     //-
 
-    // MONITOR
+#pragma mark - MONITOR
 
     void setPosition_Squares(int x, int y, int w);
     void setPosition_Ball(int x, int y, int w);
@@ -78,7 +78,7 @@ public:
 
     //-
 
-    // REFRESH FEQUENCY
+#pragma mark - REFRESH FEQUENCY
     
     unsigned long BPM_LAST_Tick_Time_LAST;//test
     unsigned long BPM_LAST_Tick_Time_ELLAPSED;//test
@@ -89,7 +89,7 @@ public:
     
     //-
 
-    // GUI
+#pragma mark - GUI
     
     void setup_Gui();
 
@@ -106,7 +106,7 @@ public:
 
     //-
     
-    // PARAMS
+#pragma mark - PARAMS
     
     ofParameterGroup params_control;
     ofParameter<bool> PLAYER_state;// player state
@@ -121,13 +121,13 @@ public:
     ofParameter<int> BPM_GLOBAL_TimeBar;//ms time of 1 bar = 4 beats
 
     ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig measurements of tap tempo
-//    ofParameter<void> BPM_Tap_Tempo_button;//trig measurements of tap tempo
+                                         //    ofParameter<void> BPM_Tap_Tempo_button;//trig measurements of tap tempo
 
     void Changed_Params(ofAbstractParameter& e);
 
     //-
     
-    // DAW METRO
+#pragma mark - DAW METRO
     
     // overide ofxDawMetro::MetroListener's method if necessary
     void onBarEvent(int & bar) override;
@@ -147,7 +147,7 @@ public:
 
     //-
     
-    // XML SETTINGS
+#pragma mark - XML SETTINGS
     
     void saveSettings(string path);
     void loadSettings(string path);
@@ -155,7 +155,7 @@ public:
 
     //-
 
-    // DRAW STUFF:
+#pragma mark - DRAW STUFF:
     
     // FONT
     
@@ -173,7 +173,7 @@ public:
     
     //-
     
-    // SOUND
+#pragma mark - SOUND
     
     ofParameter<bool> ENABLE_sound;//enable sound ticks
     ofSoundPlayer tic;
@@ -181,7 +181,8 @@ public:
     
     //-
 
-    // CURRENT BPM CLOCK VALUES
+#pragma mark - CURRENT BPM CLOCK VALUES
+
 
     void RESET_clockValues();
 
@@ -201,8 +202,8 @@ public:
     string BPM_name_str;//midi in port
 
     //-
-    
-    // API
+
+#pragma mark - API
 
     void draw_BigClockTime(int x, int y);
 
@@ -217,7 +218,7 @@ public:
 
     //-
 
-    // TAP BPM
+#pragma mark - TAP BPM
 
     void Tap_Trig();
     void Tap_update();
@@ -229,7 +230,7 @@ public:
 
     //-
 
-    // CHANGE MIDI PORT
+#pragma mark - CHANGE MIDI PORT
 
     int midiIn_CLOCK_port_OPENED;
     void setup_MIDI_PORT(int p);
@@ -237,7 +238,8 @@ public:
 
     //-
 
-    // STEP LIMITING:
+#pragma mark - STEP LIMITING
+
     // we dont need to use long song patterns
     bool ENABLE_pattern_limits;
     int pattern_BEAT_limit;
@@ -247,8 +249,8 @@ public:
 
     string myTTF;// gui font path
     int sizeTTF;
-//    ofTrueTypeFont myFont;
-//    int fontSize = 10;
+    //    ofTrueTypeFont myFont;
+    //    int fontSize = 10;
 
 };
 
