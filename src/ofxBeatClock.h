@@ -94,6 +94,7 @@ public:
     void setup_Gui();
 
     ofxGui gui_CLOCKER;
+    ofJson conf_Cont, confg_Sliders, confg_Button;
     ofxGuiContainer* container_controls;//TODO: switch to groups to minimize..
     ofxGuiContainer* container_clocker;
     ofxGuiGroup* group_transport;//nested folder

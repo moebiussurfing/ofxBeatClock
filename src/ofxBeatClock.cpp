@@ -53,8 +53,10 @@ void ofxBeatClock::setup()
     params_EXTERNAL.add(MIDI_Port_SELECT.set("MIDI PORT", 0, 0, num_MIDI_Ports-1));
 
     //-
+
+    // 3.
     
-#pragma mark - 3. MONITOR GLOBAL TARGET
+#pragma mark - MONITOR GLOBAL TARGET
 
     // this smoothed (or maybe slower refreshed than fps) clock will be sended to target sequencer outside the class. see BPM_MIDI_CLOCK_REFRESH_RATE.
     params_clocker.setName("BPM TARGET");
@@ -71,7 +73,7 @@ void ofxBeatClock::setup()
 
     //-
 
-#pragma mark - POSITIONS
+#pragma mark - DEFAULT POSITIONS
 
     // default config. to be setted after with .setPosition_Gui
 
@@ -110,7 +112,7 @@ void ofxBeatClock::setup()
 
     // ball
     pos_Ball_x = 500;
-    pos_Ball_y = 750;
+    pos_Ball_y = 600;
     pos_Ball_w = 50;
 
     setPosition_Squares(pos_Squares_x, pos_Squares_y, pos_Squares_w);
@@ -170,26 +172,30 @@ void ofxBeatClock::setup_Gui(){
     //--
 
     myTTF = "assets/fonts/PragmataProR_0822.ttf";
-    sizeTTF = 10; //font size affects sliders heigh too
+    sizeTTF = 10; //font size may affects sliders heigh too
     //ofTrueTypeFont::setGlobalDpi(72);
 
     //--
 
-    ofJson conf_Cont =
+    // THEME
+
+    conf_Cont =
     {
         {"direction", "vertical"},
     };
 
-    ofJson confg_Sliders =
+    confg_Sliders =
     {
-        {"height", (int)(sizeTTF * 2.25)},
+        //{"height", (int)(sizeTTF * 2.25)},
+        {"height", 16},
     };
 
-    ofJson confg_Button =
+    confg_Button =
     {
         {"type" , "fullsize"},
         //{"height", (int)(sizeTTF * 2.0)},
         {"text-align", "center"},
+        {"height", 30},
     };
 
     //--

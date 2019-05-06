@@ -3,10 +3,15 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofBackground(0);
+    ofBackground(32);
     ofSetFrameRate(60);
     
     CLOCKER.setup();
+
+//    // set positions and sizes
+//    CLOCKER.setPosition_Gui(10, 10, 100);
+//    CLOCKER.setPosition_Squares(400, 100, 100);
+//    CLOCKER.setPosition_Ball(400, 400, 50);
 }
 
 //--------------------------------------------------------------
@@ -26,7 +31,6 @@ void ofApp::exit(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-
     
     switch (key) {
 
@@ -34,22 +38,12 @@ void ofApp::keyPressed(int key) {
             CLOCKER.PLAYER_TOGGLE();
             break;
 
-//        case '-':
-//            break;
-//
-//        case '+':
-//            break;
-
         case 't':
             CLOCKER.Tap_Trig();
             break;
 
-         case 'r':
-            break;
-            
         default:
             break;
-            
     }
 }
 //--------------------------------------------------------------
