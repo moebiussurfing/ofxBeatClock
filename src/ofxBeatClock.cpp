@@ -171,9 +171,9 @@ void ofxBeatClock::setup_Gui(){
 
     //--
 
-    myTTF = "assets/fonts/PragmataProR_0822.ttf";
-    sizeTTF = 10; //font size may affects sliders heigh too
-    //ofTrueTypeFont::setGlobalDpi(72);
+//    myTTF = "assets/fonts/PragmataProR_0822.ttf";
+//    sizeTTF = 10; //font size may affects sliders heigh too
+//    //ofTrueTypeFont::setGlobalDpi(72);
 
     //--
 
@@ -244,10 +244,10 @@ void ofxBeatClock::setup_Gui(){
 
     // GUI FONT
 
-    gui_CLOCKER.setConfig({
-        {"font-family", myTTF},
-        {"font-size", sizeTTF},
-    });
+//    gui_CLOCKER.setConfig({
+//        {"font-family", myTTF},
+//        {"font-size", sizeTTF},
+//    });
 
     //-
 
@@ -309,7 +309,7 @@ void ofxBeatClock::setup_Gui(){
 
     //--
 
-     group_transport->minimize();
+//     group_transport->minimize();
 }
 
 //--------------------------------------------------------------
@@ -459,13 +459,14 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w){
     // 2. TEXT INFO:
     
     ofPushMatrix();
+    int pad = 10;
     ofTranslate(px, py);
     
     TTF_message = "CLOCK: " + BPM_input_str ;
-    TTF_small.drawString(TTF_message, 0, interline * i++);
+    TTF_small.drawString(TTF_message, pad, interline * i++);
     
     TTF_message = ofToString( BPM_name_str );
-    TTF_small.drawString(TTF_message, 0, interline * i++); i++;
+    TTF_small.drawString(TTF_message, pad, interline * i++); i++;
 
     py = py + (interline * (i+2));// acumulate heigh distance
 
@@ -600,12 +601,13 @@ void ofxBeatClock::draw_BigClockTime(int x, int y){
     // TODO: PERFORMANCE: reduce number of drawings..
 
     {
+        int pad = 12;
         std::string timePos =
         ofToString(BPM_bar_str, 3, ' ') + " : " +
         ofToString(BPM_beat_str) + " : " +
         ofToString(BPM_16th_str);
 
-        TTF_big.drawString(timePos, x, y);
+        TTF_big.drawString(timePos, x + pad, y);
     }
 }
 
@@ -634,6 +636,12 @@ void ofxBeatClock::setPosition_Ball(int x, int y, int w){
     pos_Ball_x = x;
     pos_Ball_y = y;
     pos_Ball_w = w;
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::set_Gui_visible (bool b)
+{
+    gui_CLOCKER.getVisible().set(b);
 }
 
 //--------------------------------------------------------------
@@ -757,6 +765,20 @@ void ofxBeatClock::CLOCK_Tick_MONITOR(int beat)
             }
         }
     }
+}
+
+#pragma mark - API
+
+//--------------------------------------------------------------
+float ofxBeatClock::get_BPM ()
+{
+    return BPM_Global;
+}
+
+//--------------------------------------------------------------
+int ofxBeatClock::get_TimeBar ()
+{
+    return BPM_GLOBAL_TimeBar;
 }
 
 #pragma mark - CHANGED LISTENERS
