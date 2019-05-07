@@ -93,6 +93,9 @@ public:
     
     void setup_Gui();
 
+    // TODO: convert to panel to enable mouse drag
+    // TODO: also disabler for header
+    
     ofxGui gui_CLOCKER;
     ofJson conf_Cont, confg_Sliders, confg_Button;
     ofxGuiContainer* container_controls;//TODO: switch to groups to minimize..
@@ -122,7 +125,16 @@ public:
     ofParameter<int> BPM_GLOBAL_TimeBar;//ms time of 1 bar = 4 beats
 
     ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig measurements of tap tempo
-                                         //    ofParameter<void> BPM_Tap_Tempo_button;//trig measurements of tap tempo
+    //    ofParameter<void> BPM_Tap_Tempo_button;//trig measurements of tap tempo
+
+    //-
+    
+    // API
+
+    float get_BPM();
+    int get_TimeBar();
+
+    //-
 
     void Changed_Params(ofAbstractParameter& e);
 
@@ -213,7 +225,8 @@ public:
     void PLAYER_TOGGLE();
     bool isPlaying;
     void setPosition_Gui(int x, int y, int w);
-
+    void set_Gui_visible( bool b);
+    
     // gui screen settings
     int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
 
