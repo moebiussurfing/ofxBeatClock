@@ -10,7 +10,8 @@ void ofxBeatClock::setup()
 
 #pragma mark - EXTERNAL MIDI IN CLOCK
 
-    setup_MIDI_CLOCK();//should be defined before rest of gui to list midi ports being included on gui
+    setup_MIDI_CLOCK();
+    //should be defined before rest of gui to list midi ports being included on gui
 
     //--
     
@@ -202,7 +203,10 @@ void ofxBeatClock::setup_Gui(){
 
     // PANEL
 
-    group_transport = gui_CLOCKER.addGroup("BEAT CLOCK", conf_Cont);
+//    group_transport = gui_CLOCKER.addGroup("BEAT CLOCK", conf_Cont);
+    group_transport = gui_CLOCKER.addPanel("BEAT CLOCK", conf_Cont);
+
+
     container_controls = group_transport->addGroup(params_control);
 
     group_INTERNAL = group_transport->addGroup("INTERNAL CLOCK", conf_Cont);
@@ -231,11 +235,10 @@ void ofxBeatClock::setup_Gui(){
     (container_clocker->getFloatSlider("GLOBAL BPM"))->setConfig(confg_Sliders);
     (container_clocker->getIntSlider("BAR ms"))->setConfig(confg_Sliders);
 
-    (group_INTERNAL->getToggle("PLAY"))->setHeight(50);
-    (group_INTERNAL->getToggle("PLAY"))->setConfig(confg_Button);
+//    (group_INTERNAL->getToggle("PLAY"))->setHeight(50);
     (group_INTERNAL->getToggle("PLAY"))->setConfig(confg_Button);
 
-    (group_INTERNAL->getToggle("TAP"))->setHeight(25);
+//    (group_INTERNAL->getToggle("TAP"))->setHeight(25);
     (group_INTERNAL->getToggle("TAP"))->setConfig(confg_Button);
     //    (group_INTERNAL->getButton("TAP"))->setHeight(25);
     //    (group_INTERNAL->getButton("TAP"))->setConfig(confg_Button);
@@ -575,7 +578,8 @@ void ofxBeatClock::draw_BALL(int px, int py, int w){
 
     //-
 
-    if ( ENABLE_CLOCKS && ( ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK ) )
+    if ( ENABLE_CLOCKS &&
+        ( ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK ) )
     {
         if ( TRIG_Ball_draw )
         {
@@ -591,6 +595,8 @@ void ofxBeatClock::draw_BALL(int px, int py, int w){
     }
 
     ofPopStyle();
+
+    //-
 }
 
 //--------------------------------------------------------------
@@ -601,6 +607,11 @@ void ofxBeatClock::draw_BigClockTime(int x, int y){
     // TODO: PERFORMANCE: reduce number of drawings..
 
     {
+        ofPushStyle();
+
+        //ofSetColor(192);
+        ofSetColor(ofColor::white);
+
         int pad = 12;
         std::string timePos =
         ofToString(BPM_bar_str, 3, ' ') + " : " +
@@ -608,6 +619,8 @@ void ofxBeatClock::draw_BigClockTime(int x, int y){
         ofToString(BPM_16th_str);
 
         TTF_big.drawString(timePos, x + pad, y);
+
+        ofPopStyle();
     }
 }
 
@@ -622,6 +635,36 @@ void ofxBeatClock::setPosition_Gui(int _x, int _y, int _w)
     gui_Panel_padW = 5;
 
     group_transport->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::setPosition_Gui_ALL(int _x, int _y, int _w)
+{
+    gui_Panel_W = _w;
+    gui_Panel_posX = _x;
+    gui_Panel_posY = _y;
+    gui_Panel_padW = 5;
+
+    // set positions and sizes
+    int w;
+//    w = 200;
+    w = _w;
+    int pad_Clock = 15;
+
+//    int pos_Clock_x = w * 2 + pad_Clock;
+    int pos_Clock_x = w + pad_Clock;
+
+    setPosition_Gui(pos_Clock_x, 0, w);
+    setPosition_Squares(pos_Clock_x, 500, w);
+    setPosition_Ball(pos_Clock_x + 50, 650, 25);
+}
+
+//--------------------------------------------------------------
+ofPoint ofxBeatClock::getPosition_Gui()
+{
+    ofPoint p;
+    p = group_transport->getShape().getTopLeft();
+    return p;
 }
 
 //--------------------------------------------------------------
@@ -1158,7 +1201,7 @@ void ofxBeatClock::saveSettings(string path)
 //--------------------------------------------------------------
 void ofxBeatClock::loadSettings(string path)
 {
-//    pathSettings = path;//store default
+    //pathSettings = path;//store default
 
     // load settings
     ofXml settings;

@@ -1,6 +1,9 @@
 
 #pragma once
 
+// TODO:
+// + fade blink ball when tapping tempo
+
 #include "ofMain.h"
 
 #include "ofxGuiExtended.h"
@@ -10,7 +13,7 @@
 #include "ofxDawMetro.h"
 
 #define BPM_INIT 120
-#define ENABLE_PATTERN_LIMITING//comment to disable: to long song mode
+#define ENABLE_PATTERN_LIMITING //comment to disable: to long song mode
 #define PATTERN_STEP_BAR_LIMIT 4
 #define PATTERN_STEP_BEAT_LIMIT 16
 
@@ -76,6 +79,8 @@ public:
     void CLOCK_Tick_MONITOR(int beat);
     bool TRIG_Ball_draw ;
 
+    void setPosition_Gui_ALL(int _x, int _y, int _w);
+    
     //-
 
 #pragma mark - REFRESH FEQUENCY
@@ -97,10 +102,14 @@ public:
     // TODO: also disabler for header
     
     ofxGui gui_CLOCKER;
-    ofJson conf_Cont, confg_Sliders, confg_Button;
-    ofxGuiContainer* container_controls;//TODO: switch to groups to minimize..
+    
+    //ofxGuiGroup* group_transport;//nested folder
+    ofxGuiPanel* group_transport;// main nested folder
+
+    ofJson conf_Cont, confg_Sliders, confg_Button;//json theme
+    ofxGuiContainer* container_controls;
+    //TODO: switch to groups to minimize..
     ofxGuiContainer* container_clocker;
-    ofxGuiGroup* group_transport;//nested folder
 
     ofxGuiGroup* group_INTERNAL;
     ofxGuiGroup* group_EXTERNAL;
@@ -125,7 +134,7 @@ public:
     ofParameter<int> BPM_GLOBAL_TimeBar;//ms time of 1 bar = 4 beats
 
     ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig measurements of tap tempo
-    //    ofParameter<void> BPM_Tap_Tempo_button;//trig measurements of tap tempo
+    //ofParameter<void> BPM_Tap_Tempo_button;//trig measurements of tap tempo
 
     //-
     
@@ -225,6 +234,7 @@ public:
     void PLAYER_TOGGLE();
     bool isPlaying;
     void setPosition_Gui(int x, int y, int w);
+    ofPoint getPosition_Gui();
     void set_Gui_visible( bool b);
     
     // gui screen settings
@@ -263,8 +273,8 @@ public:
 
     string myTTF;// gui font path
     int sizeTTF;
-    //    ofTrueTypeFont myFont;
-    //    int fontSize = 10;
+
+    //-
 
 };
 

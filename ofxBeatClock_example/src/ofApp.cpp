@@ -5,6 +5,9 @@
 void ofApp::setup(){
     ofBackground(32);
     ofSetFrameRate(60);
+    ofSetVerticalSync(true);
+
+    //-
     
     CLOCKER.setup();
 
