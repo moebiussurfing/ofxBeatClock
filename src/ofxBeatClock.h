@@ -101,7 +101,7 @@ public:
     // TODO: convert to panel to enable mouse drag
     // TODO: also disabler for header
     
-    ofxGui gui_CLOCKER;
+    ofxGui gui;
     
     //ofxGuiGroup* group_transport;//nested folder
     ofxGuiPanel* group_transport;// main nested folder
@@ -275,6 +275,8 @@ public:
     int sizeTTF;
 
     //-
+
+//    void toggleGroupHeader(bool val);
 
 };
 
