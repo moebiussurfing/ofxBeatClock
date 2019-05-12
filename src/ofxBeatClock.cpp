@@ -204,7 +204,7 @@ void ofxBeatClock::setup_Gui(){
     // PANEL
 
 //    group_transport = gui_CLOCKER.addGroup("BEAT CLOCK", conf_Cont);
-    group_transport = gui_CLOCKER.addPanel("BEAT CLOCK", conf_Cont);
+    group_transport = gui.addPanel("BEAT CLOCK", conf_Cont);
 
 
     container_controls = group_transport->addGroup(params_control);
@@ -684,7 +684,7 @@ void ofxBeatClock::setPosition_Ball(int x, int y, int w){
 //--------------------------------------------------------------
 void ofxBeatClock::set_Gui_visible (bool b)
 {
-    gui_CLOCKER.getVisible().set(b);
+    gui.getVisible().set(b);
 }
 
 //--------------------------------------------------------------
