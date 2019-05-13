@@ -42,7 +42,7 @@ void ofxBeatClock::setup()
     params_control.add(ENABLE_CLOCKS.set("ENABLE", true));
     params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
     params_control.add(ENABLE_EXTERNAL_CLOCK.set("EXTERNAL", true));
-    params_control.add(ENABLE_sound.set("TICK", false));
+    params_control.add(ENABLE_sound.set("SOUND TICK", false));
 
     params_INTERNAL.setName("INTERNAL CLOCK");
     params_INTERNAL.add(PLAYER_state.set("PLAY", false));
@@ -123,7 +123,7 @@ void ofxBeatClock::setup()
 
     // DRAW BALL TRIGGER
 
-    TRIG_Ball_draw = false;
+    TRIG_TICK = false;
 
     //---
 
@@ -581,9 +581,9 @@ void ofxBeatClock::draw_BALL(int px, int py, int w){
     if ( ENABLE_CLOCKS &&
         ( ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK ) )
     {
-        if ( TRIG_Ball_draw )
+        if ( TRIG_TICK )
         {
-            TRIG_Ball_draw = false;
+            TRIG_TICK = false;
 
             if (BPM_beat_current == 1)
                 ofSetColor(ofColor::red);
@@ -793,7 +793,7 @@ void ofxBeatClock::CLOCK_Tick_MONITOR(int beat)
 {
     if (ENABLE_CLOCKS && (ENABLE_INTERNAL_CLOCK || ENABLE_EXTERNAL_CLOCK))
     {
-        TRIG_Ball_draw = true;
+        TRIG_TICK = true;
 
         //-
 
@@ -1255,6 +1255,8 @@ void ofxBeatClock::onBeatEvent(int & beat) {
         //-
 
         CLOCK_Tick_MONITOR( BPM_beat_current );
+
+        //-
     }
 }
 

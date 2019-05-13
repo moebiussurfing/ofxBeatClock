@@ -77,7 +77,8 @@ public:
     int pos_Ball_x, pos_Ball_y, pos_Ball_w;
 
     void CLOCK_Tick_MONITOR(int beat);
-    bool TRIG_Ball_draw ;
+
+    ofParameter<bool> TRIG_TICK ;
 
     void setPosition_Gui_ALL(int _x, int _y, int _w);
     
