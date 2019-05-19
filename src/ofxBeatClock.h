@@ -50,7 +50,7 @@ public:
     
     //-
     
-    ofParameter<int> MIDI_beatsInBar; // compute remainder as # notes within the current bar
+    ofParameter<int> MIDI_beatsInBar; // compute remainder as # row_params within the current bar
     void Changed_MIDI_beatsInBar(int & beatsInBar);
     int beatsInBar_PRE;//not required
 
@@ -104,13 +104,17 @@ public:
     
     ofxGui gui;
     
-    //ofxGuiGroup* group_transport;//nested folder
-    ofxGuiPanel* group_transport;// main nested folder
+    ofxGuiGroup* group_BEAT_CLOCK;//nested folder
+//    ofxGuiPanel* group_BEAT_CLOCK;// main nested folder
 
     ofJson conf_Cont, confg_Sliders, confg_Button;//json theme
-    ofxGuiContainer* container_controls;
+
+//    ofxGuiContainer* container_controls;
+    ofxGuiGroup* container_controls;
+
     //TODO: switch to groups to minimize..
-    ofxGuiContainer* container_clocker;
+//    ofxGuiContainer* container_clocker;
+    ofxGuiGroup* container_clocker;
 
     ofxGuiGroup* group_INTERNAL;
     ofxGuiGroup* group_EXTERNAL;
