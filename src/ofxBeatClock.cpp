@@ -196,28 +196,28 @@ void ofxBeatClock::setup_Gui(){
         {"type" , "fullsize"},
         //{"height", (int)(sizeTTF * 2.0)},
         {"text-align", "center"},
-        {"height", 30},
+        {"height", 20},
     };
 
     //--
 
     // PANEL
 
-//    group_transport = gui_CLOCKER.addGroup("BEAT CLOCK", conf_Cont);
-    group_transport = gui.addPanel("BEAT CLOCK", conf_Cont);
+    group_BEAT_CLOCK = gui.addGroup("BEAT CLOCK", conf_Cont);
+//    group_BEAT_CLOCK = gui.addPanel("BEAT CLOCK", conf_Cont);
 
 
-    container_controls = group_transport->addGroup(params_control);
+    container_controls = group_BEAT_CLOCK->addGroup(params_control);
 
-    group_INTERNAL = group_transport->addGroup("INTERNAL CLOCK", conf_Cont);
-    group_EXTERNAL = group_transport->addGroup("EXTERNAL CLOCK", conf_Cont);
+    group_INTERNAL = group_BEAT_CLOCK->addGroup("INTERNAL CLOCK", conf_Cont);
+    group_EXTERNAL = group_BEAT_CLOCK->addGroup("EXTERNAL CLOCK", conf_Cont);
 
     group_INTERNAL->add(params_INTERNAL);
     group_EXTERNAL->add(params_EXTERNAL);
 
     //-
 
-    container_clocker = group_transport->addGroup(params_clocker);
+    container_clocker = group_BEAT_CLOCK->addGroup(params_clocker);
 
     //-
 
@@ -312,7 +312,7 @@ void ofxBeatClock::setup_Gui(){
 
     //--
 
-//     group_transport->minimize();
+//     group_BEAT_CLOCK->minimize();
 }
 
 //--------------------------------------------------------------
@@ -573,12 +573,21 @@ void ofxBeatClock::draw_BALL(int px, int py, int w){
 
     ofPushStyle();
 
-    ofSetColor(16); // ball background
+    if (!Tap_running)
+    {
+        ofSetColor(16); // ball background
+    }
+    else
+    {
+        ofSetColor(ofColor(96), ofGetElapsedTimeMillis()
+        % 255);//change fade color on taping
+    }
+
     ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
 
     //-
 
-    if ( ENABLE_CLOCKS &&
+    if ( ENABLE_CLOCKS && !Tap_running &&
         ( ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK ) )
     {
         if ( TRIG_TICK )
@@ -634,7 +643,7 @@ void ofxBeatClock::setPosition_Gui(int _x, int _y, int _w)
     gui_Panel_posY = _y;
     gui_Panel_padW = 5;
 
-    group_transport->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
+    group_BEAT_CLOCK->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
 }
 
 //--------------------------------------------------------------
@@ -663,7 +672,7 @@ void ofxBeatClock::setPosition_Gui_ALL(int _x, int _y, int _w)
 ofPoint ofxBeatClock::getPosition_Gui()
 {
     ofPoint p;
-    p = group_transport->getShape().getTopLeft();
+    p = group_BEAT_CLOCK->getShape().getTopLeft();
     return p;
 }
 
@@ -1124,7 +1133,7 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
                 
                 MIDI_quarters = MIDI_beats / 4; // convert total # beats to # quarters
                 MIDI_bars = ( MIDI_quarters / 4) + 1; // compute # of bars
-                MIDI_beatsInBar = ( MIDI_quarters % 4) + 1; // compute remainder as # notes within the current bar
+                MIDI_beatsInBar = ( MIDI_quarters % 4) + 1; // compute remainder as # row_params within the current bar
                 
                 //-
                 
