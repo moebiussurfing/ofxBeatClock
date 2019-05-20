@@ -103,6 +103,11 @@ public:
     // TODO: also disabler for header
     
     ofxGui gui;
+
+    int gui_w;
+    int gui_slider_h;
+    int gui_slider_big_h;
+    int gui_button_h;
     
     ofxGuiGroup* group_BEAT_CLOCK;//nested folder
 //    ofxGuiPanel* group_BEAT_CLOCK;// main nested folder
