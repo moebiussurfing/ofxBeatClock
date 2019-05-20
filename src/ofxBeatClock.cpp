@@ -170,6 +170,11 @@ void ofxBeatClock::setup_Gui(){
 
     // GUI POSITION AND SIZE
 
+    gui_w = 200;
+    gui_slider_h = 14;
+    gui_slider_big_h = 18;
+    gui_button_h = 22;
+
     //--
 
 //    myTTF = "assets/fonts/PragmataProR_0822.ttf";
@@ -182,21 +187,20 @@ void ofxBeatClock::setup_Gui(){
 
     conf_Cont =
     {
+        {"width", gui_w},
         {"direction", "vertical"},
     };
 
     confg_Sliders =
     {
-        //{"height", (int)(sizeTTF * 2.25)},
-        {"height", 16},
+        {"height", gui_slider_h},
     };
 
     confg_Button =
     {
         {"type" , "fullsize"},
-        //{"height", (int)(sizeTTF * 2.0)},
         {"text-align", "center"},
-        {"height", 20},
+        {"height", gui_button_h},
     };
 
     //--
@@ -257,11 +261,8 @@ void ofxBeatClock::setup_Gui(){
     // LISTENERS
 
     ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
-
     ofAddListener(params_INTERNAL.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
-
     ofAddListener(params_EXTERNAL.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
-
     ofAddListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
 
     //-
@@ -464,14 +465,17 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w){
     ofPushMatrix();
     int pad = 10;
     ofTranslate(px, py);
-    
+
+    TTF_message = "BPM: " + ofToString( BPM_Global );
+    TTF_big.drawString(TTF_message, pad, interline * i++);
+
     TTF_message = "CLOCK: " + BPM_input_str ;
     TTF_small.drawString(TTF_message, pad, interline * i++);
-    
-    TTF_message = ofToString( BPM_name_str );
-    TTF_small.drawString(TTF_message, pad, interline * i++); i++;
 
-    py = py + (interline * (i+2));// acumulate heigh distance
+    TTF_message = ofToString( BPM_name_str );
+    TTF_small.drawString(TTF_message, pad, interline * i++);
+
+    py = py + (interline * (i+3));// accumulate heigh distance
 
     //-
 
