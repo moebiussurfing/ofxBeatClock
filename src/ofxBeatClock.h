@@ -99,9 +99,6 @@ public:
     
     void setup_Gui();
 
-    // TODO: convert to panel to enable mouse drag
-    // TODO: also disabler for header
-    
     ofxGui gui;
 
     int gui_w;
@@ -110,20 +107,14 @@ public:
     int gui_button_h;
     
     ofxGuiGroup* group_BEAT_CLOCK;//nested folder
-//    ofxGuiPanel* group_BEAT_CLOCK;// main nested folder
 
     ofJson conf_Cont, confg_Sliders, confg_Button;//json theme
 
-//    ofxGuiContainer* container_controls;
     ofxGuiGroup* container_controls;
-
-    //TODO: switch to groups to minimize..
-//    ofxGuiContainer* container_clocker;
     ofxGuiGroup* container_clocker;
 
     ofxGuiGroup* group_INTERNAL;
     ofxGuiGroup* group_EXTERNAL;
-
     ofParameterGroup params_INTERNAL;
     ofParameterGroup params_EXTERNAL;
 
@@ -144,8 +135,8 @@ public:
     ofParameter<int> BPM_GLOBAL_TimeBar;//ms time of 1 bar = 4 beats
 
     ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig measurements of tap tempo
-    //ofParameter<void> BPM_Tap_Tempo_button;//trig measurements of tap tempo
 
+    ofParameter<bool> RESET_BPM_Global;
     //-
     
     // API
@@ -214,7 +205,6 @@ public:
     //-
 
 #pragma mark - CURRENT BPM CLOCK VALUES
-
 
     void RESET_clockValues();
 
