@@ -831,12 +831,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
     string wid = e.getName();
     //ofLogNotice("ofxBeatClock") << "Changed_gui_CLOCKER '" << wid << "': " << e;
 
-    if (wid == " ")
-    {
-
-    }
-
-    else if (wid == "TAP")
+    if (wid == "TAP")
     {
         ofLogNotice("ofxBeatClock") << "TAP BUTTON";
         //BPM_Tap_Tempo_TRIG = !BPM_Tap_Tempo_TRIG;
@@ -878,7 +873,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 
     else if (wid == "BPM")
     {
-//        ofLogVerbose"ofxBeatClock") << "NEW BPM: " << BPM_Global;
+    // ofLogVerbose"ofxBeatClock") << "NEW BPM: " << BPM_Global;
     }
 
     else if (wid == "RESET BPM")
@@ -890,13 +885,14 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
             RESET_BPM_Global = false;
             BPM_Global = 120.00;
             DAW_bpm = 120.00;
+            metro.setBpm(DAW_bpm);
             ofLogNotice("ofxBeatClock") << "BPM_Global: " << BPM_Global;
         }
     }
 
     else if (wid == "GLOBAL BPM")
     {
-//        ofLogVerbose("ofxBeatClock") << "GLOBAL BPM   : " << BPM_Global;
+        // ofLogVerbose("ofxBeatClock") << "GLOBAL BPM   : " << BPM_Global;
 
         BPM_GLOBAL_TimeBar = 60000 / BPM_Global;// 60,000 / BPM = one beat in milliseconds
 
@@ -1136,7 +1132,7 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
                 
                 MIDI_quarters = MIDI_beats / 4; // convert total # beats to # quarters
                 MIDI_bars = ( MIDI_quarters / 4) + 1; // compute # of bars
-                MIDI_beatsInBar = ( MIDI_quarters % 4) + 1; // compute remainder as # row_params within the current bar
+                MIDI_beatsInBar = ( MIDI_quarters % 4) + 1; // compute remainder as # notes_params within the current bar
                 
                 //-
                 
