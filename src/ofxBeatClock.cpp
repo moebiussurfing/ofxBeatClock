@@ -4,8 +4,8 @@
 //--------------------------------------------------------------
 void ofxBeatClock::setup()
 {
-    ofSetLogLevel(OF_LOG_VERBOSE);
-
+    ofSetLogLevel("ofxBeatClock", OF_LOG_NOTICE);
+    
     //--
 
 #pragma mark - EXTERNAL MIDI IN CLOCK
@@ -63,6 +63,8 @@ void ofxBeatClock::setup()
     params_clocker.setName("BPM TARGET");
     params_clocker.add(BPM_Global.set("GLOBAL BPM", BPM_INIT, 60, 300));
     params_clocker.add(BPM_GLOBAL_TimeBar.set("BAR ms", 60000 / BPM_Global, 1, 5000));
+
+    params_clocker.add(RESET_BPM_Global.set("RESET BPM", false));
 
     //-
 
@@ -161,6 +163,8 @@ void ofxBeatClock::setup()
     }
 
     //--
+
+    // group_BEAT_CLOCK->minimize();
 }
 
 //--------------------------------------------------------------
@@ -208,8 +212,6 @@ void ofxBeatClock::setup_Gui(){
     // PANEL
 
     group_BEAT_CLOCK = gui.addGroup("BEAT CLOCK", conf_Cont);
-//    group_BEAT_CLOCK = gui.addPanel("BEAT CLOCK", conf_Cont);
-
 
     container_controls = group_BEAT_CLOCK->addGroup(params_control);
 
@@ -238,23 +240,10 @@ void ofxBeatClock::setup_Gui(){
     (container_clocker->getFloatSlider("GLOBAL BPM"))->setPrecision(2);
     (container_clocker->getFloatSlider("GLOBAL BPM"))->setConfig(confg_Sliders);
     (container_clocker->getIntSlider("BAR ms"))->setConfig(confg_Sliders);
+    (container_clocker->getToggle("RESET BPM"))->setConfig(confg_Sliders);
 
-//    (group_INTERNAL->getToggle("PLAY"))->setHeight(50);
     (group_INTERNAL->getToggle("PLAY"))->setConfig(confg_Button);
-
-//    (group_INTERNAL->getToggle("TAP"))->setHeight(25);
     (group_INTERNAL->getToggle("TAP"))->setConfig(confg_Button);
-    //    (group_INTERNAL->getButton("TAP"))->setHeight(25);
-    //    (group_INTERNAL->getButton("TAP"))->setConfig(confg_Button);
-
-    //-
-
-    // GUI FONT
-
-//    gui_CLOCKER.setConfig({
-//        {"font-family", myTTF},
-//        {"font-size", sizeTTF},
-//    });
 
     //-
 
@@ -275,7 +264,6 @@ void ofxBeatClock::setup_Gui(){
     ofLogNotice("ofxBeatClock") << "LOAD SETTINGS";
     ofLogNotice("ofxBeatClock") << pathSettings;
 
-//    pathSettings = "settings/CLOCKER_settings.xml";//default
     pathSettings = "assets/settings/CLOCKER_settings.xml";//default
 
     loadSettings(pathSettings);
@@ -310,10 +298,7 @@ void ofxBeatClock::setup_Gui(){
         BPM_name_str += ofToString( midiIn_CLOCK.getPort() );
         BPM_name_str += " - '" + midiIn_CLOCK.getName() + "'";
     }
-
     //--
-
-//     group_BEAT_CLOCK->minimize();
 }
 
 //--------------------------------------------------------------
@@ -468,6 +453,7 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w){
 
     TTF_message = "BPM: " + ofToString( BPM_Global );
     TTF_big.drawString(TTF_message, pad, interline * i++);
+    i++;
 
     TTF_message = "CLOCK: " + BPM_input_str ;
     TTF_small.drawString(TTF_message, pad, interline * i++);
@@ -475,7 +461,7 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w){
     TTF_message = ofToString( BPM_name_str );
     TTF_small.drawString(TTF_message, pad, interline * i++);
 
-    py = py + (interline * (i+3));// accumulate heigh distance
+    py = py + (interline * (i+2));// accumulate heigh distance
 
     //-
 
@@ -895,6 +881,19 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 //        ofLogVerbose"ofxBeatClock") << "NEW BPM: " << BPM_Global;
     }
 
+    else if (wid == "RESET BPM")
+    {
+        ofLogNotice("ofxBeatClock") << "RESET BPM: " << RESET_BPM_Global;
+
+        if (RESET_BPM_Global)
+        {
+            RESET_BPM_Global = false;
+            BPM_Global = 120.00;
+            DAW_bpm = 120.00;
+            ofLogNotice("ofxBeatClock") << "BPM_Global: " << BPM_Global;
+        }
+    }
+
     else if (wid == "GLOBAL BPM")
     {
 //        ofLogVerbose("ofxBeatClock") << "GLOBAL BPM   : " << BPM_Global;
@@ -1172,14 +1171,14 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
                 case MIDI_START: case MIDI_CONTINUE:
                     if (!clockRunning) {
                         clockRunning = true;
-                        ofLog() << "clock started";
+                        ofLogVerbose("ofxBeatClock") << "clock started";
                     }
                     break;
                     
                 case MIDI_STOP:
                     if (clockRunning) {
                         clockRunning = false;
-                        ofLog() << "clock stopped";
+                        ofLogVerbose("ofxBeatClock") << "clock stopped";
                     }
                     break;
                     
@@ -1368,7 +1367,7 @@ void ofxBeatClock::Tap_update()
     int time = ofGetElapsedTimeMillis();
     if( intervals.size() > 0 && (time - lastTime > 3000) )
     {
-        ofLogVerbose(">TAP<") << "TIMEOUT: clear tap logs";
+        ofLogNotice("ofxBeatClock") << ">TAP< TIMEOUT: clear tap logs";
         intervals.clear();
 
         tapCount = 0;
