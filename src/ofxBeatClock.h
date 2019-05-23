@@ -50,7 +50,7 @@ public:
     
     //-
     
-    ofParameter<int> MIDI_beatsInBar; // compute remainder as # notes_params within the current bar
+    ofParameter<int> MIDI_beatsInBar; // compute remainder as # TARGET_NOTES_params within the current bar
     void Changed_MIDI_beatsInBar(int & beatsInBar);
     int beatsInBar_PRE;//not required
 
