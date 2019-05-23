@@ -78,7 +78,7 @@ void ofxBeatClock::setup()
 
 #pragma mark - DEFAULT POSITIONS
 
-    // default config. to be setted after with .setPosition_Gui
+    // default config. to be setted after with .setPosition_BEAT_CLOCK
 
     gui_Panel_W = 200;
     gui_Panel_posX = 5;
@@ -378,6 +378,7 @@ void ofxBeatClock::update()
     // MIDI CLOCK
     
     // read bpm with a clock refresh or every frame if not defined time-clock-refresh:
+
 #ifdef BPM_MIDI_CLOCK_REFRESH_RATE
     if (ofGetElapsedTimeMillis() - bpm_CheckUpdated_lastTime >= BPM_MIDI_CLOCK_REFRESH_RATE)
     {
@@ -555,7 +556,7 @@ void ofxBeatClock::draw_BALL(int px, int py, int w){
 
     // TODO: alpha tick could be tweened to better heartbeat feeling..
     metronome_ball_radius = w;
-    int padToBall = 10;
+    int padToBall = 0;
 
     py += padToBall + metronome_ball_radius;
     metronome_ball_pos.x = px + metronome_ball_radius;
@@ -565,15 +566,21 @@ void ofxBeatClock::draw_BALL(int px, int py, int w){
 
     if (!Tap_running)
     {
-        ofSetColor(16); // ball background
+        ofSetColor(16); // ball background when not tapping
     }
     else
     {
-        ofSetColor(ofColor(96), ofGetElapsedTimeMillis()
-        % 255);//change fade color on taping
+        // aloha fade when measuring tpaping
+        float t = (ofGetElapsedTimeMillis() % 1000);
+        float fade = sin( ofMap(t, 0, 1000, 0, 2*PI) );
+        cout << "fade: " << fade << endl;
+        int alpha = (int) ofMap(fade, -1.0f, 1.0f, 0, 127) + 128;
+        ofSetColor( ofColor(96), alpha );
     }
 
-    ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
+    ofDrawCircle(metronome_ball_pos.x,
+            metronome_ball_pos.y,
+            metronome_ball_radius);
 
     //-
 
@@ -646,14 +653,13 @@ void ofxBeatClock::setPosition_Gui_ALL(int _x, int _y, int _w)
 
     // set positions and sizes
     int w;
-//    w = 200;
     w = _w;
     int pad_Clock = 15;
-
-//    int pos_Clock_x = w * 2 + pad_Clock;
     int pos_Clock_x = w + pad_Clock;
 
-    setPosition_Gui(pos_Clock_x, 0, w);
+//    setPosition_BEAT_CLOCK(pos_Clock_x, 0, w);
+    setPosition_Gui(gui_Panel_posX, gui_Panel_posY, w);
+
     setPosition_Squares(pos_Clock_x, 500, w);
     setPosition_Ball(pos_Clock_x + 50, 650, 25);
 }
@@ -662,7 +668,8 @@ void ofxBeatClock::setPosition_Gui_ALL(int _x, int _y, int _w)
 ofPoint ofxBeatClock::getPosition_Gui()
 {
     ofPoint p;
-    p = group_BEAT_CLOCK->getShape().getTopLeft();
+//    p = group_BEAT_CLOCK->getShape().getTopLeft();
+    p = ofPoint( gui_Panel_posX, gui_Panel_posY );
     return p;
 }
 
@@ -1132,7 +1139,7 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage& message) {
                 
                 MIDI_quarters = MIDI_beats / 4; // convert total # beats to # quarters
                 MIDI_bars = ( MIDI_quarters / 4) + 1; // compute # of bars
-                MIDI_beatsInBar = ( MIDI_quarters % 4) + 1; // compute remainder as # notes_params within the current bar
+                MIDI_beatsInBar = ( MIDI_quarters % 4) + 1; // compute remainder as # TARGET_NOTES_params within the current bar
                 
                 //-
                 
