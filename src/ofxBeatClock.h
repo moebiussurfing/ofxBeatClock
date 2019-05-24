@@ -99,24 +99,21 @@ public:
     
     void setup_Gui();
 
-    ofxGui gui;
-
     int gui_w;
     int gui_slider_h;
     int gui_slider_big_h;
     int gui_button_h;
-    
+
+    ofxGui gui;
     ofxGuiGroup* group_BEAT_CLOCK;//nested folder
-
-    ofJson conf_Cont, confg_Sliders, confg_Button;//json theme
-
     ofxGuiGroup* container_controls;
     ofxGuiGroup* container_clocker;
-
     ofxGuiGroup* group_INTERNAL;
     ofxGuiGroup* group_EXTERNAL;
     ofParameterGroup params_INTERNAL;
     ofParameterGroup params_EXTERNAL;
+
+    ofJson conf_Cont, confg_Sliders, confg_Button;//json theme
 
     //-
     
