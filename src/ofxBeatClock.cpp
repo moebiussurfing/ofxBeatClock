@@ -78,7 +78,7 @@ void ofxBeatClock::setup()
 
 #pragma mark - DEFAULT POSITIONS
 
-    // default config. to be setted after with .setPosition_BEAT_CLOCK
+    // default config. to be setted after with .setPosition_EDITOR
 
     gui_Panel_W = 200;
     gui_Panel_posX = 5;
@@ -657,7 +657,7 @@ void ofxBeatClock::setPosition_Gui_ALL(int _x, int _y, int _w)
     int pad_Clock = 15;
     int pos_Clock_x = w + pad_Clock;
 
-//    setPosition_BEAT_CLOCK(pos_Clock_x, 0, w);
+//    setPosition_EDITOR(pos_Clock_x, 0, w);
     setPosition_Gui(gui_Panel_posX, gui_Panel_posY, w);
 
     setPosition_Squares(pos_Clock_x, 500, w);
@@ -1304,6 +1304,7 @@ void ofxBeatClock::RESET_clockValues()
 
 #pragma mark - TAP MACHINE
 
+// TODO: implement bpm divider / multiplier x2 x4 /2 /4
 //--------------------------------------------------------------
 void ofxBeatClock::Tap_Trig()
 {
