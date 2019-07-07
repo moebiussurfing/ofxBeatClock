@@ -66,6 +66,11 @@ void ofxBeatClock::setup()
 
     params_clocker.add(RESET_BPM_Global.set("RESET BPM", false));
 
+//    params_clocker.add(BPM_half_TRIG.set("HALF", false));
+//    params_clocker.add(BPM_double_TRIG.set("DOUBLE", false));
+    BPM_half_TRIG.set("HALF", false);
+    BPM_double_TRIG.set("DOUBLE", false);
+
     //-
 
     // 4. TAP TEMPO
@@ -227,7 +232,7 @@ void ofxBeatClock::setup_Gui(){
 
     //-
 
-    //    container_controls = gui_CLOCKER.addGroup(params_control);
+    //    group_SEQ_editor = gui_CLOCKER.addGroup(params_control);
     //    container_clocker = gui_CLOCKER.addGroup(params_clocker);
 
     //--
@@ -244,6 +249,33 @@ void ofxBeatClock::setup_Gui(){
 
     (group_INTERNAL->getToggle("PLAY"))->setConfig(confg_Button);
     (group_INTERNAL->getToggle("TAP"))->setConfig(confg_Button);
+
+    //-
+
+    ofxGuiContainer* container_h;//half double
+//    container_h = group_BEAT_CLOCK->addContainer();
+    container_h = container_clocker->addContainer();
+
+    ofJson containerConfig_browse =
+            {
+                    {"direction", "horizontal"},
+                    {"background-color", "transparent"},
+            };
+    ofJson itemConfig_browse =
+            {
+                    {"height", gui_slider_h},
+            };
+
+    container_h->setConfig(containerConfig_browse);
+    container_h->add<ofxGuiButton>(BPM_half_TRIG, itemConfig_browse);
+    container_h->add<ofxGuiButton>(BPM_double_TRIG, itemConfig_browse);
+
+    // TODO: BUG: not sure why do not requires to add to group whith listener function
+    // maybe it's already added when adding the container to gui ?
+    // if it's not commented, trigs arrive twice...
+//    // add to use listeners because are buttons not default toggles
+//    params_clocker.add(BPM_half_TRIG);
+//    params_clocker.add(BPM_double_TRIG);
 
     //-
 
@@ -889,16 +921,43 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) // patch change
 
         if (RESET_BPM_Global)
         {
-            RESET_BPM_Global = false;
+            RESET_BPM_Global = false;//should be a button not toggle
             BPM_Global = 120.00;
             DAW_bpm = 120.00;
             metro.setBpm(DAW_bpm);
             ofLogNotice("ofxBeatClock") << "BPM_Global: " << BPM_Global;
         }
     }
+    else if (wid == "HALF")
+    {
+        ofLogNotice("ofxBeatClock") << "HALF: " << BPM_half_TRIG;
+        if (BPM_half_TRIG)
+        {
+//            float tempBPM = BPM_Global / 2;
+//            cout << "temp bpm: " << tempBPM << endl;
+//            BPM_Global = BPM_Global / 2;
+            DAW_bpm = DAW_bpm / 2;
+//            BPM_Global = tempBPM;
+//            DAW_bpm = tempBPM;
+        }
+    }
+    else if (wid == "DOUBLE")
+    {
+        ofLogNotice("ofxBeatClock") << "DOUBLE: " << BPM_double_TRIG;
+        if (BPM_double_TRIG)
+        {
+//            float tempBPM = BPM_Global * 2;
+//            cout << "temp bpm: " << tempBPM << endl;
+//            BPM_Global = BPM_Global * 2;
+            DAW_bpm = DAW_bpm * 2;
+//            BPM_Global = tempBPM;
+//            DAW_bpm = tempBPM;
+        }
+    }
 
     else if (wid == "GLOBAL BPM")
     {
+        ofLogNotice("ofxBeatClock") << "GLOBAL BPM: " << BPM_Global;
         // ofLogVerbose("ofxBeatClock") << "GLOBAL BPM   : " << BPM_Global;
 
         BPM_GLOBAL_TimeBar = 60000 / BPM_Global;// 60,000 / BPM = one beat in milliseconds

@@ -115,6 +115,8 @@ public:
 
     ofJson conf_Cont, confg_Sliders, confg_Button;//json theme
 
+//    ofxGuiGroup* container_h;//half double
+
     //-
     
 #pragma mark - PARAMS
@@ -134,6 +136,8 @@ public:
     ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig measurements of tap tempo
 
     ofParameter<bool> RESET_BPM_Global;
+    ofParameter<bool> BPM_half_TRIG;
+    ofParameter<bool> BPM_double_TRIG;
     //-
     
     // API
