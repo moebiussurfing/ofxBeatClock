@@ -1,6 +1,5 @@
 #include "ofApp.h"
 
-
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofBackground(32);
@@ -49,6 +48,7 @@ void ofApp::keyPressed(int key) {
             break;
     }
 }
+
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
 
