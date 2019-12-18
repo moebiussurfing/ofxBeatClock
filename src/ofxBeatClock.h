@@ -6,7 +6,7 @@
 
 #include "ofMain.h"
 
-#include "ofxGuiExtended.h"
+#include "ofxGuiExtended2.h"
 #include "ofxMidi.h"
 #include "ofxMidiClock.h"
 #include "ofxMidiTimecode.h"
@@ -105,17 +105,17 @@ public:
     int gui_button_h;
 
     ofxGui gui;
-    ofxGuiGroup* group_BEAT_CLOCK;//nested folder
-    ofxGuiGroup* container_controls;
-    ofxGuiGroup* container_clocker;
-    ofxGuiGroup* group_INTERNAL;
-    ofxGuiGroup* group_EXTERNAL;
+    ofxGuiGroup2* group_BEAT_CLOCK;//nested folder
+    ofxGuiGroup2* container_controls;
+    ofxGuiGroup2* container_clocker;
+    ofxGuiGroup2* group_INTERNAL;
+    ofxGuiGroup2* group_EXTERNAL;
     ofParameterGroup params_INTERNAL;
     ofParameterGroup params_EXTERNAL;
 
     ofJson conf_Cont, confg_Sliders, confg_Button;//json theme
 
-//    ofxGuiGroup* container_h;//half double
+//    ofxGuiGroup2* container_h;//half double
 
     //-
     
