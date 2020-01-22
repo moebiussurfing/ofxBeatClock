@@ -1,5 +1,5 @@
 ofxBeatClock
 ofxDawMetro
-ofxGuiExtended
+ofxGuiExtended2
 ofxMidi
 ofxXmlSettings
