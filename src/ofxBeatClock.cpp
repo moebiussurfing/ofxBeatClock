@@ -106,8 +106,8 @@ void ofxBeatClock::setup()
 #pragma mark - DRAW STUFF
 
     string strFont;
-    //strFont = "assets/fonts/mono.ttf";
-    strFont = "assets/fonts/telegrama_render.otf";
+    strFont = "assets/fonts/mono.ttf";
+    //strFont = "assets/fonts/telegrama_render.otf";
 
     TTF_small.load(strFont, 9);
     TTF_medium.load(strFont, 11);
