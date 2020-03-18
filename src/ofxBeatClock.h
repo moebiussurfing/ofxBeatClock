@@ -115,7 +115,7 @@ public:
 
     ofJson conf_Cont, confg_Sliders, confg_Button;//json theme
 
-//    ofxGuiGroup* container_h;//half double
+//    ofxGuiGroup2* container_h;//half double
 
     //-
     
