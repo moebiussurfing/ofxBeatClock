@@ -1,6 +1,6 @@
 ofxBeatClock
 ofxDawMetro
-ofxGuiExtended
+ofxGuiExtended2
 ofxMidi
 ofxOsc
 ofxPubSubOsc
