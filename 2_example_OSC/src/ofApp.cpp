@@ -1,5 +1,22 @@
 #include "ofApp.h"
 
+////TODO:
+////--------------------------------------------------------------
+//void ofApp::audioOut(ofSoundBuffer &buffer)
+//{
+//    for (size_t i = 0; i < buffer.getNumFrames(); ++i)
+//    {
+//        if (++samples == samplesPerTick)
+//        {
+////            tick();
+//            ofLogError("ofApp")<<"TICK";
+//            samples = 0;
+//        }
+//
+//        // ...
+//    }
+//}
+
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -33,6 +50,7 @@ void ofApp::setup(){
     //-
 
 }
+
 ////--------------------------------------------------------------
 //void ofApp::Changed_OSC_beats(int & beatsInBar) {
 //    ofLogNotice() << "OSC tick";
