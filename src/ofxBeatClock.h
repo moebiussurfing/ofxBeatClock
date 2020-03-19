@@ -20,10 +20,31 @@
 #define BPM_MIDI_CLOCK_REFRESH_RATE 200
 //refresh received MTC by clock. disabled/commented to "realtime" by frame update
 
+
+
 class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
 
 public:
-    
+
+    bool MODE_BufferTimer = true;
+
+    //-
+
+    //TODO:
+//    double wavePhase;
+//    double pulsePhase;
+//    std::mutex audioMutex;
+    ofSoundStream soundStream;
+//    ofSoundBuffer lastBuffer;
+//    ofPolyline waveform;
+//    float rms;
+
+    void audioOut(ofSoundBuffer &buffer);
+    int samples = 0;
+    int bpm = 120;
+    int ticksPerBeat = 4;
+    int samplesPerTick = (44100 * 60.0f) / bpm / ticksPerBeat;
+
     //-
     
     void setup();
