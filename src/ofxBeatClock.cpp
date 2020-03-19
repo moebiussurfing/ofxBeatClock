@@ -1,10 +1,57 @@
 
 #include "ofxBeatClock.h"
 
+//TODO:
+//clock by audio buffer. not timer
+//--------------------------------------------------------------
+void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
+{
+    if (PLAYER_state)
+    {
+
+        //TODO:
+        if (MODE_BufferTimer)
+        {
+//            int ticksPerBeat = 4;
+            int ticksPerBeat = 4;
+            int samplesPerTick = (44100 * 60.0f) /  BPM_Global / ticksPerBeat;
+        }
+
+
+    for (size_t i = 0; i < buffer.getNumFrames(); ++i)
+    {
+        if (++samples == samplesPerTick)
+        {
+//            tick();
+            ofLogError("ofxBeatClock")<<"TICK";
+            samples = 0;
+        }
+
+        // ...
+    }
+
+    }
+}
+
 //--------------------------------------------------------------
 void ofxBeatClock::setup()
 {
     ofSetLogLevel("ofxBeatClock", OF_LOG_NOTICE);
+
+    //--
+
+//    wavePhase = 0;
+//    pulsePhase = 0;
+
+    // start the sound stream with a sample rate of 44100 Hz, and a buffer
+    // size of 512 samples per audioOut() call
+    ofSoundStreamSettings settings;
+    settings.numOutputChannels = 2;
+    settings.sampleRate = 44100;
+    settings.bufferSize = 512;
+    settings.numBuffers = 4;
+    settings.setOutListener(this);
+    soundStream.setup(settings);
 
     //--
 
@@ -406,6 +453,8 @@ void ofxBeatClock::setup_MIDI_PORT(int p)
 //--------------------------------------------------------------
 void ofxBeatClock::update()
 {
+
+
     //-
 
     // TAP
@@ -460,8 +509,13 @@ void ofxBeatClock::draw()
 {
     //TODO: improve performance with fbo drawing
 
+    //boxes
     draw_SQUARES(pos_Squares_x, pos_Squares_y, pos_Squares_w);
-    draw_BALL(pos_Ball_x, pos_Ball_y, pos_Ball_w);
+
+    //ball
+//    draw_BALL(pos_Ball_x, pos_Ball_y, pos_Ball_w);
+    draw_BALL(pos_Squares_x+0.5f*pos_Squares_w - pos_Ball_w,
+              pos_Ball_y, pos_Ball_w);
 }
 
 //--------------------------------------------------------------
@@ -792,7 +846,16 @@ void ofxBeatClock::PLAYER_START()//only used in internal mode
         if (!DAW_active)
             DAW_active = true;
 
-        isPlaying = true;
+
+        //TODO:
+        if (MODE_BufferTimer)
+        {
+            samples = 0;
+        }
+        else
+        {
+            isPlaying = true;
+        }
     }
     else
     {
