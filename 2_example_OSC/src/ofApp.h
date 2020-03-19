@@ -7,7 +7,9 @@
 
 class ofApp: public ofBaseApp{
 	public:
-    
+
+//    void audioOut(ofSoundBuffer &buffer);
+
     void setup();
     void update();
     void draw();
@@ -33,4 +35,12 @@ class ofApp: public ofBaseApp{
     // OSC OUT
     string out_ip;
     int out_port;
+
+
+//    int samples = 0;
+//    int bpm = 120;
+//    int ticksPerBeat = 4;
+//    int samplesPerTick = (44100 * 60.0f) / bpm / ticksPerBeat;
+    
 };
+
