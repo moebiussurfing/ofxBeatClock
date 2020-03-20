@@ -84,7 +84,7 @@ void ofxBeatClock::setup()
 
 	// 2. CONTROL
 
-	params_control.setName("TRANSPORT");
+	params_control.setName("CONTROL");
 	params_control.add(ENABLE_CLOCKS.set("ENABLE", true));
     params_control.add(DAW_bpm.set("BPM", BPM_INIT, 30, 300));
     params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
@@ -99,6 +99,8 @@ void ofxBeatClock::setup()
 
 	params_EXTERNAL.setName("EXTERNAL CLOCK");
 	params_EXTERNAL.add(MIDI_Port_SELECT.set("MIDI PORT", 0, 0, num_MIDI_Ports - 1));
+    params_EXTERNAL.add(midiPortName);
+    midiPortName.setSerializable(false);
 
 	//-
 
@@ -222,7 +224,28 @@ void ofxBeatClock::setup()
 
 	//--
 
-	// group_BEAT_CLOCK->minimize();
+    //expand gui
+
+    container_controls->maximize();
+    group_BEAT_CLOCK->maximize();
+
+    if (ENABLE_INTERNAL_CLOCK)
+    {
+        group_INTERNAL->maximize();
+    }
+    else
+    {
+        group_INTERNAL->minimize();
+    }
+
+    if (ENABLE_EXTERNAL_CLOCK)
+    {
+        group_EXTERNAL->maximize();
+    }
+    else
+    {
+        group_EXTERNAL->minimize();
+    }
 }
 
 //--------------------------------------------------------------
@@ -237,12 +260,6 @@ void ofxBeatClock::setup_Gui()
 	gui_slider_h = 18;
 	gui_slider_big_h = 18;
 	gui_button_h = 40;
-
-	//--
-
-	//    myTTF = "assets/fonts/PragmataProR_0822.ttf";
-	//    sizeTTF = 10; //font size may affects sliders heigh too
-	//    //ofTrueTypeFont::setGlobalDpi(72);
 
 	//--
 
@@ -284,7 +301,6 @@ void ofxBeatClock::setup_Gui()
 
     group_EXTERNAL = group_BEAT_CLOCK->addGroup("EXTERNAL CLOCK", conf_Cont);
 	group_EXTERNAL->add(params_EXTERNAL);
-
 
 
 	//-
@@ -391,10 +407,10 @@ void ofxBeatClock::setup_Gui()
 		BPM_input_str = "EXTERNAL";
 		BPM_name_str = "MIDI PORT: ";
 		BPM_name_str += ofToString(midiIn_CLOCK.getPort());
-		BPM_name_str += " - '" + midiIn_CLOCK.getName() + "'";
+		BPM_name_str += " '" + midiIn_CLOCK.getName() + "'";
 	}
 
-	//--
+    //--
 
 	ofLogNotice("ofxBeatClock") << "loadTheme";
 	group_BEAT_CLOCK->loadTheme("theme/theme_bleurgh.json");
@@ -402,7 +418,32 @@ void ofxBeatClock::setup_Gui()
 	container_clocker->loadTheme("theme/theme_bleurgh.json");
 	group_INTERNAL->loadTheme("theme/theme_bleurgh.json");
 	group_EXTERNAL->loadTheme("theme/theme_bleurgh.json");
-	//container_h->loadTheme("theme/theme_bleurgh.json"); 
+	//container_h->loadTheme("theme/theme_bleurgh.json");
+
+    //-
+
+
+//    //expand
+//    container_controls->maximize();
+//    group_BEAT_CLOCK->maximize();
+//
+//    if (ENABLE_INTERNAL_CLOCK)
+//    {
+//        group_INTERNAL->maximize();
+//    }
+//    else
+//    {
+//        group_INTERNAL->minimize();
+//    }
+//
+//    if (ENABLE_EXTERNAL_CLOCK)
+//    {
+//        group_EXTERNAL->maximize();
+//    }
+//    else
+//    {
+//        group_EXTERNAL->minimize();
+//    }
 }
 
 //--------------------------------------------------------------
@@ -460,7 +501,7 @@ void ofxBeatClock::setup_MIDI_PORT(int p)
 	BPM_input_str = "EXTERNAL";
 	BPM_name_str = "MIDI PORT: ";
 	BPM_name_str += ofToString(midiIn_CLOCK.getPort());
-	BPM_name_str += " - '" + midiIn_CLOCK.getName() + "'";
+	BPM_name_str += " '" + midiIn_CLOCK.getName() + "'";
 
 	ofLogNotice("MIDI PORT") << "connected to MIDI CLOCK IN port: " << midiIn_CLOCK.getPort();
 }
@@ -548,7 +589,7 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 	int squaresW;//squares beats size
 	squaresW = w / 4;
 
-	int interline = 11; // line heigh
+	int interline = 15; // line heigh
 
 	bool SHOW_moreInfo = false;
 
@@ -1137,7 +1178,9 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 			BPM_input_str = "EXTERNAL";
 			BPM_name_str = "MIDI PORT: ";
 			BPM_name_str += ofToString(midiIn_CLOCK.getPort());
-			BPM_name_str += " - '" + midiIn_CLOCK.getName() + "'";
+			BPM_name_str += " '" + midiIn_CLOCK.getName() + "'";
+
+            midiPortName = midiIn_CLOCK.getName();
 
 			group_EXTERNAL->maximize();
 		}
@@ -1198,6 +1241,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 
 			ofLogNotice("MIDI PORT") << "OPENING PORT: " << MIDI_Port_SELECT;
 			setup_MIDI_PORT(MIDI_Port_SELECT);
+
+            midiPortName = midiIn_CLOCK.getName();
 		}
 	}
 }
