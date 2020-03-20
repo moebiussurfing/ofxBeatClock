@@ -85,9 +85,9 @@ void ofxBeatClock::setup()
 	// 2. CONTROL
 
 	params_control.setName("TRANSPORT");
-	params_control.add(DAW_bpm.set("BPM", BPM_INIT, 30, 300));
 	params_control.add(ENABLE_CLOCKS.set("ENABLE", true));
-	params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
+    params_control.add(DAW_bpm.set("BPM", BPM_INIT, 30, 300));
+    params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
 	params_control.add(ENABLE_EXTERNAL_CLOCK.set("EXTERNAL", true));
 	params_control.add(ENABLE_sound.set("SOUND TICK", false));
 
@@ -108,8 +108,8 @@ void ofxBeatClock::setup()
 
 	// this smoothed (or maybe slower refreshed than fps) clock will be sended to target sequencer outside the class. see BPM_MIDI_CLOCK_REFRESH_RATE.
 	params_clocker.setName("BPM TARGET");
-	params_clocker.add(BPM_Global.set("GLOBAL BPM", BPM_INIT, 60, 300));
-	params_clocker.add(BPM_GLOBAL_TimeBar.set("BAR ms", 60000 / BPM_Global, 1, 5000));
+	params_clocker.add(BPM_Global.set("GLOBAL BPM", BPM_INIT, 30, 300));
+	params_clocker.add(BPM_GLOBAL_TimeBar.set("BAR ms", 60000 / BPM_Global, 100, 2000));
 
 	params_clocker.add(RESET_BPM_Global.set("RESET BPM", false));
 
@@ -153,8 +153,9 @@ void ofxBeatClock::setup()
 #pragma mark - DRAW STUFF
 
 	string strFont;
-	strFont = "assets/fonts/mono.ttf";
-	//strFont = "assets/fonts/telegrama_render.otf";
+//    strFont = "assets/fonts/mono.ttf";
+    strFont = "assets/fonts/telegrama_render.otf";
+    //strFont = "assets/fonts/telegrama_render.otf";
 
 	TTF_small.load(strFont, 9);
 	TTF_medium.load(strFont, 11);
@@ -235,7 +236,7 @@ void ofxBeatClock::setup_Gui()
 	gui_w = 200;
 	gui_slider_h = 18;
 	gui_slider_big_h = 18;
-	gui_button_h = 22;
+	gui_button_h = 40;
 
 	//--
 
@@ -260,9 +261,9 @@ void ofxBeatClock::setup_Gui()
 
 	confg_Button =
 	{
-		{"type", "fullsize"},
-		{"text-align", "center"},
-		{"height", gui_button_h},
+        {"type", "fullsize"},
+        {"text-align", "center"},
+        {"height", gui_button_h},
 	};
 
 	//--
@@ -271,13 +272,20 @@ void ofxBeatClock::setup_Gui()
 
 	group_BEAT_CLOCK = gui.addGroup("BEAT CLOCK", conf_Cont);
 
-	container_controls = group_BEAT_CLOCK->addGroup(params_control);
+    //transport
+    container_controls = group_BEAT_CLOCK->addGroup(params_control);
 
-	group_INTERNAL = group_BEAT_CLOCK->addGroup("INTERNAL CLOCK", conf_Cont);
-	group_EXTERNAL = group_BEAT_CLOCK->addGroup("EXTERNAL CLOCK", conf_Cont);
+    group_INTERNAL = group_BEAT_CLOCK->addGroup("INTERNAL CLOCK", conf_Cont);
+    group_INTERNAL->add(params_INTERNAL);
 
-	group_INTERNAL->add(params_INTERNAL);
+	container_controls->getControl("ENABLE")->setConfig(confg_Button);
+    container_controls->getControl("INTERNAL")->setConfig(confg_Button);
+    container_controls->getControl("EXTERNAL")->setConfig(confg_Button);
+
+    group_EXTERNAL = group_BEAT_CLOCK->addGroup("EXTERNAL CLOCK", conf_Cont);
 	group_EXTERNAL->add(params_EXTERNAL);
+
+
 
 	//-
 
@@ -285,8 +293,8 @@ void ofxBeatClock::setup_Gui()
 
 	//-
 
-	//    group_SEQ_editor = gui_CLOCKER.addGroup(params_control);
-	//    container_clocker = gui_CLOCKER.addGroup(params_clocker);
+	//group_SEQ_editor = gui_CLOCKER.addGroup(params_control);
+	//container_clocker = gui_CLOCKER.addGroup(params_clocker);
 
 	//--
 
@@ -1054,9 +1062,17 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 
 		BPM_GLOBAL_TimeBar = 60000 / BPM_Global;// 60,000 / BPM = one beat in milliseconds
 
+        //TODO:
+        DAW_bpm = BPM_Global;
+        
 		//ofLogNotice("ofxBeatClock") << "TIME BEAT : " << BPM_TimeBar << "ms";
 		//ofLogNotice("ofxBeatClock") << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
 	}
+    else if (wid == "BAR ms")
+    {
+        ofLogNotice("ofxBeatClock") << "BAR ms: " << BPM_GLOBAL_TimeBar;
+        BPM_Global = 60000 / BPM_GLOBAL_TimeBar;
+    }
 
 	else if (wid == "INTERNAL")
 	{
@@ -1073,7 +1089,6 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 			BPM_name_str = "";
 
 			group_INTERNAL->maximize();
-
 		}
 		else
 		{
