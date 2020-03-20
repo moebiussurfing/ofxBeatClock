@@ -1,8 +1,6 @@
 
 #pragma once
 
-// TODO:
-// + fade blink ball when tapping tempo
 
 #include "ofMain.h"
 
@@ -282,6 +280,8 @@ public:
     void setup_MIDI_PORT(int p);
     int MIDI_Port_PRE = -1;
 
+    ofParameter <string> midiPortName{"",""};
+
     //-
 
 #pragma mark - STEP LIMITING
@@ -297,8 +297,5 @@ public:
     int sizeTTF;
 
     //-
-
-//    void toggleGroupHeader(bool val);
-
 };
 
