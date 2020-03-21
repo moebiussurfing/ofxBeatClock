@@ -22,7 +22,7 @@
 
 class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
 
-private:
+//private:
 	
 	//-
 
@@ -31,7 +31,7 @@ private:
 //	ofSoundStream soundStream;
 //public:
 //	void audioOut(ofSoundBuffer &buffer);
-//private:
+////private:
 //	int samples = 0;
 //	int bpm = 120;
 //	int ticksPerBeat = 4;
@@ -49,7 +49,7 @@ public:
 
 #pragma mark - MIDI IN CLOCK
 
-private:
+//private:
 	ofxMidiIn midiIn_CLOCK;
 	ofxMidiMessage midiCLOCK_Message;
 	ofxMidiClock MIDI_clock; //< clock message parser
@@ -79,7 +79,7 @@ private:
 
 #pragma mark - MONITOR
 
-private:
+//private:
 	int pos_Squares_x, pos_Squares_y, pos_Squares_w;
 	int pos_Ball_x, pos_Ball_y, pos_Ball_w;
 
@@ -93,7 +93,7 @@ public:
 	//tick ball
 	void draw_BALL(int x, int y, int w);
 
-private:
+//private:
 	//beat circle
 	ofPoint circlePos;
 	float animTime, animCounter;
@@ -124,7 +124,7 @@ public:
 	void setup_Gui();
 	ofxGui gui;
 
-private:
+//private:
 	int gui_w;
 	int gui_slider_h;
 	int gui_slider_big_h;
@@ -173,7 +173,7 @@ public:
 
 	//-
 
-private:
+//private:
 	void Changed_Params(ofAbstractParameter& e);
 
 	//-
@@ -244,7 +244,7 @@ public:
 	ofParameter<int> BPM_beat_current;
 	ofParameter<int> BPM_16th_current;
 
-private:
+//private:
 	// STRINGS FOR MONITOR DRAWING
 
 	string BPM_bar_str;
@@ -267,7 +267,7 @@ public:
 	ofPoint getPosition_Gui();
 	void set_Gui_visible(bool b);
 
-private:
+//private:
 	// gui screen settings
 	int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
 
@@ -280,7 +280,7 @@ public:
 	void Tap_Trig();
 	void Tap_update();
 
-private:
+//private:
 	int tapCount, lastTime, avgBarMillis;
 	float Tap_BPM;
 	vector<int> intervals;
