@@ -1,37 +1,35 @@
 
 #include "ofxBeatClock.h"
 
-//TODO:
-//clock by audio buffer. not timer
-//--------------------------------------------------------------
-void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
-{
-	if (PLAYER_state)
-	{
-
-		//TODO:
-		if (MODE_BufferTimer)
-		{
-			//            int ticksPerBeat = 4;
-			int ticksPerBeat = 4;
-			int samplesPerTick = (44100 * 60.0f) / BPM_Global / ticksPerBeat;
-		}
-
-
-		for (size_t i = 0; i < buffer.getNumFrames(); ++i)
-		{
-			if (++samples == samplesPerTick)
-			{
-				//            tick();
-				ofLogError("ofxBeatClock") << "TICK";
-				samples = 0;
-			}
-
-			// ...
-		}
-
-	}
-}
+////TODO:
+////clock by audio buffer. not timer
+////--------------------------------------------------------------
+//void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
+//{
+//	//if (PLAYER_state && MODE_BufferTimer)
+//	//{
+//
+//	//	//TODO:
+//	//	//if (MODE_BufferTimer)
+//	//	{
+//	//		//int ticksPerBeat = 4;
+//	//		int ticksPerBeat = 4;
+//	//		int samplesPerTick = (44100 * 60.0f) / BPM_Global / ticksPerBeat;
+//	//	}
+//
+//	//	for (size_t i = 0; i < buffer.getNumFrames(); ++i)
+//	//	{
+//	//		if (++samples == samplesPerTick)
+//	//		{
+//	//			//tick();
+//	//			ofLogError("ofxBeatClock") << "TICK";
+//	//			samples = 0;
+//	//		}
+//
+//	//		//...
+//	//	}
+//	//}
+//}
 
 //--------------------------------------------------------------
 void ofxBeatClock::setup()
@@ -40,18 +38,18 @@ void ofxBeatClock::setup()
 
 	//--
 
-//    wavePhase = 0;
-//    pulsePhase = 0;
+	////TODO:
+	////start the sound stream with a sample rate of 44100 Hz, and a buffer
+	////size of 512 samples per audioOut() call
+	//ofSoundStreamSettings settings;
+	//settings.numOutputChannels = 2;
+	//settings.sampleRate = 44100;
+	//settings.bufferSize = 512;
+	//settings.numBuffers = 4;
+	//settings.setOutListener(this);
+	//soundStream.setup(settings);
 
-	// start the sound stream with a sample rate of 44100 Hz, and a buffer
-	// size of 512 samples per audioOut() call
-	ofSoundStreamSettings settings;
-	settings.numOutputChannels = 2;
-	settings.sampleRate = 44100;
-	settings.bufferSize = 512;
-	settings.numBuffers = 4;
-	settings.setOutListener(this);
-	soundStream.setup(settings);
+	//MODE_BufferTimer.set("AUDIO BUFFER", false);
 
 	//--
 
@@ -66,9 +64,9 @@ void ofxBeatClock::setup()
 
 	//-
 
-	// 1. DAW METRO. CLOCK SYSTEM
+	//1. DAW METRO. CLOCK SYSTEM
 
-	// add bar/beat/sixteenth listener on demand
+	//add bar/beat/sixteenth listener on demand
 	metro.addBeatListener(this);
 	metro.addBarListener(this);
 	metro.addSixteenthListener(this);
@@ -82,47 +80,51 @@ void ofxBeatClock::setup()
 
 	//-
 
-	// 2. CONTROL
+	//2. CONTROL
 
 	params_control.setName("CONTROL");
 	params_control.add(ENABLE_CLOCKS.set("ENABLE", true));
-    params_control.add(DAW_bpm.set("BPM", BPM_INIT, 30, 300));
-    params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
+	params_control.add(DAW_bpm.set("BPM", BPM_INIT, 30, 300));
+	params_control.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
 	params_control.add(ENABLE_EXTERNAL_CLOCK.set("EXTERNAL", true));
 	params_control.add(ENABLE_sound.set("SOUND TICK", false));
+	//params_control.add(MODE_BufferTimer);
 
 	params_INTERNAL.setName("INTERNAL CLOCK");
 	params_INTERNAL.add(PLAYER_state.set("PLAY", false));
 	params_INTERNAL.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
-	//    BPM_Tap_Tempo_TRIG = false;
-	//    params_INTERNAL(BPM_Tap_Tempo_button.set("TAP"));
+	//TODO:
+	//params_INTERNAL.add(bSync_Trig.set("SYNC", false));
+
+	//BPM_Tap_Tempo_TRIG = false;
+	//params_INTERNAL(BPM_Tap_Tempo_button.set("TAP"));
 
 	params_EXTERNAL.setName("EXTERNAL CLOCK");
 	params_EXTERNAL.add(MIDI_Port_SELECT.set("MIDI PORT", 0, 0, num_MIDI_Ports - 1));
-    params_EXTERNAL.add(midiPortName);
-    midiPortName.setSerializable(false);
+	params_EXTERNAL.add(midiPortName);
+	midiPortName.setSerializable(false);
 
 	//-
 
-	// 3.
+	//3.
 
 #pragma mark - MONITOR GLOBAL TARGET
 
-	// this smoothed (or maybe slower refreshed than fps) clock will be sended to target sequencer outside the class. see BPM_MIDI_CLOCK_REFRESH_RATE.
+	//this smoothed (or maybe slower refreshed than fps) clock will be sended to target sequencer outside the class. see BPM_MIDI_CLOCK_REFRESH_RATE.
 	params_clocker.setName("BPM TARGET");
 	params_clocker.add(BPM_Global.set("GLOBAL BPM", BPM_INIT, 30, 300));
 	params_clocker.add(BPM_GLOBAL_TimeBar.set("BAR ms", 60000 / BPM_Global, 100, 2000));
 
 	params_clocker.add(RESET_BPM_Global.set("RESET BPM", false));
 
-	//    params_clocker.add(BPM_half_TRIG.set("HALF", false));
-	//    params_clocker.add(BPM_double_TRIG.set("DOUBLE", false));
+	//   params_clocker.add(BPM_half_TRIG.set("HALF", false));
+	//   params_clocker.add(BPM_double_TRIG.set("DOUBLE", false));
 	BPM_half_TRIG.set("HALF", false);
 	BPM_double_TRIG.set("DOUBLE", false);
 
 	//-
 
-	// 4. TAP TEMPO
+	//4. TAP TEMPO
 
 	Tap_running = false;
 	tapCount = 0;
@@ -132,7 +134,7 @@ void ofxBeatClock::setup()
 
 #pragma mark - DEFAULT POSITIONS
 
-	// default config. to be setted after with .setPosition_EDITOR
+	//default config. to be setted after with .setPosition_EDITOR
 
 	gui_Panel_W = 200;
 	gui_Panel_posX = 5;
@@ -141,13 +143,13 @@ void ofxBeatClock::setup()
 
 	//--
 
-	// TRANSPORT GUI
+	//TRANSPORT GUI
 
 	setup_Gui();
 
 	//-
 
-	// default positions
+	//default positions
 	setPosition_Gui(gui_Panel_posX, gui_Panel_posY, gui_Panel_W);
 
 	//--
@@ -155,25 +157,24 @@ void ofxBeatClock::setup()
 #pragma mark - DRAW STUFF
 
 	string strFont;
-//    strFont = "assets/fonts/mono.ttf";
-    strFont = "assets/fonts/telegrama_render.otf";
-    //strFont = "assets/fonts/telegrama_render.otf";
+	//   strFont = "assets/fonts/mono.ttf";
+	strFont = "assets/fonts/telegrama_render.otf";
+	//strFont = "assets/fonts/telegrama_render.otf";
 
-	TTF_small.load(strFont, 9);
-	TTF_medium.load(strFont, 11);
+	TTF_small.load(strFont, 7);
+	TTF_medium.load(strFont, 10);
 	TTF_big.load(strFont, 13);
-
 
 	//-
 
-	// MONITOR DEFAULT POS
+	//MONITOR DEFAULT POS
 
-	// squares
+	//squares
 	pos_Squares_x = 10;
 	pos_Squares_y = 600;
 	pos_Squares_w = 200;
 
-	// ball
+	//ball
 	pos_Ball_x = 500;
 	pos_Ball_y = 600;
 	pos_Ball_w = 50;
@@ -183,7 +184,7 @@ void ofxBeatClock::setup()
 
 	//-
 
-	// DRAW BALL TRIGGER
+	//DRAW BALL TRIGGER
 
 	TRIG_TICK = false;
 
@@ -201,7 +202,7 @@ void ofxBeatClock::setup()
 
 	//-
 
-	// TEXT DISPLAY
+	//TEXT DISPLAY
 
 	BPM_bar_str = "0";
 	BPM_beat_str = "0";
@@ -209,7 +210,7 @@ void ofxBeatClock::setup()
 
 	//--
 
-	// PATTERN LIMITING. (VS LONG SONG MODE)
+	//PATTERN LIMITING. (VS LONG SONG MODE)
 
 #ifdef ENABLE_PATTERN_LIMITING
 	ENABLE_pattern_limits = true;
@@ -223,38 +224,14 @@ void ofxBeatClock::setup()
 	}
 
 	//--
-
-    //expand gui
-
-    container_controls->maximize();
-    group_BEAT_CLOCK->maximize();
-
-    if (ENABLE_INTERNAL_CLOCK)
-    {
-        group_INTERNAL->maximize();
-    }
-    else
-    {
-        group_INTERNAL->minimize();
-    }
-
-    if (ENABLE_EXTERNAL_CLOCK)
-    {
-        group_EXTERNAL->maximize();
-    }
-    else
-    {
-        group_EXTERNAL->minimize();
-    }
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::setup_Gui()
 {
-
 	//-
 
-	// GUI POSITION AND SIZE
+	//GUI POSITION AND SIZE
 
 	gui_w = 200;
 	gui_slider_h = 18;
@@ -263,7 +240,7 @@ void ofxBeatClock::setup_Gui()
 
 	//--
 
-	// THEME
+	//THEME
 
 	conf_Cont =
 	{
@@ -278,30 +255,29 @@ void ofxBeatClock::setup_Gui()
 
 	confg_Button =
 	{
-        {"type", "fullsize"},
-        {"text-align", "center"},
-        {"height", gui_button_h},
+		{"type", "fullsize"},
+		{"text-align", "center"},
+		{"height", gui_button_h},
 	};
 
 	//--
 
-	// PANEL
+	//PANEL
 
 	group_BEAT_CLOCK = gui.addGroup("BEAT CLOCK", conf_Cont);
 
-    //transport
-    container_controls = group_BEAT_CLOCK->addGroup(params_control);
+	//transport
+	container_controls = group_BEAT_CLOCK->addGroup(params_control);
 
-    group_INTERNAL = group_BEAT_CLOCK->addGroup("INTERNAL CLOCK", conf_Cont);
-    group_INTERNAL->add(params_INTERNAL);
+	group_INTERNAL = group_BEAT_CLOCK->addGroup("INTERNAL CLOCK", conf_Cont);
+	group_INTERNAL->add(params_INTERNAL);
 
 	container_controls->getControl("ENABLE")->setConfig(confg_Button);
-    container_controls->getControl("INTERNAL")->setConfig(confg_Button);
-    container_controls->getControl("EXTERNAL")->setConfig(confg_Button);
+	container_controls->getControl("INTERNAL")->setConfig(confg_Button);
+	container_controls->getControl("EXTERNAL")->setConfig(confg_Button);
 
-    group_EXTERNAL = group_BEAT_CLOCK->addGroup("EXTERNAL CLOCK", conf_Cont);
+	group_EXTERNAL = group_BEAT_CLOCK->addGroup("EXTERNAL CLOCK", conf_Cont);
 	group_EXTERNAL->add(params_EXTERNAL);
-
 
 	//-
 
@@ -326,6 +302,8 @@ void ofxBeatClock::setup_Gui()
 
 	(group_INTERNAL->getToggle("PLAY"))->setConfig(confg_Button);
 	(group_INTERNAL->getToggle("TAP"))->setConfig(confg_Button);
+	//TODO:
+	//(group_INTERNAL->getToggle("SYNC"))->setConfig(confg_Button);
 
 	//-
 
@@ -347,16 +325,16 @@ void ofxBeatClock::setup_Gui()
 	container_h->add<ofxGuiButton>(BPM_half_TRIG, itemConfig_browse);
 	container_h->add<ofxGuiButton>(BPM_double_TRIG, itemConfig_browse);
 
-	// TODO: BUG: not sure why do not requires to add to group whith listener function
-	// maybe it's already added when adding the container to gui ?
-	// if it's not commented, trigs arrive twice...
-	//    // add to use listeners because are buttons not default toggles
-	//    params_clocker.add(BPM_half_TRIG);
-	//    params_clocker.add(BPM_double_TRIG);
+	//TODO: BUG: not sure why do not requires to add to group whith listener function
+	//maybe it's already added when adding the container to gui ?
+	//if it's not commented, trigs arrive twice...
+	//   //add to use listeners because are buttons not default toggles
+	//   params_clocker.add(BPM_half_TRIG);
+	//   params_clocker.add(BPM_double_TRIG);
 
 	//-
 
-	// LISTENERS
+	//LISTENERS
 
 	ofAddListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
 	ofAddListener(params_INTERNAL.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
@@ -365,7 +343,7 @@ void ofxBeatClock::setup_Gui()
 
 	//-
 
-	// LOAD LAST SETTINGS
+	//LOAD LAST SETTINGS
 
 	////add extra settings to group after gui creation, to include in xml settings
 	//params_control.add(DAW_bpm);
@@ -379,7 +357,7 @@ void ofxBeatClock::setup_Gui()
 
 	//--
 
-	// init state after loaded settings just in cas not open correct
+	//init state after loaded settings just in cas not open correct
 
 	if (ENABLE_INTERNAL_CLOCK)
 	{
@@ -387,7 +365,7 @@ void ofxBeatClock::setup_Gui()
 
 		//-
 
-		// TEXT DISPLAY
+		//TEXT DISPLAY
 		BPM_input_str = "INTERNAL";
 		BPM_name_str = "";
 	}
@@ -403,14 +381,14 @@ void ofxBeatClock::setup_Gui()
 
 		//-
 
-		// TEXT DISPLAY
+		//TEXT DISPLAY
 		BPM_input_str = "EXTERNAL";
 		BPM_name_str = "MIDI PORT: ";
 		BPM_name_str += ofToString(midiIn_CLOCK.getPort());
 		BPM_name_str += " '" + midiIn_CLOCK.getName() + "'";
 	}
 
-    //--
+	//--
 
 	ofLogNotice("ofxBeatClock") << "loadTheme";
 	group_BEAT_CLOCK->loadTheme("theme/theme_bleurgh.json");
@@ -420,37 +398,37 @@ void ofxBeatClock::setup_Gui()
 	group_EXTERNAL->loadTheme("theme/theme_bleurgh.json");
 	//container_h->loadTheme("theme/theme_bleurgh.json");
 
-    //-
+	//-
 
+   //expand
 
-//    //expand
-//    container_controls->maximize();
-//    group_BEAT_CLOCK->maximize();
-//
-//    if (ENABLE_INTERNAL_CLOCK)
-//    {
-//        group_INTERNAL->maximize();
-//    }
-//    else
-//    {
-//        group_INTERNAL->minimize();
-//    }
-//
-//    if (ENABLE_EXTERNAL_CLOCK)
-//    {
-//        group_EXTERNAL->maximize();
-//    }
-//    else
-//    {
-//        group_EXTERNAL->minimize();
-//    }
+   container_controls->maximize();
+   group_BEAT_CLOCK->maximize();
+
+   if (ENABLE_INTERNAL_CLOCK)
+   {
+       group_INTERNAL->maximize();
+   }
+   else
+   {
+       group_INTERNAL->minimize();
+   }
+
+   if (ENABLE_EXTERNAL_CLOCK)
+   {
+       group_EXTERNAL->maximize();
+   }
+   else
+   {
+       group_EXTERNAL->minimize();
+   }
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::setup_MIDI_CLOCK()
 {
 
-	// EXTERNAL MIDI CLOCK:
+	//EXTERNAL MIDI CLOCK:
 	ofSetLogLevel("MIDI PORT", OF_LOG_NOTICE);
 	ofLogNotice("MIDI PORT") << "== setup_MIDI_CLOCK";
 
@@ -465,12 +443,12 @@ void ofxBeatClock::setup_MIDI_CLOCK()
 
 	ofLogNotice("MIDI PORT") << "connected to MIDI CLOCK IN port: " << midiIn_CLOCK.getPort();
 
-	// TODO: IGNORE SYSX
+	//TODO: IGNORE SYSX
 	midiIn_CLOCK.ignoreTypes(
-		true, // sysex  <-- don't ignore timecode messages!
-		false, // timing <-- don't ignore clock messages!
+		true, //sysex  <-- don't ignore timecode messages!
+		false, //timing <-- don't ignore clock messages!
 		true
-	); // sensing
+	); //sensing
 
 	midiIn_CLOCK.addListener(this);
 
@@ -497,7 +475,7 @@ void ofxBeatClock::setup_MIDI_PORT(int p)
 	midiIn_CLOCK.openPort(midiIn_CLOCK_port_OPENED);
 	ofLogNotice("MIDI PORT") << "PORT NAME " << midiIn_CLOCK.getInPortName(p);
 
-	// TEXT DISPLAY
+	//TEXT DISPLAY
 	BPM_input_str = "EXTERNAL";
 	BPM_name_str = "MIDI PORT: ";
 	BPM_name_str += ofToString(midiIn_CLOCK.getPort());
@@ -511,20 +489,18 @@ void ofxBeatClock::setup_MIDI_PORT(int p)
 //--------------------------------------------------------------
 void ofxBeatClock::update()
 {
-
-
 	//-
 
-	// TAP
+	//TAP
 
 	if (Tap_running)
 		Tap_update();
 
 	//--
 
-	// MIDI CLOCK
+	//MIDI CLOCK
 
-	// read bpm with a clock refresh or every frame if not defined time-clock-refresh:
+	//read bpm with a clock refresh or every frame if not defined time-clock-refresh:
 
 #ifdef BPM_MIDI_CLOCK_REFRESH_RATE
 	if (ofGetElapsedTimeMillis() - bpm_CheckUpdated_lastTime >= BPM_MIDI_CLOCK_REFRESH_RATE)
@@ -541,11 +517,11 @@ void ofxBeatClock::update()
 
 	//--
 
-	// BPM ENGINE:
+	//BPM ENGINE:
 
 	//#define BPM_MIDI_CLOCK_REFRESH_RATE 200
-	//    //refresh received MTC by clock. disabled/commented to "realtime" by frame update
-	// //this smoothed (or maybe slower refreshed than fps) clock will be sended to target sequencer outside the class. see BPM_MIDI_CLOCK_REFRESH_RATE.
+	//   //refresh received MTC by clock. disabled/commented to "realtime" by frame update
+	////this smoothed (or maybe slower refreshed than fps) clock will be sended to target sequencer outside the class. see BPM_MIDI_CLOCK_REFRESH_RATE.
 
 	//BPM_LAST_Tick_Time_ELLAPSED_PRE = BPM_LAST_Tick_Time_ELLAPSED;
 	//BPM_LAST_Tick_Time_ELLAPSED = ofGetElapsedTimeMillis() - BPM_LAST_Tick_Time_LAST;//test
@@ -557,7 +533,6 @@ void ofxBeatClock::update()
 	ofSoundUpdate();
 
 	//-
-
 }
 
 #pragma mark - DRAW
@@ -570,8 +545,11 @@ void ofxBeatClock::draw()
 	//boxes
 	draw_SQUARES(pos_Squares_x, pos_Squares_y, pos_Squares_w);
 
+	//-
+
+
 	//ball
-//    draw_BALL(pos_Ball_x, pos_Ball_y, pos_Ball_w);
+//   draw_BALL(pos_Ball_x, pos_Ball_y, pos_Ball_w);
 	draw_BALL(pos_Squares_x + 0.5f*pos_Squares_w - pos_Ball_w,
 		pos_Ball_y, pos_Ball_w);
 }
@@ -582,16 +560,18 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 
 	//-
 
-	// heigh paddings
+	//heigh paddings
 
 	int padToSquares = 0;
 	int padToBigTime = 0;
 	int squaresW;//squares beats size
 	squaresW = w / 4;
 
-	int interline = 15; // line heigh
+	int interline = 15; //line heigh
 
 	bool SHOW_moreInfo = false;
+
+	int alpha = 200;
 
 	//-
 
@@ -599,7 +579,7 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 
 	//--
 
-	// 2. TEXT INFO:
+	//2. TEXT INFO:
 
 	ofPushMatrix();
 	int pad = 10;
@@ -616,7 +596,7 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 	TTF_message = ofToString(BPM_name_str);
 	TTF_small.drawString(TTF_message, pad, interline * i++);
 
-	py = py + (interline * (i + 2));// accumulate heigh distance
+	py = py + (interline * (i + 2));//accumulate heigh distance
 
 	//-
 
@@ -638,7 +618,7 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 
 		//-
 
-		py = py + (interline * i);// acumulate heigh distance
+		py = py + (interline * i);//acumulate heigh distance
 	}
 
 	ofPopMatrix();//TODO: pop could be at function ending
@@ -647,11 +627,11 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 
 	py += padToBigTime;
 	draw_BigClockTime(px, py);
-	py = py + (TTF_big.getSize());// acumulate heigh distance
+	py = py + (TTF_big.getSize());//acumulate heigh distance
 
 	//--
 
-	// 2. BEATS SQUARES
+	//2. BEATS SQUARES
 
 	py += padToSquares;
 
@@ -661,41 +641,45 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 
 		//--
 
-		// DEFINE SQUARE COLORS:
+		//DEFINE SQUARE COLORS:
 
 		if (ENABLE_CLOCKS & (ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK))
 		{
 			if (i <= (BPM_beat_current - 1))
 			{
 				if (ENABLE_INTERNAL_CLOCK)
-					PLAYER_state ? ofSetColor(192) : ofSetColor(32);
+					PLAYER_state ? ofSetColor(192, alpha) : ofSetColor(32, alpha);
 
 				else if (ENABLE_EXTERNAL_CLOCK)
-					clockRunning ? ofSetColor(192) : ofSetColor(32);
+					clockRunning ? ofSetColor(192, alpha) : ofSetColor(32, alpha);
 			}
 
 			else
-				ofSetColor(32);
+				ofSetColor(32, alpha);
 		}
 
 		//-
 
 		else //disabled both modes
 		{
-			ofSetColor(32);//black
+			ofSetColor(32, alpha);//black
 		}
 
 		//--
 
-		// DRAW SQUARE
+		//DRAW SQUARE
 
+		//filled
 		ofFill();
-		ofDrawRectangle(px + i * squaresW, py, squaresW, squaresW); //border
+		//ofDrawRectangle(px + i * squaresW, py, squaresW, squaresW); //border
+		ofDrawRectRounded(px + i * squaresW, py, squaresW, squaresW, 2.0f); //border
 
+		//border
 		ofNoFill();
-		ofSetColor(8);
+		ofSetColor(8, alpha);
 		ofSetLineWidth(2);
-		ofDrawRectangle(px + i * squaresW, py, squaresW, squaresW); //filled
+		//ofDrawRectangle(px + i * squaresW, py, squaresW, squaresW); //filled
+		ofDrawRectRounded(px + i * squaresW, py, squaresW, squaresW, 3.0f); //filled
 
 		ofPopStyle();
 
@@ -707,9 +691,9 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 void ofxBeatClock::draw_BALL(int px, int py, int w)
 {
 
-	// 3. TICK BALL:
+	//3. TICK BALL:
 
-	// TODO: alpha tick could be tweened to better heartbeat feeling..
+	//TODO: alpha tick could be tweened to better heartbeat feeling..
 	metronome_ball_radius = w;
 	int padToBall = 0;
 
@@ -719,17 +703,24 @@ void ofxBeatClock::draw_BALL(int px, int py, int w)
 
 	ofPushStyle();
 
+	ofColor c;
+	if (BPM_beat_current == 1)
+		c = (ofColor::red);
+	else
+		c = (ofColor::white);
+
+	//bg ball
 	if (!Tap_running)
 	{
-		ofSetColor(16); // ball background when not tapping
+		ofSetColor(16); //ball background when not tapping
 	}
 	else
 	{
-		// aloha fade when measuring tpaping
+		//white alpha fade when measuring tapping
 		float t = (ofGetElapsedTimeMillis() % 1000);
 		float fade = sin(ofMap(t, 0, 1000, 0, 2 * PI));
-		cout << "fade: " << fade << endl;
-		int alpha = (int)ofMap(fade, -1.0f, 1.0f, 0, 127) + 128;
+		ofLogVerbose("ofxBeatClock") << "fade: " << fade << endl;
+		int alpha = (int)ofMap(fade, -1.0f, 1.0f, 0, 50) + 205;
 		ofSetColor(ofColor(96), alpha);
 	}
 
@@ -739,6 +730,33 @@ void ofxBeatClock::draw_BALL(int px, int py, int w)
 
 	//-
 
+	//beat circle
+	animCounter += 4.0f*dt;//speed
+	animRunning = animCounter <= 1;
+	float radius = metronome_ball_radius;
+	int alphaMax = 128;
+	float alpha = 0.0f;
+	ofPushStyle();
+	if (animRunning && !Tap_running)
+	{
+		circlePos.set(metronome_ball_pos.x, metronome_ball_pos.y);
+
+		ofFill();
+		alpha = ofMap(animCounter, 0, 1, alphaMax, 0);
+		ofSetColor(c, alpha);//faded alpha
+		ofDrawCircle(circlePos, animCounter * radius);
+	}
+
+	//border circle
+	ofNoFill();
+	ofSetLineWidth(2.0f);
+	ofSetColor(255, alphaMax * 0.5f + alpha * 0.5f);
+	ofDrawCircle(circlePos, radius);
+	ofPopStyle();
+
+	//-
+
+	//would disable this maybe...
 	if (ENABLE_CLOCKS && !Tap_running &&
 		(ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK))
 	{
@@ -764,9 +782,9 @@ void ofxBeatClock::draw_BALL(int px, int py, int w)
 void ofxBeatClock::draw_BigClockTime(int x, int y)
 {
 
-	// BIG LETTERS:
+	//BIG LETTERS:
 
-	// TODO: PERFORMANCE: reduce number of drawings..
+	//TODO: PERFORMANCE: reduce number of drawings..
 
 	{
 		ofPushStyle();
@@ -807,13 +825,13 @@ void ofxBeatClock::setPosition_Gui_ALL(int _x, int _y, int _w)
 	gui_Panel_posY = _y;
 	gui_Panel_padW = 5;
 
-	// set positions and sizes
+	//set positions and sizes
 	int w;
 	w = _w;
 	int pad_Clock = 15;
 	int pos_Clock_x = w + pad_Clock;
 
-	//    setPosition_EDITOR(pos_Clock_x, 0, w);
+	//   setPosition_EDITOR(pos_Clock_x, 0, w);
 	setPosition_Gui(gui_Panel_posX, gui_Panel_posY, w);
 
 	setPosition_Squares(pos_Clock_x, 500, w);
@@ -824,7 +842,7 @@ void ofxBeatClock::setPosition_Gui_ALL(int _x, int _y, int _w)
 ofPoint ofxBeatClock::getPosition_Gui()
 {
 	ofPoint p;
-	//    p = group_BEAT_CLOCK->getShape().getTopLeft();
+	//   p = group_BEAT_CLOCK->getShape().getTopLeft();
 	p = ofPoint(gui_Panel_posX, gui_Panel_posY);
 	return p;
 }
@@ -856,11 +874,11 @@ void ofxBeatClock::exit()
 {
 	ofLogNotice("ofxBeatClock") << "exit";
 
-	//    ofLogNotice("ofxBeatClock") << ofSetDataPathRoot();
-	//    ofLogNotice("ofxBeatClock") << ofRestoreWorkingDirectoryToDefault();
-	//    ofRestoreWorkingDirectoryToDefault();
+	//   ofLogNotice("ofxBeatClock") << ofSetDataPathRoot();
+	//   ofLogNotice("ofxBeatClock") << ofRestoreWorkingDirectoryToDefault();
+	//   ofRestoreWorkingDirectoryToDefault();
 
-	// default desired settings when it will opened
+	//default desired settings when it will opened
 	PLAYER_state = false;
 	if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_CLOCK)
 		ENABLE_INTERNAL_CLOCK = true;
@@ -869,7 +887,7 @@ void ofxBeatClock::exit()
 
 	//--
 
-	// EXTERNAL
+	//EXTERNAL
 
 	midiIn_CLOCK.closePort();
 	midiIn_CLOCK.removeListener(this);
@@ -877,7 +895,7 @@ void ofxBeatClock::exit()
 
 	//-
 
-	// remove listeners
+	//remove listeners
 
 	ofRemoveListener(params_control.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
 	ofRemoveListener(params_clocker.parameterChangedE(), this, &ofxBeatClock::Changed_Params);
@@ -904,13 +922,12 @@ void ofxBeatClock::PLAYER_START()//only used in internal mode
 		if (!DAW_active)
 			DAW_active = true;
 
-
-		//TODO:
-		if (MODE_BufferTimer)
-		{
-			samples = 0;
-		}
-		else
+		////TODO:
+		//if (MODE_BufferTimer)
+		//{
+		//	samples = 0;
+		//}
+		//else
 		{
 			isPlaying = true;
 		}
@@ -938,8 +955,6 @@ void ofxBeatClock::PLAYER_STOP()//only used in internal mode
 		isPlaying = false;
 
 		RESET_clockValues();
-
-
 	}
 	else
 	{
@@ -972,11 +987,14 @@ void ofxBeatClock::CLOCK_Tick_MONITOR(int beat)
 	{
 		TRIG_TICK = true;
 
+		//alpha fade
+		animCounter = 0.0f;
+
 		//-
 
 		if (ENABLE_sound)
 		{
-			// play tic on the first beat of a bar
+			//play tic on the first beat of a bar
 			if (beat == 1)
 			{
 				tic.play();
@@ -1006,12 +1024,12 @@ int ofxBeatClock::get_TimeBar()
 #pragma mark - CHANGED LISTENERS
 
 //--------------------------------------------------------------
-void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
+void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 {
-	string wid = e.getName();
-	//ofLogNotice("ofxBeatClock") << "Changed_gui_CLOCKER '" << wid << "': " << e;
+	string name = e.getName();
+	//ofLogNotice("ofxBeatClock") << "Changed_gui_CLOCKER '" << name << "': " << e;
 
-	if (wid == "TAP")
+	if (name == "TAP")
 	{
 		ofLogNotice("ofxBeatClock") << "TAP BUTTON";
 		//BPM_Tap_Tempo_TRIG = !BPM_Tap_Tempo_TRIG;
@@ -1025,12 +1043,22 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 			Tap_Trig();
 		}
 	}
+	//TODO:
+	//else if (name == "SYNC")
+	//{
+	//	ofLogNotice("ofxBeatClock") << "bSync_Trig: " << bSync_Trig;
+	//	if (bSync_Trig)
+	//	{
+	//		bSync_Trig = false;
+	//		reSync();
+	//	}
+	//}
 
-	else if (wid == "PLAY")
+	else if (name == "PLAY")
 	{
 		ofLogNotice("ofxBeatClock") << "PLAYER_state: " << PLAYER_state;
 
-		// clocks are disabled or using external midi clock. dont need playing, just to be enabled
+		//clocks are disabled or using external midi clock. dont need playing, just to be enabled
 
 		if ((ENABLE_EXTERNAL_CLOCK || !ENABLE_CLOCKS || !ENABLE_INTERNAL_CLOCK) && PLAYER_state)
 		{
@@ -1051,12 +1079,12 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 		}
 	}
 
-	else if (wid == "BPM")
+	else if (name == "BPM")
 	{
-		// ofLogVerbose"ofxBeatClock") << "NEW BPM: " << BPM_Global;
+		//ofLogVerbose"ofxBeatClock") << "NEW BPM: " << BPM_Global;
 	}
 
-	else if (wid == "RESET BPM")
+	else if (name == "RESET BPM")
 	{
 		ofLogNotice("ofxBeatClock") << "RESET BPM: " << RESET_BPM_Global;
 
@@ -1069,53 +1097,53 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 			ofLogNotice("ofxBeatClock") << "BPM_Global: " << BPM_Global;
 		}
 	}
-	else if (wid == "HALF")
+	else if (name == "HALF")
 	{
 		ofLogNotice("ofxBeatClock") << "HALF: " << BPM_half_TRIG;
 		if (BPM_half_TRIG)
 		{
-			//            float tempBPM = BPM_Global / 2;
-			//            cout << "temp bpm: " << tempBPM << endl;
-			//            BPM_Global = BPM_Global / 2;
+			//           float tempBPM = BPM_Global / 2;
+			//           cout << "temp bpm: " << tempBPM << endl;
+			//           BPM_Global = BPM_Global / 2;
 			DAW_bpm = DAW_bpm / 2;
-			//            BPM_Global = tempBPM;
-			//            DAW_bpm = tempBPM;
+			//           BPM_Global = tempBPM;
+			//           DAW_bpm = tempBPM;
 		}
 	}
-	else if (wid == "DOUBLE")
+	else if (name == "DOUBLE")
 	{
 		ofLogNotice("ofxBeatClock") << "DOUBLE: " << BPM_double_TRIG;
 		if (BPM_double_TRIG)
 		{
-			//            float tempBPM = BPM_Global * 2;
-			//            cout << "temp bpm: " << tempBPM << endl;
-			//            BPM_Global = BPM_Global * 2;
+			//           float tempBPM = BPM_Global * 2;
+			//           cout << "temp bpm: " << tempBPM << endl;
+			//           BPM_Global = BPM_Global * 2;
 			DAW_bpm = DAW_bpm * 2;
-			//            BPM_Global = tempBPM;
-			//            DAW_bpm = tempBPM;
+			//           BPM_Global = tempBPM;
+			//           DAW_bpm = tempBPM;
 		}
 	}
 
-	else if (wid == "GLOBAL BPM")
+	else if (name == "GLOBAL BPM")
 	{
 		ofLogNotice("ofxBeatClock") << "GLOBAL BPM: " << BPM_Global;
-		// ofLogVerbose("ofxBeatClock") << "GLOBAL BPM   : " << BPM_Global;
+		//ofLogVerbose("ofxBeatClock") << "GLOBAL BPM   : " << BPM_Global;
 
-		BPM_GLOBAL_TimeBar = 60000 / BPM_Global;// 60,000 / BPM = one beat in milliseconds
+		BPM_GLOBAL_TimeBar = 60000 / BPM_Global;//60,000 / BPM = one beat in milliseconds
 
-        //TODO:
-        DAW_bpm = BPM_Global;
-        
+		//TODO:
+		DAW_bpm = BPM_Global;
+
 		//ofLogNotice("ofxBeatClock") << "TIME BEAT : " << BPM_TimeBar << "ms";
 		//ofLogNotice("ofxBeatClock") << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
 	}
-    else if (wid == "BAR ms")
-    {
-        ofLogNotice("ofxBeatClock") << "BAR ms: " << BPM_GLOBAL_TimeBar;
-        BPM_Global = 60000 / BPM_GLOBAL_TimeBar;
-    }
+	else if (name == "BAR ms")
+	{
+		ofLogNotice("ofxBeatClock") << "BAR ms: " << BPM_GLOBAL_TimeBar;
+		BPM_Global = 60000 / BPM_GLOBAL_TimeBar;
+	}
 
-	else if (wid == "INTERNAL")
+	else if (name == "INTERNAL")
 	{
 		ofLogNotice("ofxBeatClock") << "CLOCK INTERNAL: " << ENABLE_INTERNAL_CLOCK;
 
@@ -1125,7 +1153,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 
 			//-
 
-			// TEXT DISPLAY
+			//TEXT DISPLAY
 			BPM_input_str = "INTERNAL";
 			BPM_name_str = "";
 
@@ -1138,14 +1166,14 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 			if (DAW_active)
 				DAW_active = false;
 
-			// TEXT DISPLAY
+			//TEXT DISPLAY
 			BPM_bar_str = "0";
 			BPM_beat_str = "0";
 			BPM_16th_str = "0";
 
 			if (!ENABLE_INTERNAL_CLOCK)
 			{
-				// TEXT DISPLAY
+				//TEXT DISPLAY
 				BPM_input_str = "NONE";
 				BPM_name_str = "";
 			}
@@ -1159,7 +1187,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 		}
 	}
 
-	else if (wid == "EXTERNAL")
+	else if (name == "EXTERNAL")
 	{
 		ofLogNotice("ofxBeatClock") << "CLOCK EXTERNAL MIDI-IN: " << ENABLE_EXTERNAL_CLOCK;
 
@@ -1174,26 +1202,26 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 
 			//-
 
-			// TEXT DISPLAY
+			//TEXT DISPLAY
 			BPM_input_str = "EXTERNAL";
 			BPM_name_str = "MIDI PORT: ";
 			BPM_name_str += ofToString(midiIn_CLOCK.getPort());
 			BPM_name_str += " '" + midiIn_CLOCK.getName() + "'";
 
-            midiPortName = midiIn_CLOCK.getName();
+			midiPortName = midiIn_CLOCK.getName();
 
 			group_EXTERNAL->maximize();
 		}
 		else
 		{
-			// TEXT DISPLAY
+			//TEXT DISPLAY
 			BPM_bar_str = "0";
 			BPM_beat_str = "0";
 			BPM_16th_str = "0";
 
 			if (!ENABLE_EXTERNAL_CLOCK)
 			{
-				// TEXT DISPLAY
+				//TEXT DISPLAY
 				BPM_input_str = "NONE";
 				BPM_name_str = "";
 			}
@@ -1207,7 +1235,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 		}
 	}
 
-	else if (wid == "ENABLE")
+	else if (name == "ENABLE")
 	{
 		ofLogNotice("ofxBeatClock") << "ENABLE: " << ENABLE_CLOCKS;
 
@@ -1221,14 +1249,14 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 
 		//-
 
-		// ENABLE CLOCKS true
+		//ENABLE CLOCKS true
 		else if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_CLOCK)
 		{
 			ENABLE_INTERNAL_CLOCK = true;//default state when enabling clocks
 		}
 	}
 
-	else if (wid == "MIDI PORT")
+	else if (name == "MIDI PORT")
 	{
 		if (MIDI_Port_PRE != MIDI_Port_SELECT)
 		{
@@ -1242,7 +1270,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 			ofLogNotice("MIDI PORT") << "OPENING PORT: " << MIDI_Port_SELECT;
 			setup_MIDI_PORT(MIDI_Port_SELECT);
 
-            midiPortName = midiIn_CLOCK.getName();
+			midiPortName = midiIn_CLOCK.getName();
 		}
 	}
 }
@@ -1251,8 +1279,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) // patch change
 void ofxBeatClock::Changed_MIDI_beatsInBar(int &beatsInBar)
 {
 
-	// this function trigs when any midi tick (beatsInBar) updating, so we need to filter if (we want beat or 16th..) has changed.
-	// problem is maybe that beat param refresh when do not changes too, jus because it's accesed..
+	//this function trigs when any midi tick (beatsInBar) updating, so we need to filter if (we want beat or 16th..) has changed.
+	//problem is maybe that beat param refresh when do not changes too, jus because it's accesed..
 
 	if (ENABLE_pattern_limits)
 	{
@@ -1288,22 +1316,33 @@ void ofxBeatClock::Changed_MIDI_beatsInBar(int &beatsInBar)
 
 		//-
 
-		// TRIG BALL DRAWING AND SOUND TICKER
+		//TRIG BALL DRAWING AND SOUND TICKER
 
 		CLOCK_Tick_MONITOR(BPM_beat_current);
 
-		//        if (pattern_limits)
-		//        {
-		//            beatsInBar_PRE = beatsInBar;
-		//        }
-		//        else
-		//        {
+		//       if (pattern_limits)
+		//       {
+		//           beatsInBar_PRE = beatsInBar;
+		//       }
+		//       else
+		//       {
 
 		beatsInBar_PRE = MIDI_beatsInBar;
 
-		//        }
+		//       }
 
 	}
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::reSync()
+{
+	ofLogVerbose("ofxBeatClock") << "reSync";
+	metro.resetTimer();
+	metro.stop();
+	metro.start();
+	PLAYER_state = true;
+
 }
 
 //--------------------------------------------------------------
@@ -1338,7 +1377,7 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage &message)
 
 	if (ENABLE_EXTERNAL_CLOCK && ENABLE_CLOCKS)
 	{
-		// 1. MIDI CLOCK:
+		//1. MIDI CLOCK:
 
 		if ((message.status == MIDI_TIME_CLOCK) ||
 			(message.status == MIDI_SONG_POS_POINTER) ||
@@ -1347,28 +1386,28 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage &message)
 			(message.status == MIDI_STOP))
 		{
 
-			//    midiCLOCK_Message = message;
+			//   midiCLOCK_Message = message;
 
-			// 1. MIDI CLOCK
+			//1. MIDI CLOCK
 
-			// update the clock length and song pos in beats
+			//update the clock length and song pos in beats
 			if (MIDI_clock.update(message.bytes))
 			{
-				// we got a new song pos
+				//we got a new song pos
 				MIDI_beats = MIDI_clock.getBeats();
 				MIDI_seconds = MIDI_clock.getSeconds();
 
 				//-
 
-				MIDI_quarters = MIDI_beats / 4; // convert total # beats to # quarters
-				MIDI_bars = (MIDI_quarters / 4) + 1; // compute # of bars
-				MIDI_beatsInBar = (MIDI_quarters % 4) + 1; // compute remainder as # TARGET_NOTES_params within the current bar
+				MIDI_quarters = MIDI_beats / 4; //convert total # beats to # quarters
+				MIDI_bars = (MIDI_quarters / 4) + 1; //compute # of bars
+				MIDI_beatsInBar = (MIDI_quarters % 4) + 1; //compute remainder as # TARGET_NOTES_params within the current bar
 
 				//-
 
 			}
 
-			// compute the seconds and bpm
+			//compute the seconds and bpm
 
 			switch (message.status)
 			{
@@ -1377,10 +1416,10 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage &message)
 				MIDI_seconds = MIDI_clock.getSeconds();
 				MIDI_CLOCK_bpm += (MIDI_clock.getBpm() - MIDI_CLOCK_bpm) / 5;
 
-				// average the last 5 bpm values
-				// no break here so the next case statement is checked,
-				// this way we can set clockRunning if we've missed a MIDI_START
-				// ie. master was running before we started this example
+				//average the last 5 bpm values
+				//no break here so the next case statement is checked,
+				//this way we can set clockRunning if we've missed a MIDI_START
+				//ie. master was running before we started this example
 
 				//-
 
@@ -1392,7 +1431,7 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage &message)
 
 				//-
 
-				// transport control
+				//transport control
 
 			case MIDI_START:
 			case MIDI_CONTINUE:
@@ -1424,13 +1463,13 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage &message)
 void ofxBeatClock::saveSettings(string path)
 {
 	//ofToDataPath( "dreadlock_ride2.wav"
-	// many debugger (included gdb and xcode) change the base path
-	// when you run your app in debug mode
-	// so the best is to use an absolute path
+	//many debugger (included gdb and xcode) change the base path
+	//when you run your app in debug mode
+	//so the best is to use an absolute path
 
-	//    pathSettings = path;//store default
+	//   pathSettings = path;//store default
 
-	// save settings
+	//save settings
 	ofXml settings;
 	ofSerialize(settings, params_control);
 	settings.save(path);
@@ -1444,7 +1483,7 @@ void ofxBeatClock::loadSettings(string path)
 {
 	//pathSettings = path;//store default
 
-	// load settings
+	//load settings
 	ofXml settings;
 	settings.load(path);
 	ofDeserialize(settings, params_control);
@@ -1506,7 +1545,6 @@ void ofxBeatClock::onBeatEvent(int &beat)
 //--------------------------------------------------------------
 void ofxBeatClock::onSixteenthEvent(int &sixteenth)
 {
-
 	ofLogVerbose("ofxBeatClock") << "DAW METRO - 16th: " << sixteenth;
 
 	if (ENABLE_CLOCKS && ENABLE_INTERNAL_CLOCK)
@@ -1519,6 +1557,8 @@ void ofxBeatClock::onSixteenthEvent(int &sixteenth)
 //--------------------------------------------------------------
 void ofxBeatClock::RESET_clockValues()
 {
+	ofLogVerbose("ofxBeatClock") << "RESET_clockValues";
+
 	metro.stop();
 	metro.resetTimer();
 
@@ -1534,7 +1574,7 @@ void ofxBeatClock::RESET_clockValues()
 
 #pragma mark - TAP MACHINE
 
-// TODO: implement bpm divider / multiplier x2 x4 /2 /4
+//TODO: implement bpm divider / multiplier x2 x4 /2 /4
 //--------------------------------------------------------------
 void ofxBeatClock::Tap_Trig()
 {
@@ -1544,7 +1584,7 @@ void ofxBeatClock::Tap_Trig()
 
 		//-
 
-		// disable sound to better flow
+		//disable sound to better flow
 		if (tapCount == 0 && ENABLE_sound)
 		{
 			ENABLE_sound = false;
@@ -1568,7 +1608,7 @@ void ofxBeatClock::Tap_Trig()
 
 			ofLogNotice(">TAP<") << "NEW Tap BPM: " << Tap_BPM;
 
-			// TODO: target bpm could be tweened..
+			//TODO: target bpm could be tweened..
 
 			//-
 
@@ -1578,7 +1618,7 @@ void ofxBeatClock::Tap_Trig()
 
 			//-
 
-			if (SOUND_wasDisabled)// sound disbler to better flow
+			if (SOUND_wasDisabled)//sound disbler to better flow
 			{
 				ENABLE_sound = true;
 				SOUND_wasDisabled = false;
@@ -1586,7 +1626,7 @@ void ofxBeatClock::Tap_Trig()
 
 			//-
 
-			// SET OBTAINED BPM
+			//SET OBTAINED BPM
 
 			DAW_bpm = Tap_BPM;
 
@@ -1609,7 +1649,7 @@ void ofxBeatClock::Tap_update()
 
 		//-
 
-		if (SOUND_wasDisabled)// sound disbler to better flow
+		if (SOUND_wasDisabled)//sound disbler to better flow
 		{
 			ENABLE_sound = true;
 			SOUND_wasDisabled = false;
