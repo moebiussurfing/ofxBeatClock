@@ -126,9 +126,9 @@ void ofxBeatClock::setup()
 
 	//4. TAP TEMPO
 
-	Tap_running = false;
+	bTap_running = false;
 	tapCount = 0;
-	intervals.clear();
+	tapIntervals.clear();
 
 	//-
 
@@ -199,6 +199,10 @@ void ofxBeatClock::setup()
 	tac.load("assets/sounds/click2.wav");
 	tac.setVolume(0.25f);
 	tac.setMultiPlay(false);
+
+	tapBell.load("assets/sounds/tapBell.wav");
+	tapBell.setVolume(1.0f);
+	tapBell.setMultiPlay(false);
 
 	//-
 
@@ -402,26 +406,26 @@ void ofxBeatClock::setup_Gui()
 
    //expand
 
-   container_controls->maximize();
-   group_BEAT_CLOCK->maximize();
+	container_controls->maximize();
+	group_BEAT_CLOCK->maximize();
 
-   if (ENABLE_INTERNAL_CLOCK)
-   {
-       group_INTERNAL->maximize();
-   }
-   else
-   {
-       group_INTERNAL->minimize();
-   }
+	if (ENABLE_INTERNAL_CLOCK)
+	{
+		group_INTERNAL->maximize();
+	}
+	else
+	{
+		group_INTERNAL->minimize();
+	}
 
-   if (ENABLE_EXTERNAL_CLOCK)
-   {
-       group_EXTERNAL->maximize();
-   }
-   else
-   {
-       group_EXTERNAL->minimize();
-   }
+	if (ENABLE_EXTERNAL_CLOCK)
+	{
+		group_EXTERNAL->maximize();
+	}
+	else
+	{
+		group_EXTERNAL->minimize();
+	}
 }
 
 //--------------------------------------------------------------
@@ -493,7 +497,7 @@ void ofxBeatClock::update()
 
 	//TAP
 
-	if (Tap_running)
+	if (bTap_running)
 		Tap_update();
 
 	//--
@@ -547,7 +551,6 @@ void ofxBeatClock::draw()
 
 	//-
 
-
 	//ball
 //   draw_BALL(pos_Ball_x, pos_Ball_y, pos_Ball_w);
 	draw_BALL(pos_Squares_x + 0.5f*pos_Squares_w - pos_Ball_w,
@@ -557,8 +560,11 @@ void ofxBeatClock::draw()
 //--------------------------------------------------------------
 void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 {
+	ofPushStyle();
 
-	//-
+	ofColor c;
+	c = ofColor(255, 255);
+	ofSetColor(c);
 
 	//heigh paddings
 
@@ -585,16 +591,39 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 	int pad = 10;
 	ofTranslate(px, py);
 
+	//bpm
 	TTF_message = "BPM: " + ofToString(BPM_Global.get(), 2);
-
 	TTF_big.drawString(TTF_message, pad, interline * i++);
-	i++;
+	i++;//spacer
 
+	//tap mode
+	int speed = 10;
+	bool b = (ofGetFrameNum() % (2 * speed) < speed);
+	ofSetColor(255, b ? 128 : 255);
+	if (bTap_running)
+	{
+		TTF_message = "TAP " + ofToString(ofMap(tapCount, 1, 4, 3, 0));
+	}
+	else
+	{
+		TTF_message = "";
+	}
+	TTF_big.drawString(TTF_message, pad, interline * i++);
+	i++;//spacer
+
+	//-
+
+	ofSetColor(c);
+
+	//clock
 	TTF_message = "CLOCK: " + BPM_input_str;
 	TTF_small.drawString(TTF_message, pad, interline * i++);
 
+	//midi port
 	TTF_message = ofToString(BPM_name_str);
 	TTF_small.drawString(TTF_message, pad, interline * i++);
+
+	//-
 
 	py = py + (interline * (i + 2));//accumulate heigh distance
 
@@ -621,6 +650,7 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 		py = py + (interline * i);//acumulate heigh distance
 	}
 
+
 	ofPopMatrix();//TODO: pop could be at function ending
 
 	//--
@@ -628,6 +658,8 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 	py += padToBigTime;
 	draw_BigClockTime(px, py);
 	py = py + (TTF_big.getSize());//acumulate heigh distance
+
+	ofPopStyle();
 
 	//--
 
@@ -660,7 +692,7 @@ void ofxBeatClock::draw_SQUARES(int px, int py, int w)
 
 		//-
 
-		else //disabled both modes
+		else//disabled both modes
 		{
 			ofSetColor(32, alpha);//black
 		}
@@ -710,7 +742,7 @@ void ofxBeatClock::draw_BALL(int px, int py, int w)
 		c = (ofColor::white);
 
 	//bg ball
-	if (!Tap_running)
+	if (!bTap_running)
 	{
 		ofSetColor(16); //ball background when not tapping
 	}
@@ -737,7 +769,7 @@ void ofxBeatClock::draw_BALL(int px, int py, int w)
 	int alphaMax = 128;
 	float alpha = 0.0f;
 	ofPushStyle();
-	if (animRunning && !Tap_running)
+	if (animRunning && !bTap_running)
 	{
 		circlePos.set(metronome_ball_pos.x, metronome_ball_pos.y);
 
@@ -757,7 +789,7 @@ void ofxBeatClock::draw_BALL(int px, int py, int w)
 	//-
 
 	//would disable this maybe...
-	if (ENABLE_CLOCKS && !Tap_running &&
+	if (ENABLE_CLOCKS && !bTap_running &&
 		(ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK))
 	{
 		if (TRIG_TICK)
@@ -992,7 +1024,7 @@ void ofxBeatClock::CLOCK_Tick_MONITOR(int beat)
 
 		//-
 
-		if (ENABLE_sound)
+		if (ENABLE_sound && !bTap_running)
 		{
 			//play tic on the first beat of a bar
 			if (beat == 1)
@@ -1580,16 +1612,16 @@ void ofxBeatClock::Tap_Trig()
 {
 	if (ENABLE_INTERNAL_CLOCK)
 	{
-		Tap_running = true;
+		bTap_running = true;
 
 		//-
 
-		//disable sound to better flow
-		if (tapCount == 0 && ENABLE_sound)
-		{
-			ENABLE_sound = false;
-			SOUND_wasDisabled = true;
-		}
+		////disable sound to better flow
+		//if (tapCount == 0 && ENABLE_sound)
+		//{
+		//	ENABLE_sound = false;
+		//	SOUND_wasDisabled = true;
+		//}
 
 		//-
 
@@ -1597,13 +1629,26 @@ void ofxBeatClock::Tap_Trig()
 		tapCount++;
 		ofLogNotice(">TAP<") << "TRIG: " << tapCount;
 
-		intervals.push_back(time - lastTime);
+		if (tapCount != 4)
+			tic.play();
+		else
+			tapBell.play();
+
+		tapIntervals.push_back(time - lastTime);
 		lastTime = time;
 
-		if (tapCount > 3)
+		if (tapCount > 3)//4th tap
 		{
-			intervals.erase(intervals.begin());
-			avgBarMillis = accumulate(intervals.begin(), intervals.end(), 0) / intervals.size();
+			tapIntervals.erase(tapIntervals.begin());
+			avgBarMillis = accumulate(tapIntervals.begin(), tapIntervals.end(), 0) / tapIntervals.size();
+
+			if (avgBarMillis == 0)
+			{
+				avgBarMillis = 1000;
+				ofLogError("ofxBeatClock") << "Divide by 0!";
+				ofLogError("ofxBeatClock") << "avgBarMillis: " << ofToString(avgBarMillis);
+			}
+
 			Tap_BPM = 60 * 1000 / (float)avgBarMillis;
 
 			ofLogNotice(">TAP<") << "NEW Tap BPM: " << Tap_BPM;
@@ -1612,48 +1657,65 @@ void ofxBeatClock::Tap_Trig()
 
 			//-
 
-			intervals.clear();
+			tapIntervals.clear();
 			tapCount = 0;
-			Tap_running = false;
+			bTap_running = false;
 
 			//-
 
-			if (SOUND_wasDisabled)//sound disbler to better flow
-			{
-				ENABLE_sound = true;
-				SOUND_wasDisabled = false;
-			}
+			//TODO:
+			//if (SOUND_wasDisabled)//sound disbler to better flow
+			//{
+			//	ENABLE_sound = true;
+			//	SOUND_wasDisabled = false;
+			//}
 
 			//-
 
 			//SET OBTAINED BPM
-
 			DAW_bpm = Tap_BPM;
-
-			//-
 		}
 	}
+	else if (tapCount > 1)
+	{
+		//TODO
+		//temp update to last interval...
+		float val = (float)tapIntervals[tapIntervals.size() - 1];
+		if (val == 0)
+		{
+			val = 1000;
+			ofLogError("ofxBeatClock") << "Divide by 0!";
+			ofLogError("ofxBeatClock") << "val: " << ofToString(val);
+		}
+		Tap_BPM = 60 * 1000 / val;
+		ofLogNotice("ofxBeatClock") << "> TAP < : NEW BPM Tap : " << Tap_BPM;
+
+		//SET OBTAINED BPM
+		DAW_bpm = Tap_BPM;
+	}
+
+	//-
 }
 
 //---------------------------
 void ofxBeatClock::Tap_update()
 {
 	int time = ofGetElapsedTimeMillis();
-	if (intervals.size() > 0 && (time - lastTime > 3000))
+	if (tapIntervals.size() > 0 && (time - lastTime > 3000))
 	{
 		ofLogNotice("ofxBeatClock") << ">TAP< TIMEOUT: clear tap logs";
-		intervals.clear();
+		tapIntervals.clear();
 
 		tapCount = 0;
-		Tap_running = false;
+		bTap_running = false;
 
 		//-
 
-		if (SOUND_wasDisabled)//sound disbler to better flow
-		{
-			ENABLE_sound = true;
-			SOUND_wasDisabled = false;
-		}
+		//if (SOUND_wasDisabled)//sound disbler to better flow
+		//{
+		//	ENABLE_sound = true;
+		//	SOUND_wasDisabled = false;
+		//}
 	}
 }
 
