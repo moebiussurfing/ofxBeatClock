@@ -167,9 +167,16 @@ public:
 	//-
 
 	// API
+
 public:
 	float get_BPM();
 	int get_TimeBar();
+
+	//bool bBallAutoPos = false;
+	//void setPosition_CLOCK_Ball_Auto(bool b)
+	//{
+	//	bBallAutoPos = b;
+	//}
 
 	//-
 
@@ -231,6 +238,7 @@ public:
 	ofParameter<bool> ENABLE_sound;//enable sound ticks
 	ofSoundPlayer tic;
 	ofSoundPlayer tac;
+	ofSoundPlayer tapBell;
 
 	//-
 
@@ -283,8 +291,8 @@ public:
 //private:
 	int tapCount, lastTime, avgBarMillis;
 	float Tap_BPM;
-	vector<int> intervals;
-	bool Tap_running;
+	vector<int> tapIntervals;
+	bool bTap_running;
 	bool SOUND_wasDisabled = false;// sound disbler to better flow
 
 	//-
