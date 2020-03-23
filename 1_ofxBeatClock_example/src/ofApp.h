@@ -3,7 +3,11 @@
 #include "ofMain.h"
 
 #include "ofxBeatClock.h"
+
+#define USE_ofxWindowApp
+#ifdef USE_ofxWindowApp
 #include "ofxWindowApp.h"
+#endif
 
 class ofApp: public ofBaseApp{
 	public:
@@ -24,5 +28,8 @@ class ofApp: public ofBaseApp{
     void gotMessage(ofMessage msg);
     
     ofxBeatClock CLOCKER;
+
+#ifdef USE_ofxWindowApp
 	ofxWindowApp windowApp;
+#endif
 };
