@@ -4,8 +4,14 @@
 void ofApp::setup() {
 	ofBackground(32);
 
-	//ofSetFrameRate(60);
-	//ofSetVerticalSync(true);
+	//-
+
+#ifdef USE_ofxWindowApp
+	//windowApp.setSettingsFps(60);
+#else
+	ofSetFrameRate(60);
+	ofSetVerticalSync(true);
+#endif
 
 	//-
 
@@ -13,10 +19,8 @@ void ofApp::setup() {
 
 	////customize positions and sizes
 	//CLOCKER.setPosition_Gui(10, 10, 100);
-	//CLOCKER.setPosition_BeatBoxes(400, 100, 100);
+	//CLOCKER.setPosition_BeatBoxes(400, 100, 300);
 	//CLOCKER.setPosition_BeatBall(400, 400, 50);
-
-	 //windowApp.setSettingsFps(60);
 }
 
 //--------------------------------------------------------------
@@ -42,7 +46,6 @@ void ofApp::keyPressed(int key) {
 	case ' ':
 		CLOCKER.PLAYER_TOGGLE();
 		break;
-
 	case 't':
 		CLOCKER.Tap_Trig();
 		break;

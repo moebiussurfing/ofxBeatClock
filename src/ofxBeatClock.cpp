@@ -152,9 +152,8 @@ void ofxBeatClock::setup()
 #pragma mark - DRAW STUFF
 
 	string strFont;
-	strFont = "assets/fonts/telegrama_render.otf";
-	//strFont = "assets/fonts/mono.ttf";
-	//strFont = "assets/fonts/telegrama_render.otf";
+	strFont = "ofxBeatClock/fonts/telegrama_render.otf";
+	//strFont = "ofxBeatClock/fonts/mono.ttf";
 
 	TTF_small.load(strFont, 7);
 	TTF_medium.load(strFont, 10);
@@ -162,16 +161,26 @@ void ofxBeatClock::setup()
 
 	//-
 
+	//TODO:
+	if (!TTF_small.isLoaded())
+	{
+		ofLogError("ofxBeatClock") << "ERROR LOADING FONT "<< strFont ;
+		ofLogError("ofxBeatClock") << "WILL FAIL TO LOAD JSON THEME TO ofxGuiExteneded. EDIT FILE TO CORRECT FOONT FILENAME!";
+		ofLogError("ofxBeatClock") << "theme/theme_bleurgh.json";
+	}
+
+	//-
+
 	//MONITOR DEFAULT POS
 
-	//squares
+	//beat boxes
+	pos_Squares_y = 600;
 	pos_Squares_x = 5;
-	pos_Squares_y = 570;
 	pos_Squares_w = 200;
 
-	//ball
+	//beat ball
+	pos_Ball_y = 810;
 	pos_Ball_x = 500;
-	pos_Ball_y = 780;
 	pos_Ball_w = 30;
 
 	setPosition_BeatBoxes(pos_Squares_x, pos_Squares_y, pos_Squares_w);
@@ -187,15 +196,15 @@ void ofxBeatClock::setup()
 
 #pragma mark - SOUNDS
 
-	tic.load("assets/sounds/click1.wav");
+	tic.load("ofxBeatClock/sounds/click1.wav");
 	tic.setVolume(1.0f);
 	tic.setMultiPlay(false);
 
-	tac.load("assets/sounds/click2.wav");
+	tac.load("ofxBeatClock/sounds/click2.wav");
 	tac.setVolume(0.25f);
 	tac.setMultiPlay(false);
 
-	tapBell.load("assets/sounds/tapBell.wav");
+	tapBell.load("ofxBeatClock/sounds/tapBell.wav");
 	tapBell.setVolume(1.0f);
 	tapBell.setMultiPlay(false);
 
@@ -238,11 +247,6 @@ void ofxBeatClock::setup_Gui()
 
 	//THEME
 
-	//conf_Cont =
-	//{
-	//	//{"width", gui_w},
-	//	//{"direction", "vertical"},
-	//};
 	confg_Sliders =
 	{
 		{"height", gui_slider_big_h}
@@ -253,6 +257,11 @@ void ofxBeatClock::setup_Gui()
 		{"text-align", "center"},
 		{"height", gui_button_h},
 	};
+	//conf_Cont =
+	//{
+	//	//{"width", gui_w},
+	//	//{"direction", "vertical"},
+	//};
 
 	//--
 
@@ -312,7 +321,6 @@ void ofxBeatClock::setup_Gui()
 	//{
 	//	//{"height", gui_slider_h},
 	//};
-
 	//container_h->setConfig(containerConfig_browse);
 
 	container_h->add<ofxGuiButton>(BPM_half_TRIG);
@@ -344,8 +352,8 @@ void ofxBeatClock::setup_Gui()
 	ofLogNotice("ofxBeatClock") << "LOAD SETTINGS";
 	ofLogNotice("ofxBeatClock") << pathSettings;
 
-	pathSettings = "assets/settings/";//folder to both settings files
-	//pathSettings = "assets/settings/CLOCKER_settings.xml";//default
+	pathSettings = "ofxBeatClock/settings/";//folder to both settings files
+	//pathSettings = "ofxBeatClock/settings/CLOCKER_settings.xml";//default
 
 	loadSettings(pathSettings);
 
@@ -384,16 +392,18 @@ void ofxBeatClock::setup_Gui()
 
 	//--
 
-	ofLogNotice("ofxBeatClock") << "loadTheme";
+	ofLogNotice("ofxBeatClock") << "Trying to load JSON ofxGuiExtended2 Theme...";
+	ofLogNotice("ofxBeatClock") << "'theme/theme_bleurgh.json'";
+
 	group_BEAT_CLOCK->loadTheme("theme/theme_bleurgh.json");
 	group_Controls->loadTheme("theme/theme_bleurgh.json");
 	group_BpmTarget->loadTheme("theme/theme_bleurgh.json");
 	group_INTERNAL->loadTheme("theme/theme_bleurgh.json");
 	group_EXTERNAL->loadTheme("theme/theme_bleurgh.json");
 
-	//-
+	//--
 
-   //expand
+	//expand/collapse pannels
 
 	group_Controls->maximize();
 	group_BEAT_CLOCK->maximize();
@@ -550,7 +560,7 @@ void ofxBeatClock::draw()
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::drawBeatBoxes(int px, int py, int w)
+void ofxBeatClock::drawBeatBoxes(int px, int py, int w)///draws text info and boxes
 {
 	ofPushStyle();
 
@@ -571,7 +581,7 @@ void ofxBeatClock::drawBeatBoxes(int px, int py, int w)
 
 	//--
 
-	//2. TEXT INFO:
+	//1. TEXT INFO:
 
 	ofSetColor(c);
 
