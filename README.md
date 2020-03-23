@@ -10,7 +10,7 @@ Internal clock mode:
 ![Alt text](/screenshot0.JPG?raw=true "screenshot0")
 ![Alt text](/screenshot1.JPG?raw=true "screenshot1")
 
-External clock MIDI Sync mode:
+External clock MIDI Sync:
 
 ![Alt text](/screenshot2.JPG?raw=true "screenshot2")
 
@@ -25,20 +25,20 @@ ofApp.h:
 
 #include "ofxBeatClock.h"
 
-ofxBeatClock beatClock;
+ofxBeatClock CLOCKER;
 
 //--
 
 ofApp.cpp:
 
 //setup()
-beatClock.setup();
+CLOCKER.setup();
 
 //update()
-beatClock.update();
+CLOCKER.update();
 
 //draw()
-beatClock.draw();
+CLOCKER.draw();
 ```
 
 
@@ -46,11 +46,10 @@ beatClock.draw();
 
 - internal clock based in a threaded timer from ofxDawMetro from https://github.com/castovoid
 - external clock source as midi input mtc clock using ofxMidi 
-- easy to sync to Ableton Live or any sequencer with midi clock 
-- cute tap tempo engine
-- save/load mode settings
+- easy to sync to Ableton Live or any sequencer
+- tap tempo
+- save/load settings
 - cute customizable gui by editing json file theme
-- customizable gui positions by code
 - nice metronome sound ticks
 
 

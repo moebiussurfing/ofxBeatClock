@@ -79,7 +79,7 @@ void ofxBeatClock::setup()
 #pragma mark - MONITOR GLOBAL TARGET
 
 	//this smoothed (or maybe slower refreshed than fps) clock will be sended to target sequencer outside the class. see BPM_MIDI_CLOCK_REFRESH_RATE.
-	params_BpmTarget.setName("ADVANCED");
+	params_BpmTarget.setName("BPM TARGET");
 	params_BpmTarget.add(BPM_Global.set("GLOBAL BPM", BPM_INIT, 30, 300));
 	params_BpmTarget.add(BPM_GLOBAL_TimeBar.set("BAR ms", 60000 / BPM_Global, 100, 2000));
 
