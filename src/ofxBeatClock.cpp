@@ -1,35 +1,5 @@
 #include "ofxBeatClock.h"
 
-////TODO:
-////clock by audio buffer. not timer
-////--------------------------------------------------------------
-//void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
-//{
-//	//if (PLAYER_state && MODE_BufferTimer)
-//	//{
-//
-//	//	//TODO:
-//	//	//if (MODE_BufferTimer)
-//	//	{
-//	//		//int ticksPerBeat = 4;
-//	//		int ticksPerBeat = 4;
-//	//		int samplesPerTick = (44100 * 60.0f) / BPM_Global / ticksPerBeat;
-//	//	}
-//
-//	//	for (size_t i = 0; i < buffer.getNumFrames(); ++i)
-//	//	{
-//	//		if (++samples == samplesPerTick)
-//	//		{
-//	//			//tick();
-//	//			ofLogError("ofxBeatClock") << "TICK";
-//	//			samples = 0;
-//	//		}
-//
-//	//		//...
-//	//	}
-//	//}
-//}
-
 //--------------------------------------------------------------
 void ofxBeatClock::setup()
 {
@@ -553,7 +523,7 @@ void ofxBeatClock::draw()
 		//-
 
 		//ball
-	//   draw_BeatBall(pos_Ball_x, pos_Ball_y, pos_Ball_w);//custom position
+		//draw_BeatBall(pos_Ball_x, pos_Ball_y, pos_Ball_w);//custom position
 		draw_BeatBall(pos_Squares_x + 0.5f*pos_Squares_w - pos_Ball_w,
 			pos_Ball_y, pos_Ball_w);//above squares
 	}
@@ -822,11 +792,7 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int w)
 //--------------------------------------------------------------
 void ofxBeatClock::draw_BigClockTime(int x, int y)
 {
-
 	//BIG LETTERS:
-
-	//TODO: PERFORMANCE: reduce number of drawings..
-
 	{
 		ofPushStyle();
 
@@ -872,7 +838,7 @@ void ofxBeatClock::setPosition_Gui_ALL(int _x, int _y, int _w)
 	int pad_Clock = 15;
 	int pos_Clock_x = w + pad_Clock;
 
-	//   setPosition_EDITOR(pos_Clock_x, 0, w);
+	//setPosition_EDITOR(pos_Clock_x, 0, w);
 	setPosition_Gui(gui_Panel_posX, gui_Panel_posY, w);
 
 	setPosition_BeatBoxes(pos_Clock_x, 500, w);
@@ -883,7 +849,7 @@ void ofxBeatClock::setPosition_Gui_ALL(int _x, int _y, int _w)
 ofPoint ofxBeatClock::getPosition_Gui()
 {
 	ofPoint p;
-	//   p = group_BEAT_CLOCK->getShape().getTopLeft();
+	//p = group_BEAT_CLOCK->getShape().getTopLeft();
 	p = ofPoint(gui_Panel_posX, gui_Panel_posY);
 	return p;
 }
@@ -1375,14 +1341,15 @@ void ofxBeatClock::Changed_MIDI_beatsInBar(int &beatsInBar)
 	}
 }
 
+//TODO:
 //--------------------------------------------------------------
 void ofxBeatClock::reSync()
 {
-	ofLogVerbose("ofxBeatClock") << "reSync";
-	metro.resetTimer();
-	metro.stop();
-	metro.start();
-	PLAYER_state = true;
+	//ofLogVerbose("ofxBeatClock") << "reSync";
+	//metro.resetTimer();
+	//metro.stop();
+	//metro.start();
+	//PLAYER_state = true;
 }
 
 //--------------------------------------------------------------
@@ -1728,3 +1695,34 @@ void ofxBeatClock::set_DAW_bpm(float bpm)
 {
 	DAW_bpm = bpm;
 }
+
+
+////TODO:
+////clock by audio buffer. not timer
+////--------------------------------------------------------------
+//void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
+//{
+//	//if (PLAYER_state && MODE_BufferTimer)
+//	//{
+//
+//	//	//TODO:
+//	//	//if (MODE_BufferTimer)
+//	//	{
+//	//		//int ticksPerBeat = 4;
+//	//		int ticksPerBeat = 4;
+//	//		int samplesPerTick = (44100 * 60.0f) / BPM_Global / ticksPerBeat;
+//	//	}
+//
+//	//	for (size_t i = 0; i < buffer.getNumFrames(); ++i)
+//	//	{
+//	//		if (++samples == samplesPerTick)
+//	//		{
+//	//			//tick();
+//	//			ofLogError("ofxBeatClock") << "TICK";
+//	//			samples = 0;
+//	//		}
+//
+//	//		//...
+//	//	}
+//	//}
+//}
