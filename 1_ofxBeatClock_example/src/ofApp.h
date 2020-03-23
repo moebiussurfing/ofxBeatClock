@@ -4,7 +4,8 @@
 
 #include "ofxBeatClock.h"
 
-#define USE_ofxWindowApp
+//uncomment if you added this addon to handle window settings
+//#define USE_ofxWindowApp
 #ifdef USE_ofxWindowApp
 #include "ofxWindowApp.h"
 #endif
@@ -26,8 +27,12 @@ class ofApp: public ofBaseApp{
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
-    
-    ofxBeatClock CLOCKER;
+
+    ofxBeatClock beatClock;
+
+	//callback
+	ofEventListener listener;
+	void callback_Tick();
 
 #ifdef USE_ofxWindowApp
 	ofxWindowApp windowApp;
