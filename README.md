@@ -17,6 +17,9 @@ External clock MIDI Sync:
 
 ## Usage
 
+Create your poreject with OF ProjectGenerator as usual.
+
+
 ```c++
 ofApp.h:
 
@@ -41,7 +44,7 @@ CLOCKER.draw();
 
 ## Features
 
-- internal clock based in a threaded timer from ofxDawMetro
+- internal clock based in a threaded timer from ofxDawMetro from https://github.com/castovoid
 - external clock source as midi input mtc clock using ofxMidi 
 - easy to sync to Ableton Live or any sequencer
 - tap tempo
@@ -64,18 +67,18 @@ Addon by MoebiusSurfing.
 
 ## Requeriments
 
-ofxGuiExtended2 (my fork)
-ofxMidi
-ofxDawMetro
+https://github.com/danomatika/ofxMidi
+https://github.com/castovoid/ofxDawMetro
+https://github.com/moebiussurfing/ofxGuiExtended2 (my fork)
 
-data/ofxBeatClock: xml settings, gui font file, and json theme. (crashes if not present)
+''data/ofxBeatClock'': xml settings, gui font file, and json theme. (crashes if not present)
 
 
 ## TODO:
 
 - improve example to get beat ticks to our ofApp.
 - add different timer approach using the audio buffer to avoid out-of-sync problems of current normal and threaded timers.
-- on-the-fly re-sync to bar beat start
+- on-the-fly re-sync to bar beat start.
 
 
 PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS
