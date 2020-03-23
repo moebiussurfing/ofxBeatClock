@@ -3,7 +3,6 @@
 openFrameworks addon to run a typical beat clock based in bpm / DAW style.
 
 
-
 ## Screenshots
 
 ![Alt text](/screenshot1.JPG?raw=true "screenshot1")
@@ -36,11 +35,13 @@ CLOCKER.draw();
 
 ## Features
 
-- internal clock base in timer
-- external clock source as midi input mtc clock. (from Ableton Live or any sequencer)
+- internal clock based in a threaded timer from ofxDawMetro
+- external clock source as midi input mtc clock using ofxMidi 
+- easy to sync to Ableton Live or any sequencer
 - tap tempo
 - save/load settings
-- cute customizable gui
+- cute customizable gui by editing json file theme
+- nice metronome sound ticks
 
 
 ## Tested system
@@ -61,12 +62,13 @@ ofxGuiExtended2 (my fork)
 ofxMidi
 ofxDawMetro
 
-data/ofxBeatClock : xml settings, gui font file, and json theme. (crashes if not present)
+data/ofxBeatClock: xml settings, gui font file, and json theme. (crashes if not present)
 
 
 ## TODO:
 
-- add different timer approach using the audio buffer to avoid out-of--sync problems of normal and threaded timers.
+- improve example to get beat ticks to our ofApp.
+- add different timer approach using the audio buffer to avoid out-of-sync problems of current normal and threaded timers.
 - on-the-fly re-sync to bar beat start
 
 
