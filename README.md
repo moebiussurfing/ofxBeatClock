@@ -1,23 +1,72 @@
-ofxAddonTemplate
-================
+# ofxGpuLutCube
 
-OpenFrameworks addon template for easier development of structurally correct addons.
+openFrameworks addon to run a beat clock based in bpm / DAW style.
 
-This template aids you as an addon author in creating an addon in a "proper" way. Doing this enables the openFrameworks community to easily use your addon, and having addons adhere to an established structure makes it easier for the openFrameworks developers to create features around contributed addons, like the addons index at ofxaddons.com.
 
-Download
---------
-The template contains all you need to start developing your addon. Download the template using the Download button on the right side of the github page. Unzip, rename and copy it to your addons folder.
-**PLEASE DON'T FORK** the addon template repo if you plan on creating your own addon, this will lead to confusion on the Github inheritance/forking graph, and you will unnecessarily have this repository's history in your own git repo.
 
-Further Steps
--------------
-`README_AUTHOR.md` contains instructions and explanations for you.
-`README_DEPLOY.md` is filled with a template for an informative README file you might want to use with your addon.
+## Screenshots
 
-Before announcing your addon to the world, you should remove this file (`README.md`) and the author instructions, and rename `README_DEPLOY.md` to `README.md`.
-Also, if you have special instructions which people should see when submitting a pull request or open an issue in your addon repository, add a `CONTRIBUTING.md` file at the root of your repository. For more details, see https://github.com/blog/1184-contributing-guidelines
+![Alt text](/screenshot1.JPG?raw=true "screenshot1")
+![Alt text](/screenshot2.JPG?raw=true "screenshot2")
 
-This template reflects the help text found at http://ofxaddons.com/howto, and will be updated from time to time by the OF developers.
 
-Thanks for listening, and happy coding!
+## Usage
+
+```c++
+ofApp.h:
+
+#include "ofxBeatClock.h"
+
+ofxBeatClock CLOCKER;
+
+//--
+
+ofApp.cpp:
+
+//setup()
+CLOCKER.setup();
+
+//update()
+CLOCKER.update();
+
+//draw()
+CLOCKER.draw();
+```
+
+
+## Features
+
+- internal clock base in timer
+- external clock source as midi input mtc clock. (from Ableton Live or any sequencer)
+- tap tempo
+- save/load settings
+- cute customizable gui
+
+
+## Tested system
+
+- OF 0.11
+- Visual Studio 2017
+- macOS / HighSierra
+
+
+## About
+
+Addon by MoebiusSurfing.
+
+
+## Requeriments
+
+ofxGuiExtended2 (my fork)
+ofxMidi
+ofxDawMetro
+
+data/ofxBeatClock : xml settings, gui font file, and json theme. (crashes if not present)
+
+
+## TODO:
+
+- add different timer approach using the audio buffer to avoid out-of--sync problems of normal and threaded timers.
+
+
+PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS
