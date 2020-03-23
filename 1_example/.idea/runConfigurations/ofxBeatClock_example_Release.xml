@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ofxBeatClock_example Release" type="AppleRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ofxBeatClock_example" TARGET_NAME="ofxBeatClock_example" CONFIG_NAME="Release" SCHEME_NAME="ofxBeatClock_example Release" IS_LOCATION_SIMULATION_ALLOWED="true" RUN_TARGET_PROJECT_NAME="ofxBeatClock_example" RUN_TARGET_NAME="ofxBeatClock_example" MAKE_ACTIVE="TRUE">
-    <EXTENSION ID="org.jetbrains.appcode.reveal.RevealRunConfigurationExtension">
-      <REVEAL_SETTINGS autoInject="false" autoInstall="true" askToEnableAutoInstall="true" />
-    </EXTENSION>
-    <method />
-  </configuration>
-</component>

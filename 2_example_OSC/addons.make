@@ -1,7 +1,0 @@
-ofxBeatClock
-ofxDawMetro
-ofxGuiExtended2
-ofxMidi
-ofxOsc
-ofxPubSubOsc
-ofxXmlSettings
