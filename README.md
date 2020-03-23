@@ -1,6 +1,6 @@
 # ofxBeatClock
 
-openFrameworks addon to run a typical beat clock based in bpm / DAW style.
+openFrameworks addon to run a DAW styled BPM-Beat clock with tap tempo and external MIDI sync.
 
 
 ## Screenshots
