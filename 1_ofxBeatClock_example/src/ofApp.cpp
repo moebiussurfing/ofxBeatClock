@@ -15,27 +15,45 @@ void ofApp::setup() {
 
 	//-
 
-	CLOCKER.setup();
+	beatClock.setup();
 
 	////customize positions and sizes
-	//CLOCKER.setPosition_Gui(10, 10, 100);
-	//CLOCKER.setPosition_BeatBoxes(400, 100, 300);
-	//CLOCKER.setPosition_BeatBall(400, 400, 50);
+	//beatClock.setPosition_Gui(10, 10, 100);
+	//beatClock.setPosition_BeatBoxes(400, 100, 300);
+	//beatClock.setPosition_BeatBall(400, 400, 50);
+
+	//-
+
+	//callback
+	listener = beatClock.TRIG_TICK.newListener([&](bool&) {this->callback_Tick(); });
+}
+
+//--------------------------------------------------------------
+void ofApp::callback_Tick()
+{
+	//TODO:
+	//improve callback to get bool value too to avoid to check state like this..
+	if (beatClock.TRIG_TICK)
+		ofLogWarning("ofApp") << "TICK!";
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
-	CLOCKER.update();
+	beatClock.update();
+
+	//add a log line every 10 frames to spread TICK callbacks
+	if (ofGetFrameNum() % 10 == 0)
+		ofLogWarning("ofApp") << "";
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	CLOCKER.draw();
+	beatClock.draw();
 }
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-	CLOCKER.exit();
+	beatClock.exit();
 }
 
 //--------------------------------------------------------------
@@ -44,14 +62,22 @@ void ofApp::keyPressed(int key) {
 	switch (key) {
 
 	case ' ':
-		CLOCKER.PLAYER_TOGGLE();
+		beatClock.PLAYER_TOGGLE();
 		break;
+
 	case 't':
-		CLOCKER.Tap_Trig();
+		beatClock.Tap_Trig();
 		break;
+
 	case 'g':
-		CLOCKER.toggle_Gui_visible();
+		beatClock.toggle_Gui_visible();
 		break;
+
+	case OF_KEY_RETURN:
+		ofLogWarning("ofApp") << "BPM: " << beatClock.get_BPM();
+		ofLogWarning("ofApp") << "BAR TIME: " << beatClock.get_TimeBar() << "ms";
+		break;
+	
 	default:
 		break;
 	}
