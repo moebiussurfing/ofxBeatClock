@@ -1,6 +1,6 @@
-# ofxGpuLutCube
+# ofxBeatClock
 
-openFrameworks addon to run a beat clock based in bpm / DAW style.
+openFrameworks addon to run a typical beat clock based in bpm / DAW style.
 
 
 
@@ -67,6 +67,7 @@ data/ofxBeatClock : xml settings, gui font file, and json theme. (crashes if not
 ## TODO:
 
 - add different timer approach using the audio buffer to avoid out-of--sync problems of normal and threaded timers.
+- on-the-fly re-sync to bar beat start
 
 
 PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS
