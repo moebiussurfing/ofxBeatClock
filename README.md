@@ -5,7 +5,7 @@ openFrameworks addon to run a typical beat clock based in bpm / DAW style.
 
 ## Screenshots
 
-![Alt text](/screenshot1.JPG?raw=true "screenshot0")
+![Alt text](/screenshot0.JPG?raw=true "screenshot0")
 ![Alt text](/screenshot1.JPG?raw=true "screenshot1")
 ![Alt text](/screenshot2.JPG?raw=true "screenshot2")
 
