@@ -9,7 +9,7 @@
             "margin": 2,
             "text-color": "rgba(255,255,255,0.8)",
             "text-padding": 5,
-            "font-family": "assets/fonts/telegrama_render.otf",
+            "font-family": "ofxBeatClock/fonts/telegrama_render.otf",
             "font-size": 8,
             "align-content": "center",
             "justify-content": "space-around",
