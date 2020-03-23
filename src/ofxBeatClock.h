@@ -15,23 +15,23 @@
 #define PATTERN_STEP_BAR_LIMIT 4
 #define PATTERN_STEP_BEAT_LIMIT 16
 
-#define BPM_MIDI_CLOCK_REFRESH_RATE 200
+#define BPM_MIDI_CLOCK_REFRESH_RATE 250
 //refresh received MTC by clock. disabled/commented to "realtime" by frame update
 
 
 
 class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
 
-//private:
-	
+private:
+
 	//-
 
-//	ofParameter<bool> MODE_BufferTimer;
 //	//TODO:
+//	ofParameter<bool> MODE_BufferTimer;
 //	ofSoundStream soundStream;
 //public:
 //	void audioOut(ofSoundBuffer &buffer);
-////private:
+//private:
 //	int samples = 0;
 //	int bpm = 120;
 //	int ticksPerBeat = 4;
@@ -49,7 +49,7 @@ public:
 
 #pragma mark - MIDI IN CLOCK
 
-//private:
+private:
 	ofxMidiIn midiIn_CLOCK;
 	ofxMidiMessage midiCLOCK_Message;
 	ofxMidiClock MIDI_clock; //< clock message parser
@@ -79,21 +79,21 @@ public:
 
 #pragma mark - MONITOR
 
-//private:
+private:
 	int pos_Squares_x, pos_Squares_y, pos_Squares_w;
 	int pos_Ball_x, pos_Ball_y, pos_Ball_w;
 
 public:
-	void setPosition_Squares(int x, int y, int w);
-	void setPosition_Ball(int x, int y, int w);
+	void setPosition_BeatBoxes(int x, int y, int w);
+	void setPosition_BeatBall(int x, int y, int w);
 
 	//squares
-	void draw_SQUARES(int x, int y, int w);
+	void drawBeatBoxes(int x, int y, int w);
 
 	//tick ball
-	void draw_BALL(int x, int y, int w);
+	void draw_BeatBall(int x, int y, int w);
 
-//private:
+private:
 	//beat circle
 	ofPoint circlePos;
 	float animTime, animCounter;
@@ -102,12 +102,14 @@ public:
 
 	void CLOCK_Tick_MONITOR(int beat);
 
+public:
 	ofParameter<bool> TRIG_TICK;
 
 	void setPosition_Gui_ALL(int _x, int _y, int _w);
 
 	//-
 
+private:
 #pragma mark - REFRESH FEQUENCY
 
 	unsigned long BPM_LAST_Tick_Time_LAST;//test
@@ -124,29 +126,31 @@ public:
 	void setup_Gui();
 	ofxGui gui;
 
-//private:
-	int gui_w;
-	int gui_slider_h;
+private:
+	//int gui_w;
+	//int gui_slider_h;
 	int gui_slider_big_h;
 	int gui_button_h;
 
 	ofxGuiGroup2* group_BEAT_CLOCK;//nested folder
-	ofxGuiGroup2* container_controls;
-	ofxGuiGroup2* container_clocker;
+	ofxGuiGroup2* group_Controls;
+	ofxGuiGroup2* group_BpmTarget;
 	ofxGuiGroup2* group_INTERNAL;
 	ofxGuiGroup2* group_EXTERNAL;
 	ofParameterGroup params_INTERNAL;
 	ofParameterGroup params_EXTERNAL;
 
-	ofJson conf_Cont, confg_Sliders, confg_Button;//json theme
+	//json theme
+	ofJson confg_Button, confg_Sliders;
+	//ofJson conf_Cont;
 
 //    ofxGuiGroup2* container_h;//half double
 
 	//-
 
 #pragma mark - PARAMS
-
-	ofParameterGroup params_control;
+private:
+	ofParameterGroup params_CONTROL;
 	ofParameter<bool> PLAYER_state;// player state
 	ofParameter<bool> ENABLE_CLOCKS;// enable clock
 	ofParameter<bool> ENABLE_INTERNAL_CLOCK;// enable internal clock
@@ -154,10 +158,13 @@ public:
 	ofParameter<int> MIDI_Port_SELECT;
 	int num_MIDI_Ports = 0;
 
-	ofParameterGroup params_clocker;
-	ofParameter<float> BPM_Global;//tempo bpm global
-	ofParameter<int> BPM_GLOBAL_TimeBar;//ms time of 1 bar = 4 beats
+	ofParameterGroup params_BpmTarget;
 
+public:
+	ofParameter<int> BPM_GLOBAL_TimeBar;//ms time of 1 bar = 4 beats
+	ofParameter<float> BPM_Global;//tempo bpm global
+
+private:
 	ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig measurements of tap tempo
 
 	ofParameter<bool> RESET_BPM_Global;
@@ -180,7 +187,7 @@ public:
 
 	//-
 
-//private:
+private:
 	void Changed_Params(ofAbstractParameter& e);
 
 	//-
@@ -212,6 +219,8 @@ public:
 	void saveSettings(string path);
 	void loadSettings(string path);
 	string pathSettings;
+	string filenameControl = "BeatClock_Settings.xml";
+	string filenameMidiPort = "MidiInputPort_Settings.xml";
 
 	//-
 
@@ -233,6 +242,8 @@ public:
 
 	//-
 
+	ofParameter<bool> SHOW_Extra;
+
 #pragma mark - SOUND
 
 	ofParameter<bool> ENABLE_sound;//enable sound ticks
@@ -252,7 +263,7 @@ public:
 	ofParameter<int> BPM_beat_current;
 	ofParameter<int> BPM_16th_current;
 
-//private:
+private:
 	// STRINGS FOR MONITOR DRAWING
 
 	string BPM_bar_str;
@@ -265,6 +276,7 @@ public:
 	//-
 
 #pragma mark - API
+
 public:
 	void draw_BigClockTime(int x, int y);
 
@@ -274,8 +286,18 @@ public:
 	void setPosition_Gui(int x, int y, int w);
 	ofPoint getPosition_Gui();
 	void set_Gui_visible(bool b);
+	bool get_Gui_visible()
+	{
+		return gui.getVisible();
+	}
+	void toggle_Gui_visible()
+	{
+		bool b = get_Gui_visible();
+		set_Gui_visible(!b);
+	}
 
-//private:
+
+private:
 	// gui screen settings
 	int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
 
@@ -288,7 +310,7 @@ public:
 	void Tap_Trig();
 	void Tap_update();
 
-//private:
+private:
 	int tapCount, lastTime, avgBarMillis;
 	float Tap_BPM;
 	vector<int> tapIntervals;
