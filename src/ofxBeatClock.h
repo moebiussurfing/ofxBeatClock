@@ -1,6 +1,8 @@
-
 #pragma once
 
+///TODO:
+///+ use one single play param toggle to both modes internal/external
+///+ use public bpm param too, to use with ofxSeq too
 
 #include "ofMain.h"
 
@@ -16,9 +18,7 @@
 #define PATTERN_STEP_BEAT_LIMIT 16
 
 #define BPM_MIDI_CLOCK_REFRESH_RATE 250
-//refresh received MTC by clock. disabled/commented to "realtime" by frame update
-
-
+//refresh received MTC by clock. disabled/commented to "realtime" by every-frame-update
 
 class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
 
@@ -47,7 +47,7 @@ public:
 
 	//-
 
-#pragma mark - MIDI IN CLOCK
+#pragma mark - MIDI_IN_CLOCK
 
 private:
 	ofxMidiIn midiIn_CLOCK;
@@ -60,12 +60,12 @@ private:
 	unsigned int MIDI_beats; //< song pos in beats
 	double MIDI_seconds; //< song pos in seconds, computed from beats
 	double MIDI_CLOCK_bpm; //< song tempo in bpm, computed from clock length
-	int MIDI_quarters; // convert total # beats to # quarters
-	int MIDI_bars; // compute # of bars
+	int MIDI_quarters; //convert total # beats to # quarters
+	int MIDI_bars; //compute # of bars
 
 	//-
 
-	ofParameter<int> MIDI_beatsInBar; // compute remainder as # TARGET_NOTES_params within the current bar
+	ofParameter<int> MIDI_beatsInBar; //compute remainder as # TARGET_NOTES_params within the current bar
 	void Changed_MIDI_beatsInBar(int & beatsInBar);
 	int beatsInBar_PRE;//not required
 
@@ -129,8 +129,8 @@ public:
 private:
 	//int gui_w;
 	//int gui_slider_h;
-	int gui_slider_big_h;
-	int gui_button_h;
+	//int gui_slider_big_h;
+	//int gui_button_h;
 
 	ofxGuiGroup2* group_BEAT_CLOCK;//nested folder
 	ofxGuiGroup2* group_Controls;
@@ -144,17 +144,17 @@ private:
 	ofJson confg_Button, confg_Sliders;
 	//ofJson conf_Cont;
 
-//    ofxGuiGroup2* container_h;//half double
+//   ofxGuiGroup2* container_h;//half double
 
 	//-
 
 #pragma mark - PARAMS
 private:
 	ofParameterGroup params_CONTROL;
-	ofParameter<bool> PLAYER_state;// player state
-	ofParameter<bool> ENABLE_CLOCKS;// enable clock
-	ofParameter<bool> ENABLE_INTERNAL_CLOCK;// enable internal clock
-	ofParameter<bool> ENABLE_EXTERNAL_CLOCK;// enable midi clock sync
+	ofParameter<bool> PLAYER_state;//player state
+	ofParameter<bool> ENABLE_CLOCKS;//enable clock
+	ofParameter<bool> ENABLE_INTERNAL_CLOCK;//enable internal clock
+	ofParameter<bool> ENABLE_EXTERNAL_CLOCK;//enable midi clock sync
 	ofParameter<int> MIDI_Port_SELECT;
 	int num_MIDI_Ports = 0;
 
@@ -173,9 +173,17 @@ private:
 
 	//-
 
-	// API
+	//API
 
 public:
+	bool getInternalClockMode()
+	{
+		return ENABLE_INTERNAL_CLOCK;
+	}
+	bool getExternalClockMode()
+	{
+		return ENABLE_EXTERNAL_CLOCK;
+	}
 	float get_BPM();
 	int get_TimeBar();
 
@@ -196,7 +204,7 @@ private:
 	void reSync();
 	ofParameter<bool> bSync_Trig;
 
-	// overide ofxDawMetro::MetroListener's method if necessary
+	//overide ofxDawMetro::MetroListener's method if necessary
 	void onBarEvent(int & bar) override;
 	void onBeatEvent(int & beat) override;
 	void onSixteenthEvent(int & sixteenth) override;
@@ -209,13 +217,13 @@ private:
 	void Changed_DAW_active(bool & value);
 
 	ofxGuiContainer* container_daw;
-
+public:
 	void set_DAW_bpm(float bpm);//to set bpm from outside
 
 	//-
 
 #pragma mark - XML SETTINGS
-
+private:
 	void saveSettings(string path);
 	void loadSettings(string path);
 	string pathSettings;
@@ -226,7 +234,7 @@ private:
 
 #pragma mark - DRAW STUFF:
 
-	// FONT
+	//FONT
 
 	string TTF_message;
 	ofTrueTypeFont TTF_small;
@@ -235,7 +243,7 @@ private:
 
 	//-
 
-	// BALL
+	//BALL
 
 	ofPoint metronome_ball_pos;
 	int metronome_ball_radius;
@@ -257,14 +265,14 @@ private:
 public:
 	void RESET_clockValues();
 
-	// TODO: could be nice to add listener system..
+	//TODO: could be nice to add listener system..
 
 	ofParameter<int> BPM_bar_current;
 	ofParameter<int> BPM_beat_current;
 	ofParameter<int> BPM_16th_current;
 
 private:
-	// STRINGS FOR MONITOR DRAWING
+	//STRINGS FOR MONITOR DRAWING
 
 	string BPM_bar_str;
 	string BPM_beat_str;
@@ -286,6 +294,8 @@ public:
 	void setPosition_Gui(int x, int y, int w);
 	ofPoint getPosition_Gui();
 	void set_Gui_visible(bool b);
+	void set_BeatBall_visible(bool b);
+
 	bool get_Gui_visible()
 	{
 		return gui.getVisible();
@@ -296,16 +306,21 @@ public:
 		set_Gui_visible(!b);
 	}
 
+	bool isPlaying()
+	{
+		return bIsPlaying;
+	}
 
 private:
-	// gui screen settings
+	//gui screen settings
 	int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
 
-	bool isPlaying;
+	bool bIsPlaying;
 
 	//-
 
-#pragma mark - TAP BPM
+#pragma mark - TAP_ENGINE
+
 public:
 	void Tap_Trig();
 	void Tap_update();
@@ -315,7 +330,7 @@ private:
 	float Tap_BPM;
 	vector<int> tapIntervals;
 	bool bTap_running;
-	bool SOUND_wasDisabled = false;// sound disbler to better flow
+	bool SOUND_wasDisabled = false;//sound disbler to better flow
 
 	//-
 
@@ -331,14 +346,14 @@ private:
 
 #pragma mark - STEP LIMITING
 
-	// we dont need to use long song patterns
+	//we dont need to use long song patterns
 	bool ENABLE_pattern_limits;
 	int pattern_BEAT_limit;
 	int pattern_BAR_limit;
 
 	//--
 
-	string myTTF;// gui font path
+	string myTTF;//gui font path
 	int sizeTTF;
 
 	//-
