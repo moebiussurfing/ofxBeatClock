@@ -84,15 +84,16 @@ An addon by MoebiusSurfing, 2020.
 Thanks to developers of the included add-ons!  
 @danomatika & @castovoid.
 
-<br/>
 
 
 ## TODO:
 
-- Add different and better timer approach using the audio-buffer to avoid out-of-sync problems of current normal and threaded timers. Any help is welcome!  
+- Add different and better timer approach using the audio-buffer to avoid out-of-sync problems of current normal and threaded timers. Problems happen when minimizing or moving the app window.. Any help is welcome!  
 - On-the-fly re-sync to bar beat start.
 - A better link between play button/params int both internal/external modes with one unique button.  
 - Add filter to smooth/stabilize BPM number when using external mode.
+
+<br/>
 
 
 **PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!**
