@@ -80,15 +80,19 @@ xml settings, gui font file, and json theme. (app may crash if not present)
 
 ## About
 
-An addon by MoebiusSurfing.  
-Thanks to developers of included add-ons!
+An addon by MoebiusSurfing, 2020.  
+Thanks to developers of the included add-ons!  
+@danomatika & @castovoid.
+
+<br/>
 
 
 ## TODO:
 
-- Add different and better timer approach using the audio-buffer to avoid out-of-sync problems of current normal and threaded timers.
+- Add different and better timer approach using the audio-buffer to avoid out-of-sync problems of current normal and threaded timers. Any help is welcome!  
 - On-the-fly re-sync to bar beat start.
-- A better link between play button/params int both internal/external modes with one unique button.
+- A better link between play button/params int both internal/external modes with one unique button.  
+- Add filter to smooth/stabilize BPM number when using external mode.
 
 
 **PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!**
