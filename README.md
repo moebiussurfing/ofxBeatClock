@@ -81,8 +81,7 @@ xml settings, gui font file, and json theme. (app may crash if not present)
 ## About
 
 An addon by MoebiusSurfing, 2020.  
-Thanks to developers of the included add-ons!  
-@danomatika & @castovoid.
+Thanks to developers of the included add-ons! @danomatika & @castovoid.
 
 
 
