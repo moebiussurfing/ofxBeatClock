@@ -74,6 +74,7 @@ https://github.com/castovoid/ofxDawMetro
 https://github.com/moebiussurfing/ofxGuiExtended2 (my fork)
 
 >/data/ofxBeatClock/  
+
 xml settings, gui font file, and json theme. (app may crash if not present)
 
 
