@@ -3,6 +3,10 @@
 openFrameworks addon to run a DAW styled BPM-Beat clock with tap tempo and external MIDI sync.
 
 
+## Screencast
+![Alt text](/ofxBeatClock.gif?raw=true "ofxBeatClock.gif")
+
+
 ## Screenshots
 
 Internal clock mode:
