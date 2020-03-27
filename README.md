@@ -21,7 +21,7 @@ External clock MIDI Sync mode:
 
 ## Usage
 
-Create your project with OF ProjectGenerator as usual.
+Create the example project or your own with OF ProjectGenerator as usual. Take care of included /data files.
 
 
 ```c++
@@ -48,46 +48,47 @@ beatClock.draw();
 
 ## Features
 
-- internal clock based in a threaded timer from ofxDawMetro from https://github.com/castovoid
-- external clock source as input MIDI clock using ofxMidi 
-- easy to sync to Ableton Live or any sequencer with midi clock 
-- cute tap tempo engine
-- save/load mode settings
-- cute customizable GUI by editing JSON file theme. ("theme_bleurgh.json". Based on @Transat theme)
-- customizable GUI positions by code
-- nice metronome sound ticks
+- Internal clock based in a threaded timer from ofxDawMetro from https://github.com/castovoid
+- External clock source as input MIDI clock using ofxMidi 
+- Easy to sync to Ableton Live or any sequencer with midi clock 
+- Cute tap tempo engine
+- Save/load mode settings
+- Cute customizable GUI by editing the JSON file theme. ("theme_bleurgh.json". Based on a @transat theme)
+- Customizable GUI positions by code
+- Nice metronome sound ticks
 
 
-## Tested system
+
+## Tested systems
 
 - OF 0.11
 - Visual Studio 2017
 - macOS / HighSierra
 
 
-## About
-
-An addon by MoebiusSurfing.
-
 
 ## Requeriments
 
-https://github.com/danomatika/ofxMidi
-
-
-https://github.com/castovoid/ofxDawMetro
-
+https://github.com/danomatika/ofxMidi  
+https://github.com/castovoid/ofxDawMetro  
 https://github.com/moebiussurfing/ofxGuiExtended2 (my fork)
 
-/data/ofxBeatClock/  
-xml settings, gui font file, and json theme. (crashes if not present)
+> /data/ofxBeatClock/  
+xml settings, gui font file, and json theme. (app may crash if not present)
+
+
+
+## About
+
+An addon by MoebiusSurfing.  
+Thanks to developers of included add-ons!
 
 
 ## TODO:
 
-- add different timer approach using the audio buffer to avoid out-of-sync problems of current normal and threaded timers.
-- on-the-fly re-sync to bar beat start.
+- Add different and better timer approach using the audio-buffer to avoid out-of-sync problems of current normal and threaded timers.
+- On-the-fly re-sync to bar beat start.
+- A better link between play button/params int both internal/external modes with one unique button.
 
 
-
-PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS
+**PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!**
