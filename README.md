@@ -47,13 +47,13 @@ beatClock.draw();
 
 ## Features
 
-- Internal clock based in a threaded timer from ofxDawMetro from https://github.com/castovoid
-- External clock source as input MIDI clock using ofxMidi 
+- Internal clock based in a threaded timer from ofxDawMetro from @castovoid
+- External clock source as input MIDI clock using ofxMidi from @danomatika
 - Easy to sync to Ableton Live or any sequencer with midi clock 
 - Cute tap tempo engine
 - Save/load mode settings
 - Cute customizable GUI by editing the JSON file theme. ("theme_bleurgh.json". Based on a @transat theme)
-- Customizable GUI positions by code
+- Customizable GUI positions by code. Check other methods too
 - Nice metronome sound ticks
 
 
@@ -87,10 +87,10 @@ Thanks to developers of the included add-ons! @danomatika & @castovoid.
 
 ## TODO:
 
-- Add different and better timer approach using the audio-buffer to avoid out-of-sync problems of current normal and threaded timers. Problems happen when minimizing or moving the app window.. Any help is welcome!  
+- Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current normal and threaded timers. Problems happen when minimizing or moving the app window.. Any help is welcome!  
 - On-the-fly re-sync to bar beat start.
-- A better link between play button/params int both internal/external modes with one unique button.  
-- Add filter to smooth/stabilize BPM number when using external mode.
+- A better link between play button/params in both internal/external modes with one unique play button.  
+- Add filter to smooth/stabilize BPM number when using external midi clock mode.
 
 <br/>
 
