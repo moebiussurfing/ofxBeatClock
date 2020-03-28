@@ -5,6 +5,8 @@
 #include "ofxBeatClock.h"
 
 //uncomment if you added this addon to handle window settings
+//this addon auto stores/recall window size, position, fps and vsync between app sessions
+//also it shows alert when fps drop the expected framerate.
 //#define USE_ofxWindowApp
 #ifdef USE_ofxWindowApp
 #include "ofxWindowApp.h"
@@ -30,7 +32,7 @@ class ofApp: public ofBaseApp{
 
     ofxBeatClock beatClock;
 
-	//callback
+	//callback to receive clock ticks
 	ofEventListener listener;
 	void callback_Tick();
 
