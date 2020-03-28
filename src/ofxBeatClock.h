@@ -1,8 +1,12 @@
 #pragma once
 
 ///TODO:
-///+ use one single play param toggle to both modes internal/external
-///+ use public bpm param too, to use with ofxSeq too
+///+ Add alternative and better timer approach using the audio - buffer to avoid out - of - sync problems of current timers
+///(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). Problems happen when minimizing or moving the app window.. Any help is welcome!
+///+ On - the - fly re - sync to bar beat start.
+///+ A better link between play button / params in both internal / external modes with one unique play button.
+///+ Add filter to smooth / stabilize BPM number when using external midi clock mode.
+///NOTE: Sorry, I am not sure why I am using more than one BPM vars... Maybe one of them is from midi clock, other from local daw timer, and other as the global and this is the finaly used, also the one to be smoothed..
 
 #include "ofMain.h"
 
@@ -13,12 +17,14 @@
 #include "ofxDawMetro.h"
 
 #define BPM_INIT 120
-#define ENABLE_PATTERN_LIMITING //comment to disable: to long song mode
+#define ENABLE_PATTERN_LIMITING//comment to disable: to long song mode
 #define PATTERN_STEP_BAR_LIMIT 4
 #define PATTERN_STEP_BEAT_LIMIT 16
 
-#define BPM_MIDI_CLOCK_REFRESH_RATE 250
-//refresh received MTC by clock. disabled/commented to "realtime" by every-frame-update
+//TODO:
+//smooth clock
+//#define BPM_MIDI_CLOCK_REFRESH_RATE 1000
+////refresh received MTC by clock. disabled/commented to "realtime" by every-frame-update
 
 class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
 
@@ -27,6 +33,7 @@ private:
 	//-
 
 //	//TODO:
+//	//audio - buffer alternative mode
 //	ofParameter<bool> MODE_BufferTimer;
 //	ofSoundStream soundStream;
 //public:
@@ -65,13 +72,13 @@ private:
 
 	//-
 
-	ofParameter<int> MIDI_beatsInBar; //compute remainder as # TARGET_NOTES_params within the current bar
+	ofParameter<int> MIDI_beatsInBar;//compute remainder as # TARGET_NOTES_params within the current bar
 	void Changed_MIDI_beatsInBar(int & beatsInBar);
 	int beatsInBar_PRE;//not required
 
 	//-
 
-#pragma mark - EXTERNAL CLOCK
+#pragma mark - EXTERNAL_CLOCK
 
 	void setup_MIDI_CLOCK();
 
@@ -80,58 +87,56 @@ private:
 #pragma mark - MONITOR
 
 private:
-	int pos_Squares_x, pos_Squares_y, pos_Squares_w;
-	int pos_Ball_x, pos_Ball_y, pos_Ball_w;
+	int pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_w;
+	int pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_w;
 
 public:
 	void setPosition_BeatBoxes(int x, int y, int w);
 	void setPosition_BeatBall(int x, int y, int w);
+	void setPosition_Gui_ALL(int _x, int _y, int _w);
 
-	//squares
+	//beat boxes
 	void drawBeatBoxes(int x, int y, int w);
 
-	//tick ball
+	//beat tick ball
 	void draw_BeatBall(int x, int y, int w);
 
 private:
-	//beat circle
+	//beat ball
 	ofPoint circlePos;
 	float animTime, animCounter;
 	bool animRunning;
 	float dt = 1.0f / 60.f;
 
+	//main receiver
 	void CLOCK_Tick_MONITOR(int beat);
 
 public:
 	ofParameter<bool> TRIG_TICK;
 
-	void setPosition_Gui_ALL(int _x, int _y, int _w);
-
 	//-
 
-private:
-#pragma mark - REFRESH FEQUENCY
-
-	unsigned long BPM_LAST_Tick_Time_LAST;//test
-	unsigned long BPM_LAST_Tick_Time_ELLAPSED;//test
-	unsigned long BPM_LAST_Tick_Time_ELLAPSED_PRE;//test
-	long ELLAPSED_diff;//test
-
-	unsigned long bpm_CheckUpdated_lastTime;
+//	//TODO:
+//private:
+//smooth clock
+//#pragma mark - REFRESH_FEQUENCY
+//	//used only when BPM_MIDI_CLOCK_REFRESH_RATE is defined
+//	unsigned long BPM_LAST_Tick_Time_LAST;//test
+//	unsigned long BPM_LAST_Tick_Time_ELLAPSED;//test
+//	unsigned long BPM_LAST_Tick_Time_ELLAPSED_PRE;//test
+//	long ELLAPSED_diff;//test
+//
+//	unsigned long bpm_CheckUpdated_lastTime;
 
 	//-
 
 #pragma mark - GUI
+
 public:
 	void setup_Gui();
 	ofxGui gui;
 
 private:
-	//int gui_w;
-	//int gui_slider_h;
-	//int gui_slider_big_h;
-	//int gui_button_h;
-
 	ofxGuiGroup2* group_BEAT_CLOCK;//nested folder
 	ofxGuiGroup2* group_Controls;
 	ofxGuiGroup2* group_BpmTarget;
@@ -139,12 +144,8 @@ private:
 	ofxGuiGroup2* group_EXTERNAL;
 	ofParameterGroup params_INTERNAL;
 	ofParameterGroup params_EXTERNAL;
-
 	//json theme
 	ofJson confg_Button, confg_Sliders;
-	//ofJson conf_Cont;
-
-//   ofxGuiGroup2* container_h;//half double
 
 	//-
 
@@ -176,22 +177,24 @@ private:
 	//API
 
 public:
-	bool getInternalClockMode()
+	bool getInternalClockModeState()
 	{
 		return ENABLE_INTERNAL_CLOCK;
 	}
-	bool getExternalClockMode()
+	bool getExternalClockModeState()
 	{
 		return ENABLE_EXTERNAL_CLOCK;
 	}
 	float get_BPM();
 	int get_TimeBar();
 
-	//bool bBallAutoPos = false;
-	//void setPosition_CLOCK_Ball_Auto(bool b)
-	//{
-	//	bBallAutoPos = b;
-	//}
+private:
+	bool bBallAutoPos = true;
+public:
+	void setPosition_BeatBall_Auto(bool b)
+	{
+		bBallAutoPos = b;
+	}
 
 	//-
 
@@ -200,6 +203,7 @@ private:
 
 	//-
 
+	//internal clock
 #pragma mark - DAW METRO
 	void reSync();
 	ofParameter<bool> bSync_Trig;
@@ -215,13 +219,14 @@ private:
 	ofParameter<bool> DAW_active;
 	void Changed_DAW_bpm(float & value);
 	void Changed_DAW_active(bool & value);
+	//ofxGuiContainer* container_daw;
 
-	ofxGuiContainer* container_daw;
 public:
 	void set_DAW_bpm(float bpm);//to set bpm from outside
 
 	//-
 
+	//settings
 #pragma mark - XML SETTINGS
 private:
 	void saveSettings(string path);
@@ -243,14 +248,16 @@ private:
 
 	//-
 
-	//BALL
+	//BEAT BALL
 
 	ofPoint metronome_ball_pos;
 	int metronome_ball_radius;
 
 	//-
 
-	ofParameter<bool> SHOW_Extra;
+	ofParameter<bool> SHOW_Extra;//beat boxes and beat ball
+
+	//-
 
 #pragma mark - SOUND
 
@@ -274,6 +281,7 @@ public:
 private:
 	//STRINGS FOR MONITOR DRAWING
 
+	//1:1:1
 	string BPM_bar_str;
 	string BPM_beat_str;
 	string BPM_16th_str;
@@ -291,6 +299,8 @@ public:
 	void PLAYER_START();
 	void PLAYER_STOP();
 	void PLAYER_TOGGLE();
+
+	//layout
 	void setPosition_Gui(int x, int y, int w);
 	ofPoint getPosition_Gui();
 	void set_Gui_visible(bool b);
@@ -312,7 +322,6 @@ public:
 	}
 
 private:
-	//gui screen settings
 	int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
 
 	bool bIsPlaying;
@@ -346,7 +355,7 @@ private:
 
 #pragma mark - STEP LIMITING
 
-	//we dont need to use long song patterns
+	//we don't need to use long song patterns
 	bool ENABLE_pattern_limits;
 	int pattern_BEAT_limit;
 	int pattern_BAR_limit;
