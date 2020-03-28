@@ -7,7 +7,7 @@ void ofApp::setup() {
 	//-
 
 #ifdef USE_ofxWindowApp
-	//windowApp.setSettingsFps(60);
+	//windowApp.setSettingsFps(60);//required when opening for first time, when no json settings created yet.
 #else
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
@@ -20,6 +20,7 @@ void ofApp::setup() {
 	////customize positions and sizes
 	//beatClock.setPosition_Gui(10, 10, 100);
 	//beatClock.setPosition_BeatBoxes(400, 100, 300);
+	//beatClock.setPosition_BeatBall_Auto(false);//must disable auto to customize pos/size
 	//beatClock.setPosition_BeatBall(400, 400, 50);
 
 	//-
@@ -41,7 +42,7 @@ void ofApp::callback_Tick()
 void ofApp::update() {
 	beatClock.update();
 
-	//add a log line every 10 frames to spread TICK callbacks
+	//add a log line every 10 frames to spread received and logged TICK callbacks
 	if (ofGetFrameNum() % 10 == 0)
 		ofLogWarning("ofApp") << "";
 }
