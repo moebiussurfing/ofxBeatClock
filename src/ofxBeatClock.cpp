@@ -140,20 +140,21 @@ void ofxBeatClock::setup()
 
 	//-
 
-	//MONITOR DEFAULT POS
+	//MONITOR DEFAULT POSITIONS
+	//will be used if they are not redefined
 
 	//beat boxes
-	pos_Squares_y = 600;
-	pos_Squares_x = 5;
-	pos_Squares_w = 200;
+	pos_BeatBoxes_y = 600;
+	pos_BeatBoxes_x = 5;
+	pos_BeatBoxes_w = 200;
 
 	//beat ball
-	pos_Ball_y = 810;
-	pos_Ball_x = 500;
-	pos_Ball_w = 30;
+	pos_BeatBall_y = 810;
+	pos_BeatBall_x = 500;
+	pos_BeatBall_w = 30;
 
-	setPosition_BeatBoxes(pos_Squares_x, pos_Squares_y, pos_Squares_w);
-	setPosition_BeatBall(pos_Ball_x, pos_Ball_y, pos_Ball_w);
+	setPosition_BeatBoxes(pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_w);
+	setPosition_BeatBall(pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_w);
 
 	//-
 
@@ -429,37 +430,35 @@ void ofxBeatClock::update()
 
 	//--
 
+	//TODO:
+	//smooth clock
 	//MIDI CLOCK
 
-	//read bpm with a clock refresh or every frame if not defined time-clock-refresh:
-
-#ifdef BPM_MIDI_CLOCK_REFRESH_RATE
-	if (ofGetElapsedTimeMillis() - bpm_CheckUpdated_lastTime >= BPM_MIDI_CLOCK_REFRESH_RATE)
-	{
-#endif
-		//ofLogNotice("ofxBeatClock") << "BPM UPDATED" << ofGetElapsedTimeMillis() - bpm_CheckUpdated_lastTime;
-
-		//-
-
-#ifdef BPM_MIDI_CLOCK_REFRESH_RATE
-		bpm_CheckUpdated_lastTime = ofGetElapsedTimeMillis();
-	}
-#endif
+//	//read bpm with a spaced clock refresh or in every frame if not defined time-clock-refresh:
+//
+//#ifdef BPM_MIDI_CLOCK_REFRESH_RATE
+//	if (ofGetElapsedTimeMillis() - bpm_CheckUpdated_lastTime >= (int)BPM_MIDI_CLOCK_REFRESH_RATE)
+//	{
+//#endif
+//		ofLogNotice("ofxBeatClock") << "BPM UPDATED" << ofGetElapsedTimeMillis() - bpm_CheckUpdated_lastTime;
+//
+//		//-
+//
+//#ifdef BPM_MIDI_CLOCK_REFRESH_RATE
+//		bpm_CheckUpdated_lastTime = ofGetElapsedTimeMillis();
+//	}
+//#endif
 
 	//--
 
 	//BPM ENGINE:
-
-	//#define BPM_MIDI_CLOCK_REFRESH_RATE 200
-	////refresh received MTC by clock. disabled/commented to "realtime" by frame update
-	////this smoothed (or maybe slower refreshed than fps) clock will be sended to target sequencer outside the class. see BPM_MIDI_CLOCK_REFRESH_RATE.
 
 	//BPM_LAST_Tick_Time_ELLAPSED_PRE = BPM_LAST_Tick_Time_ELLAPSED;
 	//BPM_LAST_Tick_Time_ELLAPSED = ofGetElapsedTimeMillis() - BPM_LAST_Tick_Time_LAST;//test
 	//BPM_LAST_Tick_Time_LAST = ofGetElapsedTimeMillis();//test
 	//ELLAPSED_diff = BPM_LAST_Tick_Time_ELLAPSED_PRE - BPM_LAST_Tick_Time_ELLAPSED;
 
-	//-
+	//--
 
 	ofSoundUpdate();
 
@@ -471,19 +470,28 @@ void ofxBeatClock::update()
 //--------------------------------------------------------------
 void ofxBeatClock::draw()
 {
-	//TODO: could improve performance with fbo drawings
+	//TODO: maybe could improve performance with fbo drawings for all BeatBoxes
 
 	if (SHOW_Extra)
 	{
-		//boxes
-		drawBeatBoxes(pos_Squares_x, pos_Squares_y, pos_Squares_w);
+		//beat boxes
+		drawBeatBoxes(pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_w);
 
 		//-
 
-		//ball
-		//draw_BeatBall(pos_Ball_x, pos_Ball_y, pos_Ball_w);//custom position
-		draw_BeatBall(pos_Squares_x + 0.5f*pos_Squares_w - pos_Ball_w,
-			pos_Ball_y, pos_Ball_w);//above squares
+		//beat ball
+
+		if (bBallAutoPos)
+		{
+			//above squares auto position
+			draw_BeatBall(pos_BeatBoxes_x + 0.5f*pos_BeatBoxes_w - pos_BeatBall_w,
+				pos_BeatBall_y, pos_BeatBall_w);
+		}
+		else
+		{
+			//custom position mode
+			draw_BeatBall(pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_w);
+		}
 	}
 }
 
@@ -814,17 +822,17 @@ ofPoint ofxBeatClock::getPosition_Gui()
 //--------------------------------------------------------------
 void ofxBeatClock::setPosition_BeatBoxes(int x, int y, int w)
 {
-	pos_Squares_x = x;
-	pos_Squares_y = y;
-	pos_Squares_w = w;
+	pos_BeatBoxes_x = x;
+	pos_BeatBoxes_y = y;
+	pos_BeatBoxes_w = w;
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::setPosition_BeatBall(int x, int y, int w)
 {
-	pos_Ball_x = x;
-	pos_Ball_y = y;
-	pos_Ball_w = w;
+	pos_BeatBall_x = x;
+	pos_BeatBall_y = y;
+	pos_BeatBall_w = w;
 }
 
 //--------------------------------------------------------------
@@ -1014,17 +1022,6 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		}
 	}
 
-	//TODO:
-	//else if (name == "SYNC")
-	//{
-	//	ofLogNotice("ofxBeatClock") << "bSync_Trig: " << bSync_Trig;
-	//	if (bSync_Trig)
-	//	{
-	//		bSync_Trig = false;
-	//		reSync();
-	//	}
-	//}
-
 	else if (name == "PLAY")
 	{
 		ofLogNotice("ofxBeatClock") << "PLAYER_state: " << (PLAYER_state ? "TRUE" : "FALSE");
@@ -1050,10 +1047,10 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		}
 	}
 
-	else if (name == "BPM")
-	{
-		//ofLogVerbose"ofxBeatClock") << "NEW BPM: " << BPM_Global;
-	}
+	//else if (name == "BPM")
+	//{
+	//	//ofLogVerbose"ofxBeatClock") << "NEW BPM: " << BPM_Global;
+	//}
 
 	else if (name == "RESET BPM")
 	{
@@ -1098,7 +1095,6 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	else if (name == "GLOBAL BPM")
 	{
 		ofLogVerbose("ofxBeatClock") << "GLOBAL BPM   : " << BPM_Global;
-		//ofLogNotice("ofxBeatClock") << "GLOBAL BPM: " << BPM_Global;
 
 		BPM_GLOBAL_TimeBar = 60000.0f / (float)BPM_Global;//60,000 / BPM = one beat in milliseconds
 
@@ -1111,7 +1107,6 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	else if (name == "BAR ms")
 	{
 		ofLogVerbose("ofxBeatClock") << "BAR ms: " << BPM_GLOBAL_TimeBar;
-		//ofLogNotice("ofxBeatClock") << "BAR ms: " << BPM_GLOBAL_TimeBar;
 
 		BPM_Global = 60000.0f / (float)BPM_GLOBAL_TimeBar;
 	}
@@ -1247,6 +1242,17 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			midiPortName = midiIn_CLOCK.getName();
 		}
 	}
+
+	//TODO:
+	//else if (name == "SYNC")
+	//{
+	//	ofLogNotice("ofxBeatClock") << "bSync_Trig: " << bSync_Trig;
+	//	if (bSync_Trig)
+	//	{
+	//		bSync_Trig = false;
+	//		reSync();
+	//	}
+	//}
 }
 
 //--------------------------------------------------------------
