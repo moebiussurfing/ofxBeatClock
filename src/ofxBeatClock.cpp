@@ -648,7 +648,7 @@ void ofxBeatClock::drawBeatBoxes(int px, int py, int w)///draws text info and bo
 			ofSetColor(colorBoxes, alpha - 64);
 		}
 
-		ofDrawRectRounded(px + i * squaresW, py, squaresW, squaresW, 2.0f); //border
+		ofDrawRectRounded(px + i * squaresW, py, squaresW, squaresW, 3.0f); //border
 		//ofDrawRectangle(px + i * squaresW, py, squaresW, squaresW); //border
 
 		//border
@@ -685,10 +685,10 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int w)
 	else
 		c = (ofColor::white);
 
-	//bg ball
+	//bg black ball
 	if (!bTap_running)
 	{
-		ofSetColor(16); //ball background when not tapping
+		ofSetColor(16, 200); //ball background when not tapping
 	}
 	else
 	{
@@ -974,6 +974,8 @@ void ofxBeatClock::CLOCK_Tick_MONITOR(int beat)
 		{
 			//play tic on the first beat of a bar
 			if (beat == 1)
+			//TODO: BUG: why tick at second beat?
+			//if (beat == 4)
 			{
 				tic.play();
 			}
