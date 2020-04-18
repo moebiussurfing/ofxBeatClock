@@ -387,7 +387,7 @@ void ofxBeatClock::setup_MIDI_CLOCK()
 	clockRunning = false; //< is the clock sync running?
 	MIDI_beats = 0; //< song pos in beats
 	MIDI_seconds = 0; //< song pos in seconds, computed from beats
-	MIDI_CLOCK_bpm = BPM_INIT; //< song tempo in bpm, computed from clock length
+	MIDI_CLOCK_bpm = (double)BPM_INIT; //< song tempo in bpm, computed from clock length
 	//bpm_CLOCK.addListener(this, &ofxBeatClock::bpm_CLOCK_Changed);
 
 	//-
