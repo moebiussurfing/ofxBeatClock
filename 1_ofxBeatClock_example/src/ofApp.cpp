@@ -43,7 +43,7 @@ void ofApp::update() {
 	beatClock.update();
 
 	//add a log line every 10 frames to spread received and logged TICK callbacks
-	if (ofGetFrameNum() % 10 == 0)
+	if (ofGetFrameNum() % 60 == 0 && true)
 		ofLogWarning("ofApp") << "";
 }
 
