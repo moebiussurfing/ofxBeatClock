@@ -550,3 +550,4 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 1_ofxBeatClock_example/bin/data/ofxBeatClock/settings/BeatClock_Settings.xml
+1_ofxBeatClock_example/bin/data/ofxBeatClock/settings/BeatClock_Settings.xml
