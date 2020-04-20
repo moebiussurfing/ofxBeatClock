@@ -28,21 +28,26 @@
 
 class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
 
-private:
-
 	//-
 
-//	//TODO:
-//	//audio - buffer alternative mode
-//	ofParameter<bool> MODE_BufferTimer;
-//	ofSoundStream soundStream;
-//public:
-//	void audioOut(ofSoundBuffer &buffer);
-//private:
-//	int samples = 0;
-//	int bpm = 120;
-//	int ticksPerBeat = 4;
-//	int samplesPerTick = (44100 * 60.0f) / bpm / ticksPerBeat;
+	//TODO:
+//#define USE_AUDIO_BUFFER_TIMER_MODE
+#ifdef USE_AUDIO_BUFFER_TIMER_MODE
+private:
+	void setupAudioBuffer();
+	void closeAudioBuffer();
+	//audio - buffer alternative mode
+	ofParameter<bool> MODE_AudioBufferTimer;
+	ofSoundStream soundStream;
+	int deviceOut;
+	int samples = 0;
+	int ticksPerBeat = 4;
+	int samplesPerTick;
+	int sampleRate;
+	int bufferSize;
+public:
+	void audioOut(ofSoundBuffer &buffer);
+#endif
 
 	//-
 
@@ -212,7 +217,7 @@ private:
 	void onBarEvent(int & bar) override;
 	void onBeatEvent(int & beat) override;
 	void onSixteenthEvent(int & sixteenth) override;
-	ofxDawMetro metro;
+	ofxDawMetro dawMetro;
 
 	ofParameterGroup params_daw;
 	ofParameter<float> DAW_bpm;
@@ -270,7 +275,7 @@ private:
 
 #pragma mark - CURRENT BPM CLOCK VALUES
 public:
-	void RESET_clockValues();
+	void Reset_clockValuesAndStop();
 
 	//TODO: could be nice to add listener system..
 
@@ -321,6 +326,14 @@ public:
 		return bIsPlaying;
 	}
 
+	void loadTheme(string s)
+	{
+		group_BEAT_CLOCK->loadTheme(s);
+		group_Controls->loadTheme(s);
+		group_BpmTarget->loadTheme(s);
+		group_INTERNAL->loadTheme(s);
+		group_EXTERNAL->loadTheme(s);
+	}
 private:
 	int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
 
