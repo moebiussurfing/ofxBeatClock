@@ -7,7 +7,8 @@ void ofApp::setup() {
 	//-
 
 #ifdef USE_ofxWindowApp
-	//windowApp.setSettingsFps(60);//required when opening for first time, when no json settings created yet.
+	//required when opening for first time, when no json settings created yet.
+	windowApp.setSettingsFps(60);
 #else
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
@@ -25,7 +26,7 @@ void ofApp::setup() {
 
 	//-
 
-	//callback
+	//callback beat tick
 	listener = beatClock.TRIG_TICK.newListener([&](bool&) {this->callback_Tick(); });
 }
 
@@ -35,16 +36,16 @@ void ofApp::callback_Tick()
 	//TODO:
 	//improve callback to get bool value too to avoid to check state like this..
 	if (beatClock.TRIG_TICK)
-		ofLogWarning("ofApp") << "TICK!";
+		ofLogWarning("ofApp") << "TICK! " << beatClock.BPM_beat_current;
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
 	beatClock.update();
 
-	//add a log line every 10 frames to spread received and logged TICK callbacks
-	if (ofGetFrameNum() % 60 == 0 && true)
-		ofLogWarning("ofApp") << "";
+	////add a log line every x frames to spread received and logged TICK callbacks
+	//if (ofGetFrameNum() % 15 == 0 && true)
+	//	ofLogWarning("ofApp") << "";
 }
 
 //--------------------------------------------------------------
