@@ -1835,6 +1835,8 @@ void ofxBeatClock::setupAudioBuffer(int _device)
 	//size of 512 samples per audioOut() call
 	sampleRate = 44100;
 	bufferSize = 512;
+	//sampleRate = 48000;
+	//bufferSize = 256;
 
 	ofLogNotice("ofxBeatClock") << "OUTPUT devices";
 	soundStream.printDeviceList();
