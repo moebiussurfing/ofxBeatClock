@@ -3,7 +3,7 @@
 ///TODO:
 ///+ Add alternative and better timer approach using the audio - buffer to avoid out - of - sync problems of current timers
 ///(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). Problems happen when minimizing or moving the app window.. Any help is welcome!
-///+ On - the - fly re - sync to bar beat start.
+///+ On-the-fly re-sync to bar beat start.
 ///+ A better link between play button / params in both internal / external modes with one unique play button.
 ///+ Add filter to smooth / stabilize BPM number when using external midi clock mode.
 ///NOTE: Sorry, I am not sure why I am using more than one BPM vars... Maybe one of them is from midi clock, other from local daw timer, and other as the global and this is the finaly used, also the one to be smoothed..
@@ -16,40 +16,26 @@
 #include "ofxMidiTimecode.h"
 #include "ofxDawMetro.h"
 
+//audioBuffer alternative timer mode
+//(code is at the bottom)
+//un-comment to enable this NOT WORKING yet alternative mode
+//#define USE_AUDIO_BUFFER_TIMER_MODE
+
 #define BPM_INIT 120
-#define ENABLE_PATTERN_LIMITING//comment to disable: to long song mode
+
+//only to long song mode on external midi sync
+#define ENABLE_PATTERN_LIMITING//comment to disable
 #define PATTERN_STEP_BAR_LIMIT 4
 #define PATTERN_STEP_BEAT_LIMIT 16
 
 //TODO:
-//smooth clock
+//smooth global bpm clock
 //#define BPM_MIDI_CLOCK_REFRESH_RATE 1000
 ////refresh received MTC by clock. disabled/commented to "realtime" by every-frame-update
 
+//-
+
 class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
-
-	//-
-
-	//TODO:
-//#define USE_AUDIO_BUFFER_TIMER_MODE
-#ifdef USE_AUDIO_BUFFER_TIMER_MODE
-private:
-	void setupAudioBuffer();
-	void closeAudioBuffer();
-	//audio - buffer alternative mode
-	ofParameter<bool> MODE_AudioBufferTimer;
-	ofSoundStream soundStream;
-	int deviceOut;
-	int samples = 0;
-	int ticksPerBeat = 4;
-	int samplesPerTick;
-	int sampleRate;
-	int bufferSize;
-public:
-	void audioOut(ofSoundBuffer &buffer);
-#endif
-
-	//-
 
 public:
 	void setup();
@@ -78,7 +64,7 @@ private:
 	//-
 
 	ofParameter<int> MIDI_beatsInBar;//compute remainder as # TARGET_NOTES_params within the current bar
-	void Changed_MIDI_beatsInBar(int & beatsInBar);
+	void Changed_MIDI_beatsInBar(int & beatsInBar);//only used in midiIn clock sync 
 	int beatsInBar_PRE;//not required
 
 	//-
@@ -94,11 +80,13 @@ private:
 private:
 	int pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_w;
 	int pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_w;
+	glm::vec2 pos_TextBpm;
 
 public:
 	void setPosition_BeatBoxes(int x, int y, int w);
 	void setPosition_BeatBall(int x, int y, int w);
 	void setPosition_Gui_ALL(int _x, int _y, int _w);
+	void setPosition_TextBpm(int _x, int _y);//TODO:
 
 	//beat boxes
 	void drawBeatBoxes(int x, int y, int w);
@@ -114,7 +102,7 @@ private:
 	float dt = 1.0f / 60.f;
 
 	//main receiver
-	void CLOCK_Tick_MONITOR(int beat);
+	void beatTick_MONITOR(int beat);///trigs sound and gui drawing ball visual feedback
 
 public:
 	ofParameter<bool> TRIG_TICK;
@@ -139,6 +127,7 @@ public:
 
 public:
 	void setup_Gui();
+	void refresh_Gui();
 	ofxGui gui;
 
 private:
@@ -213,11 +202,13 @@ private:
 	void reSync();
 	ofParameter<bool> bSync_Trig;
 
+	ofxDawMetro dawMetro;
+
+	//callbacks
 	//overide ofxDawMetro::MetroListener's method if necessary
 	void onBarEvent(int & bar) override;
 	void onBeatEvent(int & beat) override;
 	void onSixteenthEvent(int & sixteenth) override;
-	ofxDawMetro dawMetro;
 
 	ofParameterGroup params_daw;
 	ofParameter<float> DAW_bpm;
@@ -267,6 +258,7 @@ private:
 #pragma mark - SOUND
 
 	ofParameter<bool> ENABLE_sound;//enable sound ticks
+	ofParameter<float> volumeSound;//sound ticks volume
 	ofSoundPlayer tic;
 	ofSoundPlayer tac;
 	ofSoundPlayer tapBell;
@@ -377,6 +369,39 @@ private:
 
 	string myTTF;//gui font path
 	int sizeTTF;
+
+	//-
+
+	//TODO:
+	//audioBuffer alternative timer mode
+	//based on:
+	//https://forum.openframeworks.cc/t/audio-programming-basics/34392/10?u=moebiussurfing
+	//by davidspry
+	//"the way I’m generating the clock is naive and simple.I’m simply counting the number of samples written to the buffer and sending a notification each time the number of samples is equal to one subdivided “beat”, as in BPM.
+	//Presumably there’s some inconsistency because the rate of writing samples to the buffer is faster than the sample rate, but it seems fairly steady with a small buffer size."
+
+	//we can maybe use the same soundStream used for the sound tick also for the audiBuffer timer..
+	//maybe will be a better solution to put this timer into ofxDawMetro class!!
+
+#ifdef USE_AUDIO_BUFFER_TIMER_MODE
+private:
+	void setupAudioBuffer(int _device);
+	void closeAudioBuffer();
+	ofParameter<bool> MODE_AudioBufferTimer;
+	ofSoundStream soundStream;
+	int deviceOut;
+	int samples = 0;
+	int ticksPerBeat = 4;
+	//default is 4. 
+	//is this a kind of resolution if we set bigger like 16?
+	int samplesPerTick;
+	int sampleRate;
+	int bufferSize;
+	int DEBUG_ticks = 0;
+	bool DEBUG_bufferAudio = false;
+public:
+	void audioOut(ofSoundBuffer &buffer);
+#endif
 
 	//-
 };
