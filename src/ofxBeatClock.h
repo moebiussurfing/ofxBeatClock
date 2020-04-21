@@ -1,12 +1,11 @@
 #pragma once
 
 ///TODO:
-///+ Add alternative and better timer approach using the audio - buffer to avoid out - of - sync problems of current timers
-///(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). Problems happen when minimizing or moving the app window.. Any help is welcome!
 ///+ On-the-fly re-sync to bar beat start.
 ///+ A better link between play button / params in both internal / external modes with one unique play button.
 ///+ Add filter to smooth / stabilize BPM number when using external midi clock mode.
-///NOTE: Sorry, I am not sure why I am using more than one BPM vars... Maybe one of them is from midi clock, other from local daw timer, and other as the global and this is the finaly used, also the one to be smoothed..
+///NOTE: Sorry, I am not sure why I am using more than one BPM vars...
+///Maybe one of them is from midi clock, other from local daw timer, and other as the global and this is the finaly used, also the one to be smoothed..
 
 #include "ofMain.h"
 
@@ -16,10 +15,14 @@
 #include "ofxMidiTimecode.h"
 #include "ofxDawMetro.h"
 
-//audioBuffer alternative timer mode
-//(code is at the bottom)
-//un-comment to enable this NOT WORKING yet alternative mode
-//#define USE_AUDIO_BUFFER_TIMER_MODE
+///+ Add alternative and better timer approach using the audio - buffer to avoid out - of - sync problems of current timers
+///(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). Problems happen when minimizing or moving the app window.. Any help is welcome!
+///audioBuffer alternative timer mode
+///(code is at the bottom)
+///un-comment to enable this NOT WORKING yet alternative mode
+///THE PROBLEM: clock drift very often..
+///help on improve this is welcome!
+///#define USE_AUDIO_BUFFER_TIMER_MODE
 
 #define BPM_INIT 120
 
