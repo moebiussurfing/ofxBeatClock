@@ -20,9 +20,9 @@
 ///audioBuffer alternative timer mode
 ///(code is at the bottom)
 ///un-comment to enable this NOT WORKING yet alternative mode
-///THE PROBLEM: clock drift very often..
+///THE PROBLEM: clock drift very often.. maybe in wasapi sound api?
 ///help on improve this is welcome!
-///#define USE_AUDIO_BUFFER_TIMER_MODE
+//#define USE_AUDIO_BUFFER_TIMER_MODE
 
 #define BPM_INIT 120
 

@@ -213,7 +213,7 @@ void ofxBeatClock::setup()
 	refresh_Gui();
 
 #ifdef USE_AUDIO_BUFFER_TIMER_MODE
-	setupAudioBuffer(3);
+	setupAudioBuffer(0);
 #endif
 
 	//-----
@@ -1322,7 +1322,9 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		//workflow: stop to avoid freeze bug
 		PLAYER_state = false;
 
-		//this is required only if we want to use both internal modes together
+		//NOTE: both modes are ready to work and setted up.
+		//this is required only if we want to use only one internal mode at the same time.
+		//but we need to enable/disable listeners
 		//(dawMetro and audioBuffer) 
 		//but it seems that causes problems when connecting/disconnectings ports..
 		//if (MODE_AudioBufferTimer)
@@ -1850,17 +1852,17 @@ void ofxBeatClock::setupAudioBuffer(int _device)
 
 	deviceOut = _device;
 
-	//deviceOut = 3;//wasapi (line-1 out)
-	devicesOut = soundStream.getDeviceList(ofSoundDevice::Api::MS_WASAPI);
-	settings.setApi(ofSoundDevice::Api::MS_WASAPI);
+	//deviceOut = 3;//wasapi (line-1 out)//it seems that clock drift bad...
+	//devicesOut = soundStream.getDeviceList(ofSoundDevice::Api::MS_WASAPI);
+	//settings.setApi(ofSoundDevice::Api::MS_WASAPI);
 
 	//deviceOut = 0;//ds
 	//devicesOut = soundStream.getDeviceList(ofSoundDevice::Api::MS_DS);
 	//settings.setApi(ofSoundDevice::Api::MS_DS);
 
-	//deviceOut = 0;//asio
-	//devicesOut = soundStream.getDeviceList(ofSoundDevice::Api::MS_ASIO);
-	//settings.setApi(ofSoundDevice::Api::MS_ASIO);
+	//deviceOut = 0;//asio//it seems that clock works more accurate!!
+	devicesOut = soundStream.getDeviceList(ofSoundDevice::Api::MS_ASIO);
+	settings.setApi(ofSoundDevice::Api::MS_ASIO);
 
 	//-
 
