@@ -34,9 +34,27 @@ class ofApp: public ofBaseApp{
 
 	//callback to receive clock ticks
 	ofEventListener listener;
-	void callback_Tick();
+	void callback_BeatTick();
 
 #ifdef USE_ofxWindowApp
 	ofxWindowApp windowApp;
 #endif
+
+	//anchor debug mark
+	bool DEBUG_Layout = false;
+	void draw_Anchor(int x, int y)//show mouse position and coordinates to debug layout
+	{
+		if (DEBUG_Layout)
+		{
+			ofPushStyle();
+			ofFill();
+			ofSetColor(ofColor::red);
+			ofDrawCircle(x, y, 3);
+			int pad;
+			if (y < 15) pad = 20;
+			else pad = -20;
+			ofDrawBitmapStringHighlight(ofToString(x) + "," + ofToString(y), x, y + pad);
+			ofPopStyle();
+		}
+	}
 };
