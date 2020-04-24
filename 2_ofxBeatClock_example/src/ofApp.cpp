@@ -3,7 +3,8 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-	ofBackground(32);
+	//ofBackground(64);
+	ofBackground(ofColor::orangeRed);
 
 	//-
 
@@ -14,14 +15,15 @@ void ofApp::setup()
 	ofSetVerticalSync(true);
 #endif
 
-
 	//----
+
 
 	beatClock.setup();
 
 	//--
 
-	//optional (you can uncomment one of the 3 blocks)
+	//optional 
+	//(you can uncomment one of the 3 blocks)
 
 	////customize all layout elements "grouped" with default positions/distances/sizes
 	//beatClock.setPosition_GuiGlobal(200, 50);
@@ -30,12 +32,12 @@ void ofApp::setup()
 	//beatClock.setPosition_GuiExtra(500, 10);
 	//beatClock.setPosition_GuiPanel(100, 100, 300);
 
-	//or heavier customize positions and sizes element by element
-	beatClock.setPosition_GuiPanel(30, 400, 300);
-	beatClock.setPosition_BpmInfo(ofGetWidth()*0.5 - 100, ofGetHeight() - 50);
-	beatClock.setPosition_BeatBoxes(10, 10, ofGetWidth() - 20);
-	beatClock.setPosition_BeatBall(ofGetWidth()*0.5 - 100, ofGetHeight()*0.5 - 100, 200);
-	beatClock.setPosition_ClockInfo(ofGetWidth() - 200, ofGetHeight()*0.5 - 100);
+	////or heavier customize positions and sizes element by element
+	//beatClock.setPosition_GuiPanel(30, 400, 300);
+	//beatClock.setPosition_BpmInfo(ofGetWidth()*0.5 - 100, ofGetHeight() - 50);
+	//beatClock.setPosition_BeatBoxes(10, 10, ofGetWidth() - 20);
+	//beatClock.setPosition_BeatBall(ofGetWidth()*0.5 - 100, ofGetHeight()*0.5 - 100, 200);
+	//beatClock.setPosition_ClockInfo(ofGetWidth() - 200, ofGetHeight()*0.5 - 100);
 
 	//-
 
@@ -81,11 +83,6 @@ void ofApp::exit()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-	//TODO:
-	beatClock.LINK_keyPressed(key);
-
-	//-
-
 	switch (key)
 	{
 
