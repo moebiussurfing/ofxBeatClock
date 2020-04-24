@@ -75,7 +75,7 @@ void ofxBeatClock::setup()
 	params_INTERNAL.setName("INTERNAL CLOCK");
 	params_INTERNAL.add(PLAYING_State.set("PLAY", false));
 	params_INTERNAL.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
-	
+
 	//TODO:
 	//params_INTERNAL.add(bSync_Trig.set("SYNC", false));///trig resync
 
@@ -108,7 +108,6 @@ void ofxBeatClock::setup()
 	LINK_ResetBeats.setSerializable(false);
 	LINK_Peers_string.setSerializable(false);
 	LINK_Beat_Selector.setSerializable(false);
-
 #endif
 
 	//--
@@ -145,10 +144,9 @@ void ofxBeatClock::setup()
 
 	//default config. to be setted after with .setPosition_GuiPanel
 
-	gui_Panel_W = 200;
+	gui_Panel_Width = 200;
 	gui_Panel_posX = 5;
 	gui_Panel_posY = 5;
-	gui_Panel_padW = 5;
 
 	//-
 
@@ -181,7 +179,7 @@ void ofxBeatClock::setup()
 #pragma mark - LAYOUT_GUI_ELEMENTS
 
 	//default gui panel position
-	setPosition_GuiPanel(gui_Panel_posX, gui_Panel_posY, gui_Panel_W);
+	setPosition_GuiPanel(gui_Panel_posX, gui_Panel_posY, gui_Panel_Width);
 
 	//--
 
@@ -310,7 +308,7 @@ void ofxBeatClock::setup_GuiPanel()
 #ifdef USE_ofxAbletonLink
 
 #endif
-	
+
 	//--
 
 	//custom settings
@@ -342,6 +340,12 @@ void ofxBeatClock::setup_GuiPanel()
 	ofLogNotice("ofxBeatClock") << "Trying to load JSON ofxGuiExtended2 Theme...";
 	ofLogNotice("ofxBeatClock") << "'theme/theme_bleurgh.json'";
 	loadTheme("theme/theme_bleurgh.json");
+
+	////customize panel width over the loaded json theme
+	//group_BEAT_CLOCK->setWidth(gui_Panel_Width);
+	//group_INTERNAL->setWidth(gui_Panel_Width);
+	//group_Controls->setWidth(gui_Panel_Width);
+	//group_BpmTarget->setWidth(gui_Panel_Width);
 
 	//--
 
@@ -445,16 +449,16 @@ void ofxBeatClock::refresh_Gui()
 	{
 		group_EXTERNAL_MIDI->minimize();
 	}
-//#ifdef USE_ofxAbletonLink
-//	if (ENABLE_EXTERNAL_MIDI_CLOCK)
-//	{
-//		group_LINK->maximize();
-//	}
-//	else
-//	{
-//		group_LINK->minimize();
-//	}
-//#endif
+	//#ifdef USE_ofxAbletonLink
+	//	if (ENABLE_EXTERNAL_MIDI_CLOCK)
+	//	{
+	//		group_LINK->maximize();
+	//	}
+	//	else
+	//	{
+	//		group_LINK->minimize();
+	//	}
+	//#endif
 }
 
 //--------------------------------------------------------------
@@ -481,7 +485,7 @@ void ofxBeatClock::setup_MidiIn_Clock()
 		true); //sensing
 
 	////TEST:
-	////this can be used to sync timecode too
+	////this can be used to add support to timecode sync too is desired!
 	//midiIn.ignoreTypes(
 	//	false, // sysex  <-- don't ignore timecode messages!
 	//	false, // timing <-- don't ignore clock messages!
@@ -954,12 +958,16 @@ void ofxBeatClock::setPosition_GuiGlobal(int x, int y)
 //--------------------------------------------------------------
 void ofxBeatClock::setPosition_GuiPanel(int _x, int _y, int _w)
 {
-	gui_Panel_W = _w;
 	gui_Panel_posX = _x;
 	gui_Panel_posY = _y;
-	gui_Panel_padW = 5;
+	gui_Panel_Width = _w;
 
 	group_BEAT_CLOCK->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
+
+	group_BEAT_CLOCK->setWidth(gui_Panel_Width);
+	group_INTERNAL->setWidth(gui_Panel_Width);
+	group_Controls->setWidth(gui_Panel_Width);
+	group_BpmTarget->setWidth(gui_Panel_Width);
 }
 
 //--------------------------------------------------------------
@@ -1565,7 +1573,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		//	clockInternal.addBarListener(this);
 		//	clockInternal.addSixteenthListener(this);
 		//}
-}
+		}
 #endif
 
 	//metronome ticks volume
@@ -1587,7 +1595,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//		reSync();
 	//	}
 	//}
-}
+	}
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_midiIn_BeatsInBar(int &beatsInBar)
