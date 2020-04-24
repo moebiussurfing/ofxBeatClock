@@ -53,7 +53,7 @@ public:
 	ofParameter<bool> ENABLE_LINK_SYNC;
 
 	//TODO:
-	//beat callback to LINK?
+	//beat callback to LINK?...beat in LINK is a float so it's changing on every frame...
 	//link.beat
 	//use Changed_MIDI_beatsInBar(int &beatsInBar)
 
@@ -62,7 +62,7 @@ public:
 
 		BPM_Global = (float)bpm;
 		DAW_bpm = (float)bpm;
-		
+
 	}
 
 	void LINK_numPeersChanged(std::size_t &peers) {
@@ -71,6 +71,8 @@ public:
 
 	void LINK_playStateChanged(bool &state) {
 		ofLogNotice("ofxBeatClock") << "LINK_playStateChanged" << (state ? "play" : "stop");
+
+		PLAYER_state = state;
 	}
 
 	void LINK_setup() {
@@ -87,6 +89,9 @@ public:
 		ofPushStyle();
 
 		float x = ofGetWidth() * link.getPhase() / link.getQuantum();
+		x += 300;//move to right
+
+		//red vertical line
 		ofSetColor(255, 0, 0);
 		ofDrawLine(x, 0, x, ofGetHeight());
 
@@ -173,21 +178,64 @@ private:
 #pragma mark - MONITOR
 
 private:
+	bool SHOW_moreInfo = false;//more debug
+
+	//TODO:
+	////layout
+	//ofParameter<glm::vec2> position_BeatBoxes;
+	//ofParameter<glm::vec2> position_BeatBall;
+	//ofParameter<glm::vec2> position_ClockInfo;
+	//ofParameter<glm::vec2> position_BpmInfo;
+
 	int pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_w;
 	int pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_w;
-	glm::vec2 pos_TextBpm;
+	glm::vec2 pos_ClockInfo;
+	glm::vec2 pos_BpmInfo;
 
 public:
-	void setPosition_BeatBoxes(int x, int y, int w);
-	void setPosition_BeatBall(int x, int y, int w);
-	void setPosition_Gui_ALL(int _x, int _y, int _w);
-	void setPosition_TextBpm(int _x, int _y);//TODO:
+	void setPosition_Gui_ALL(int _x, int _y, int _w);//TODO:
+	void setPosition_BeatBoxes(int x, int y, int w);//position x, y and w = width of all 4 squares
+	void setPosition_BeatBall(int x, int y, int w);//position x, y and w = width of ball
+	void setPosition_ClockInfo(int _x, int _y);//TODO:
+	void setPosition_BpmInfo(int _x, int _y);//TODO:
 
 	//beat boxes
-	void drawBeatBoxes(int x, int y, int w);
+	void draw_BeatBoxes(int x, int y, int w);
 
 	//beat tick ball
-	void draw_BeatBall(int x, int y, int w);
+	void draw_BeatBall(int x, int y, int radius);
+
+	//beat tick ball
+	void draw_ClockInfo(int x, int y);
+
+	//beat tick ball
+	void draw_BpmInfo(int x, int y);
+
+	//big clock
+	void draw_BigClockTime(int x, int y);
+
+	//main text color
+	ofColor colorText;
+
+	//anchar debug mark
+	bool DEBUG_Layout = true;
+	void draw_Anchor(int x, int y)
+	{
+		if (DEBUG_Layout)
+		{
+			ofPushStyle();
+			ofFill();
+			ofSetColor(ofColor::red);
+			ofDrawCircle(x, y, 3);
+			int pad;
+			if (y < 15) pad = 20;
+			else pad = -20;
+			ofDrawBitmapStringHighlight(ofToString(x) + "," + ofToString(y), x, y + pad);
+			ofPopStyle();
+		}
+	}
+
+	//-
 
 private:
 	//beat ball
@@ -397,14 +445,13 @@ private:
 #pragma mark - API
 
 public:
-	void draw_BigClockTime(int x, int y);
 
 	void PLAYER_START();
 	void PLAYER_STOP();
 	void PLAYER_TOGGLE();
 
 	//layout
-	void setPosition_Gui(int x, int y, int w);
+	void setPosition_Gui(int x, int y, int w);//gui panel
 	ofPoint getPosition_Gui();
 	void set_Gui_visible(bool b);
 	void set_BeatBall_visible(bool b);
