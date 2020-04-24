@@ -451,7 +451,7 @@ public:
 	}
 
 private:
-	int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
+	int gui_Panel_Width, gui_Panel_posX, gui_Panel_posY;
 
 	bool bIsPlaying;
 
