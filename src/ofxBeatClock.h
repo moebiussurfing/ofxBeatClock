@@ -1,23 +1,33 @@
 #pragma once
 
 ///TODO:
-///+ On-the-fly re-sync to bar beat start.
-///+ A better link between play button / params in both internal / external modes with one unique play button.
+///+ On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
 ///+ Add filter to smooth / stabilize BPM number when using external midi clock mode.
+///+ A better link between play button / params in both internal / external modes with one unique play button.
 
 #include "ofMain.h"
 
-#include "ofxGuiExtended2.h"
+#include "ofxMidiClock.h"//used for external midi clock sync (1)
 #include "ofxMidi.h"
-#include "ofxMidiClock.h"//used for external midi clock sync
 #include "ofxMidiTimecode.h"
-#include "ofxDawMetro.h"//used for internal clock
+#include "ofxDawMetro.h"//used for internal clock (2)
+#include "ofxGuiExtended2.h"
 
 #define USE_ofxAbletonLink
 #ifdef USE_ofxAbletonLink
-#include "ofxAbletonLink.h"//used for external Ableton Live LINK engine compati
+#include "ofxAbletonLink.h"//used for external Ableton Live LINK engine (3)
 #endif
+///What is Ableton Link?
+///"This is the codebase for Ableton Link, a technology that synchronizes musical beat,
+///tempo, and phase across multiple applications running on one or more devices.
+///Applications on devices connected to a local network discover each other automatically
+///and form a musical session in which each participant can perform independently: 
+///anyone can start or stop while still staying in time.Anyone can change the tempo, 
+///the others will follow.Anyone can join or leave without disrupting the session."
+///https://github.com/Ableton/link
+///https://www.ableton.com/en/link/
 
+///TODO:
 ///WIP: alternative and better timer approach using the audio - buffer to avoid out - of - sync problems of current timers
 ///(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). Problems happen when minimizing or moving the app window.. Any help is welcome!
 ///audioBuffer alternative timer mode
@@ -27,70 +37,121 @@
 ///help on improve this is welcome!
 //#define USE_AUDIO_BUFFER_TIMER_MODE
 
-#define BPM_INIT 120
+///TODO:
+///smooth global bpm clock
+///could be only visual refreshing the midi clock slower or using a real filter.
+///#define BPM_MIDI_CLOCK_REFRESH_RATE 1000
+/////refresh received MTC by clock. disabled/commented to "realtime" by every-frame-update
+
 
 //only to long song mode on external midi sync vs simpler 4 bars / 16 beats
 #define ENABLE_PATTERN_LIMITING//comment to disable
 #define PATTERN_STEP_BAR_LIMIT 4
 #define PATTERN_STEP_BEAT_LIMIT 16
 
-//TODO:
-//smooth global bpm clock
-//could be only visual refreshing the midi clock slower or using a real filter.
-//#define BPM_MIDI_CLOCK_REFRESH_RATE 1000
-////refresh received MTC by clock. disabled/commented to "realtime" by every-frame-update
+#define BPM_INIT 120
 
 //-
 
 class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
 
+	//--
+
 #ifdef USE_ofxAbletonLink
 private:
+
 	ofxAbletonLink link;
 
 	ofParameter<bool> ENABLE_LINK_SYNC;
 
-	//TODO:
-	//beat callback to LINK?...beat in LINK is a float so it's changing on every frame...
-	//link.beat
-	//use Changed_MIDI_beatsInBar(int &beatsInBar)
-
-	void LINK_bpmChanged(double &bpm) {
+	void LINK_bpmChanged(double &bpm)
+	{
 		ofLogNotice("ofxBeatClock") << "LINK_bpmChanged" << bpm;
 
 		BPM_Global = (float)bpm;
-		bpm_ClockInternal = (float)bpm;
-
+		clockInternal_Bpm = (float)bpm;
 	}
 
-	void LINK_numPeersChanged(std::size_t &peers) {
+	void LINK_numPeersChanged(std::size_t &peers)
+	{
 		ofLogNotice("ofxBeatClock") << "LINK_numPeersChanged" << peers;
 	}
 
-	void LINK_playStateChanged(bool &state) {
+	void LINK_playStateChanged(bool &state)
+	{
 		ofLogNotice("ofxBeatClock") << "LINK_playStateChanged" << (state ? "play" : "stop");
 
 		PLAYING_State = state;
 	}
 
-	void LINK_setup() {
+	void LINK_setup()
+	{
 		link.setup();
-
 		//ofAddListener(link.bpmChanged, this, &ofxBeatClock::LINK_bpmChanged);
 		//ofAddListener(link.numPeersChanged, this, &ofxBeatClock::LINK_numPeersChanged);
 		//ofAddListener(link.playStateChanged, this, &ofxBeatClock::LINK_playStateChanged);
 	}
 
-	void LINK_update();
+	void LINK_update()
+	{
+		if (ENABLE_LINK_SYNC)//not required but prophylactic
+		{
+			//TEXT DISPLAY
+			clockActive_Type = "ABLETON LINK";
 
-	void LINK_draw() {
+			//clockActive_Info + = ""
+			clockActive_Info = "BEAT: " + ofToString(link.getBeat(), 2);
+			clockActive_Info += "\n";
+			clockActive_Info += "PHASE:  " + ofToString(link.getPhase(), 2);
+			clockActive_Info += "\n";
+			clockActive_Info += "PEERS:  " + ofToString(link.getNumPeers());
+
+			//	<< "bpm:   " << link.getBPM() << std::endl
+			//	<< "beat:  " << link.getBeat() << std::endl
+			//	<< "phase: " << link.getPhase() << std::endl
+			//	<< "peers: " << link.getNumPeers() << std::endl
+			//	<< "play?: " << (link.isPlaying() ? "play" : "stop");
+
+			//BPM_Global = (float)link.getBPM();
+			//clockInternal_Bpm = BPM_Global;
+
+			Beat_float_current = (float)link.getBeat() + 1.0f;
+			Beat_float_string = ofToString(Beat_float_current, 2);
+
+			if (ENABLE_pattern_limits)
+			{
+				Beat_current = 1 + ((int)Beat_float_current) % pattern_BEAT_limit;//limited to 16 beats
+			}
+			else
+			{
+				Beat_current = 1 + ((int)Beat_float_current);
+			}
+			Beat_string = ofToString(Beat_current);
+
+			if (Beat_current != Beat_current_PRE)
+			{
+				cout << "LINK beat changed:" << Beat_current << endl;
+				Beat_current_PRE = Beat_current;
+
+				//-
+
+				beatTick_MONITOR(Beat_current);
+
+				//-
+			}
+		}
+	}
+
+	void LINK_draw()
+	{
 		ofPushStyle();
 
-		int xpos = 250;
-		int ypos = 500;
+		//text
+		int xpos = 400;
+		int ypos = 750;
 
+		//line
 		float x = ofGetWidth() * link.getPhase() / link.getQuantum();
-		x += 300;//move to right
 
 		//red vertical line
 		ofSetColor(255, 0, 0);
@@ -98,20 +159,20 @@ private:
 
 		std::stringstream ss("");
 		ss
-			<< "bpm:   " << link.getBPM() << std::endl
-			<< "beat:  " << link.getBeat() << std::endl
-			<< "phase: " << link.getPhase() << std::endl
+			<< "bpm:   " << ofToString(link.getBPM(), 2) << std::endl
+			<< "beat:  " << ofToString(link.getBeat(), 2) << std::endl
+			<< "phase: " << ofToString(link.getPhase(), 2) << std::endl
 			<< "peers: " << link.getNumPeers() << std::endl
 			<< "play?: " << (link.isPlaying() ? "play" : "stop");
 
 		ofSetColor(255);
 		if (fontMedium.isLoaded())
 		{
-			fontMedium.drawString(ss.str(), 20, 20);
+			fontMedium.drawString(ss.str(), xpos, ypos);
 		}
 		else
 		{
-			ofDrawBitmapString(ss.str(), 20, 20);
+			ofDrawBitmapString(ss.str(), xpos, ypos);
 		}
 
 		ofPopStyle();
@@ -122,20 +183,26 @@ private:
 	//maybe creating a LINK dedicated transport bar
 	//control
 public:
-	void LINK_keyPressed(int key) {
-		if (key == OF_KEY_LEFT) {
+	void LINK_keyPressed(int key)
+	{
+		if (key == OF_KEY_LEFT)
+		{
 			if (20 < link.getBPM()) link.setBPM(link.getBPM() - 1.0);
 		}
-		else if (key == OF_KEY_RIGHT) {
+		else if (key == OF_KEY_RIGHT)
+		{
 			link.setBPM(link.getBPM() + 1.0);
 		}
-		else if (key == 'b') {
+		else if (key == 'b')
+		{
 			link.setBeat(0.0);
 		}
-		else if (key == 'B') {
+		else if (key == 'B')
+		{
 			link.setBeatForce(0.0);
 		}
-		else if (key == ' ') {
+		else if (key == OF_KEY_RETURN)
+		{
 			link.setIsPlaying(!link.isPlaying());
 		}
 	}
@@ -156,19 +223,22 @@ public:
 #pragma mark - MIDI_IN_CLOCK
 
 private:
-	ofxMidiIn midiIn_CLOCK;
-	ofxMidiMessage midiCLOCK_Message;
-	ofxMidiClock MIDI_clock; //< clock message parser
+	ofxMidiIn midiIn;
+	ofxMidiMessage midiIn_Clock_Message;
+	ofxMidiClock midiIn_Clock; //< clock message parser
 
 	void newMidiMessage(ofxMidiMessage& eventArgs);
 
-	bool bMidiClockRunning; //< is the clock sync running?
+	bool bMidiInClockRunning; //< is the clock sync running?
 	unsigned int MIDI_beats; //< song pos in beats
 	double MIDI_seconds; //< song pos in seconds, computed from beats
-	double MIDI_CLOCK_bpm; //< song tempo in bpm, computed from clock length
+	double midiIn_Clock_Bpm; //< song tempo in bpm, computed from clock length
 	int MIDI_quarters; //convert total # beats to # quarters
 	int MIDI_bars; //compute # of bars
-
+	
+	//TEST
+	//int MIDI_ticks;//16th ticks are not implemented on the used ofxMidi example
+	
 	//-
 
 	ofParameter<int> MIDI_beatsInBar;//compute remainder as # TARGET_NOTES_params within the current bar
@@ -179,7 +249,7 @@ private:
 
 #pragma mark - EXTERNAL_CLOCK
 
-	void setup_MIDI_IN_Clock();
+	void setup_MidiIn_Clock();
 
 	//-
 
@@ -240,21 +310,27 @@ public:
 			ofSetColor(ofColor::red);
 			ofDrawCircle(x, y, 3);
 			int pad;
-			if (y < 15) pad = 20;
-			else pad = -20;
+			if (y < 15) pad = 10;
+			else pad = -10;
 			ofDrawBitmapStringHighlight(ofToString(x) + "," + ofToString(y), x, y + pad);
 			ofPopStyle();
 		}
 	}
-	void setDebug(bool b)
+	void setDebug_Clock(bool b)
+	{
+		DEBUG_moreInfo = b;
+	}
+	void toggleDebug_Clock()
+	{
+		DEBUG_moreInfo = !DEBUG_moreInfo;
+	}
+	void setDebug_Layout(bool b)
 	{
 		DEBUG_Layout = b;
-		DEBUG_moreInfo = DEBUG_Layout;
 	}
-	void toggleDebugMode()
+	void toggleDebug_Layout()
 	{
 		DEBUG_Layout = !DEBUG_Layout;
-		DEBUG_moreInfo = DEBUG_Layout;
 	}
 
 	//--
@@ -320,9 +396,9 @@ private:
 	ofParameter<bool> PLAYING_State;//player state
 	ofParameter<bool> ENABLE_CLOCKS;//enable clock
 	ofParameter<bool> ENABLE_INTERNAL_CLOCK;//enable internal clock
-	ofParameter<bool> ENABLE_EXTERNAL_CLOCK;//enable midi clock sync
+	ofParameter<bool> ENABLE_EXTERNAL_MIDI_CLOCK;//enable midi clock sync
 	ofParameter<int> MIDI_Port_SELECT;
-	int num_MIDI_Ports = 0;
+	int midiIn_numPorts = 0;
 
 	ofParameterGroup params_BpmTarget;
 
@@ -331,7 +407,7 @@ private:
 public:
 	//this is the final target bpm, is the destinations of all other clocks (internal, external midi sync or ableton link)
 	ofParameter<float> BPM_Global;//global tempo bpm.
-	ofParameter<int> BPM_GLOBAL_TimeBar;//ms time of 1 bar = 4 beats
+	ofParameter<int> BPM_Global_TimeBar;//ms time of 1 bar = 4 beats
 
 	//----
 
@@ -354,21 +430,21 @@ public:
 	}
 	bool getExternalClockModeState()
 	{
-		return ENABLE_EXTERNAL_CLOCK;
+		return ENABLE_EXTERNAL_MIDI_CLOCK;
 	}
 	float getBPM();
 	int getTimeBar();
 
-//private:
-//	bool bBallAutoPos = true;
-//
-//public:
-//	void setPosition_BeatBall_Auto(bool b)
-//	{
-//		bBallAutoPos = b;
-//	}
+	//private:
+	//	bool bBallAutoPos = true;
+	//
+	//public:
+	//	void setPosition_BeatBall_Auto(bool b)
+	//	{
+	//		bBallAutoPos = b;
+	//	}
 
-	//-
+		//-
 
 private:
 	void Changed_Params(ofAbstractParameter& e);
@@ -389,7 +465,7 @@ private:
 	void onSixteenthEvent(int & sixteenth) override;
 
 	ofParameterGroup params_ClockInternal;
-	ofParameter<float> bpm_ClockInternal;
+	ofParameter<float> clockInternal_Bpm;
 	ofParameter<bool> clockInternal_Active;
 	void Changed_ClockInternal_Bpm(float & value);
 	void Changed_ClockInternal_Active(bool & value);
@@ -475,7 +551,7 @@ private:
 	//----
 
 #pragma mark - API
-	
+
 	//----
 
 public:
@@ -536,14 +612,14 @@ private:
 	float tap_BPM;
 	int tap_Count, tap_LastTime, tap_AvgBarMillis;
 	vector<int> tap_Intervals;
-	bool bTap_running;
+	bool bTap_Running;
 	bool SOUND_wasDisabled = false;//sound disbler to better user workflow
 
 	//-
 
 #pragma mark - CHANGE_MIDI_PORT
 
-	int midiIn_CLOCK_port_OPENED;
+	int midiIn_Clock_Port_OPENED;
 	void setup_MidiIn_Port(int p);
 	int MIDI_Port_PRE = -1;
 	ofParameter <string> midiPortName{ "","" };
