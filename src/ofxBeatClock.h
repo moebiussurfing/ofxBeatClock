@@ -219,7 +219,7 @@ private:
 	void beatTick_MONITOR(int beat);
 
 public:
-	ofParameter<bool> BeatTick_TRIG;
+	ofParameter<bool> BeatTick_TRIG;//this trigs to draw a flashing circle for a frame only
 
 	//-
 
@@ -541,82 +541,12 @@ private:
 
 	ofxAbletonLink link;
 
+	ofParameter<bool> ENABLE_LINK_SYNC;
+
 	ofxGuiGroup2* group_LINK;
 	ofParameterGroup params_LINK;
 
-	void Changed_LINK_Params(ofAbstractParameter &e)
-	{
-		string name = e.getName();
-		ofLogVerbose("ofxBeatClock") << "Changed_LINK_Params '" << name << "': " << e;
-
-		//-
-		if (name == "PLAY")
-		{
-			ofLogNotice("ofxBeatClock") << "LINK PLAY";
-			link.setIsPlaying(LINK_Play);
-		}
-		else if (name == "BPM")
-		{
-			ofLogNotice("ofxBeatClock") << "LINK BPM";
-
-			link.setBPM(LINK_Bpm);
-			if (ENABLE_LINK_SYNC)
-			{
-				BPM_Global = LINK_Bpm;
-				
-				//TODO: required if ofxDawMetro is not being used?
-				clockInternal_Bpm = BPM_Global;
-			}
-		}
-		else if (name == "RESTART" && LINK_RestartBeat)
-		{
-			ofLogNotice("ofxBeatClock") << "LINK RESTART";
-			LINK_RestartBeat = false;
-
-			link.setBeat(0.0);
-
-			if (ENABLE_LINK_SYNC)
-			{
-				Tick_16th_current = 0;
-				Tick_16th_string = ofToString(Tick_16th_current);
-
-				Beat_current = 0;
-				Beat_string = ofToString(Beat_current);
-
-				Bar_current = 0;
-				Bar_string = ofToString(Bar_current);
-			}
-		}
-		else if (name == "RESET" && LINK_ResetBeats)
-		{
-			ofLogNotice("ofxBeatClock") << "LINK RESET";
-			LINK_ResetBeats = false;
-
-			link.setBeatForce(0.0);
-		}
-		else if (name == "GO BEAT")
-		{
-			if (LINK_Beat_Selector != LINK_Beat_Selector_PRE)//changed
-			{
-				ofLogNotice("ofxBeatClock") << "LINK GO BEAT: " << LINK_Beat_Selector;
-				LINK_Beat_Selector_PRE = LINK_Beat_Selector;
-
-				link.setBeat(LINK_Beat_Selector);
-
-				if (ENABLE_LINK_SYNC)
-				{
-					//Tick_16th_current = 0;
-					//Tick_16th_string = ofToString(Tick_16th_current);
-
-					Beat_current = 0;
-					Beat_string = ofToString(Beat_current);
-				}
-			}
-		}
-	}
-
-	ofParameter<bool> ENABLE_LINK_SYNC;
-
+	ofParameter<bool> LINK_Enable;
 	ofParameter<float> LINK_Bpm;//link bpm
 	ofParameter<bool> LINK_Play;//control and get Ableton Live playing too, mirrored like Link does
 	ofParameter<float> LINK_Phase;//phase on the bar. cycled from 0.0f to 4.0f
@@ -625,8 +555,8 @@ private:
 	ofParameter<string> LINK_Beat_string;//monitor beat counter
 	//amount of beats are not limited nor in sync / mirrored with Ableton Live.
 	ofParameter<string> LINK_Peers_string;//number of synced devices/apps on your network
-	ofParameter<int> LINK_Beat_Selector;//TODO: TEST
-	int LINK_Beat_Selector_PRE = -1;
+	//ofParameter<int> LINK_Beat_Selector;//TODO: TEST
+	//int LINK_Beat_Selector_PRE = -1;
 
 	void LINK_setup()
 	{
@@ -648,7 +578,7 @@ private:
 
 			clockActive_Info = "BEAT: " + ofToString(link.getBeat(), 1);
 			clockActive_Info += "\n";
-			clockActive_Info += "PHASE:  " + ofToString(link.getPhase(), 2);
+			clockActive_Info += "PHASE:  " + ofToString(link.getPhase(), 1);
 			clockActive_Info += "\n";
 			clockActive_Info += "PEERS:  " + ofToString(link.getNumPeers());
 
@@ -667,7 +597,7 @@ private:
 
 			if (Beat_current != Beat_current_PRE)
 			{
-				cout << "LINK beat changed:" << Beat_current << endl;
+				ofLogNotice("ofxBeatClock") << "LINK beat changed:" << Beat_current;
 				Beat_current_PRE = Beat_current;
 
 				//-
@@ -726,10 +656,130 @@ private:
 		ofRemoveListener(params_LINK.parameterChangedE(), this, &ofxBeatClock::Changed_LINK_Params);
 	}
 
-	//TODO:
-	//should add some control into the gui too. 
-	//maybe creating a LINK dedicated transport bar
-	//control
+	//-
+
+	//callbacks
+
+	void Changed_LINK_Params(ofAbstractParameter &e)
+	{
+		string name = e.getName();
+		ofLogVerbose("ofxBeatClock") << "Changed_LINK_Params '" << name << "': " << e;
+
+		//-
+
+		if (name == "PLAY")
+		{
+			ofLogNotice("ofxBeatClock") << "LINK PLAY: " << LINK_Play;
+			
+			//TODO:
+			//BUG:
+			//play engine do not works fine
+
+			//TEST:
+			//link.setIsPlaying(LINK_Play);
+
+			//TEST:
+			if (LINK_Play)
+			{
+				link.play();
+			}
+			else
+			{
+				link.stop();
+			}
+		}
+
+		else if (name == "ENABLE")
+		{
+			ofLogNotice("ofxBeatClock") << "ENABLE: " << LINK_Enable;
+
+			//TEST:
+			//if (LINK_Enable)
+			//{
+			//	link.enablePlayStateSync();
+			//}
+			//else
+			//{
+			//	link.disablePlayStateSync();
+			//}
+
+			//TEST:
+			if (LINK_Enable)
+			{
+				link.enableLink();
+			}
+			else
+			{
+				link.disableLink();
+			}
+		}
+
+		else if (name == "BPM")
+		{
+			ofLogNotice("ofxBeatClock") << "LINK BPM";
+
+			link.setBPM(LINK_Bpm);
+			if (ENABLE_LINK_SYNC)
+			{
+				//TODO: 
+				//it's required if ofxDawMetro is not being used?
+				clockInternal_Bpm = LINK_Bpm;
+
+				//will be autoupdate on clockInternal callback
+				//BPM_Global = LINK_Bpm;
+			}
+		}
+
+		else if (name == "RESTART" && LINK_RestartBeat)
+		{
+			ofLogNotice("ofxBeatClock") << "LINK RESTART";
+			LINK_RestartBeat = false;
+
+			link.setBeat(0.0);
+
+			if (ENABLE_LINK_SYNC)
+			{
+				Tick_16th_current = 0;
+				Tick_16th_string = ofToString(Tick_16th_current);
+
+				Beat_current = 0;
+				Beat_string = ofToString(Beat_current);
+
+				Bar_current = 0;
+				Bar_string = ofToString(Bar_current);
+			}
+		}
+
+		else if (name == "RESET" && LINK_ResetBeats)
+		{
+			ofLogNotice("ofxBeatClock") << "LINK RESET";
+			LINK_ResetBeats = false;
+
+			link.setBeatForce(0.0);
+		}
+
+		//TODO:
+		//don't understand yet what setBeat does...
+		//else if (name == "GO BEAT")
+		//{
+		//	if (LINK_Beat_Selector != LINK_Beat_Selector_PRE)//changed
+		//	{
+		//		ofLogNotice("ofxBeatClock") << "LINK GO BEAT: " << LINK_Beat_Selector;
+		//		LINK_Beat_Selector_PRE = LINK_Beat_Selector;
+
+		//		link.setBeat(LINK_Beat_Selector);
+
+		//		if (ENABLE_LINK_SYNC)
+		//		{
+		//			//Tick_16th_current = 0;
+		//			//Tick_16th_string = ofToString(Tick_16th_current);
+
+		//			Beat_current = 0;
+		//			Beat_string = ofToString(Beat_current);
+		//		}
+		//	}
+		//}
+	}
 
 	void LINK_bpmChanged(double &bpm)
 	{
@@ -737,8 +787,8 @@ private:
 
 		LINK_Bpm = bpm;
 
-		//BPM_Global = (float)bpm;
-		//clockInternal_Bpm = BPM_Global;//TODO: required if dawMetro is not being used?
+		//BPM_Global will be update on the LINK_Bpm callback
+		//clockInternal_Bpm will be updated too
 	}
 
 	void LINK_numPeersChanged(std::size_t &peers)
