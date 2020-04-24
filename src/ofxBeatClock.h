@@ -15,6 +15,11 @@
 #include "ofxMidiTimecode.h"
 #include "ofxDawMetro.h"
 
+#define USE_ofxAbletonLink
+#ifdef USE_ofxAbletonLink
+#include "ofxAbletonLink.h"
+#endif
+
 ///+ Add alternative and better timer approach using the audio - buffer to avoid out - of - sync problems of current timers
 ///(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). Problems happen when minimizing or moving the app window.. Any help is welcome!
 ///audioBuffer alternative timer mode
@@ -41,6 +46,93 @@
 class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
 
 public:
+
+#ifdef USE_ofxAbletonLink
+	ofxAbletonLink link;
+
+	ofParameter<bool> ENABLE_LINK_SYNC;
+
+	//TODO:
+	//beat callback to LINK?
+	//link.beat
+	//use Changed_MIDI_beatsInBar(int &beatsInBar)
+
+	void LINK_bpmChanged(double &bpm) {
+		ofLogNotice("ofxBeatClock") << "LINK_bpmChanged" << bpm;
+
+		BPM_Global = (float)bpm;
+		DAW_bpm = (float)bpm;
+		
+	}
+
+	void LINK_numPeersChanged(std::size_t &peers) {
+		ofLogNotice("ofxBeatClock") << "LINK_numPeersChanged" << peers;
+	}
+
+	void LINK_playStateChanged(bool &state) {
+		ofLogNotice("ofxBeatClock") << "LINK_playStateChanged" << (state ? "play" : "stop");
+	}
+
+	void LINK_setup() {
+		link.setup();
+
+		//ofAddListener(link.bpmChanged, this, &ofxBeatClock::LINK_bpmChanged);
+		//ofAddListener(link.numPeersChanged, this, &ofxBeatClock::LINK_numPeersChanged);
+		//ofAddListener(link.playStateChanged, this, &ofxBeatClock::LINK_playStateChanged);
+	}
+
+	void LINK_update();
+
+	void LINK_draw() {
+		ofPushStyle();
+
+		float x = ofGetWidth() * link.getPhase() / link.getQuantum();
+		ofSetColor(255, 0, 0);
+		ofDrawLine(x, 0, x, ofGetHeight());
+
+		std::stringstream ss("");
+		ss
+			<< "bpm:   " << link.getBPM() << std::endl
+			<< "beat:  " << link.getBeat() << std::endl
+			<< "phase: " << link.getPhase() << std::endl
+			<< "peers: " << link.getNumPeers() << std::endl
+			<< "play?: " << (link.isPlaying() ? "play" : "stop");
+
+		ofSetColor(255);
+		if (fontMedium.isLoaded())
+		{
+			fontMedium.drawString(ss.str(), 20, 20);
+		}
+		else
+		{
+			ofDrawBitmapString(ss.str(), 20, 20);
+		}
+
+		ofPopStyle();
+	}
+
+	void LINK_keyPressed(int key) {
+		if (key == OF_KEY_LEFT) {
+			if (20 < link.getBPM()) link.setBPM(link.getBPM() - 1.0);
+		}
+		else if (key == OF_KEY_RIGHT) {
+			link.setBPM(link.getBPM() + 1.0);
+		}
+		else if (key == 'b') {
+			link.setBeat(0.0);
+		}
+		else if (key == 'B') {
+			link.setBeatForce(0.0);
+		}
+		else if (key == ' ') {
+			link.setIsPlaying(!link.isPlaying());
+		}
+	}
+#endif
+
+	//-
+
+public:
 	void setup();
 	void update();
 	void draw();
@@ -57,7 +149,7 @@ private:
 
 	void newMidiMessage(ofxMidiMessage& eventArgs);
 
-	bool clockRunning; //< is the clock sync running?
+	bool bMidiClockRunning; //< is the clock sync running?
 	unsigned int MIDI_beats; //< song pos in beats
 	double MIDI_seconds; //< song pos in seconds, computed from beats
 	double MIDI_CLOCK_bpm; //< song tempo in bpm, computed from clock length
@@ -159,15 +251,17 @@ private:
 	ofParameterGroup params_BpmTarget;
 
 public:
+	ofParameter<float> BPM_Global;//global tempo bpm.
+	//this is the final target bpm, is the destinations of all other clocks (internal, external midi sync or ableton link)
 	ofParameter<int> BPM_GLOBAL_TimeBar;//ms time of 1 bar = 4 beats
-	ofParameter<float> BPM_Global;//tempo bpm global
 
 private:
-	ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig measurements of tap tempo
+	ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig the measurements of tap tempo
 
+	//helpers
 	ofParameter<bool> RESET_BPM_Global;
-	ofParameter<bool> BPM_half_TRIG;
-	ofParameter<bool> BPM_double_TRIG;
+	ofParameter<bool> BPM_half_TRIG;//divide bpm by 2
+	ofParameter<bool> BPM_double_TRIG;//multiply bpm by 2
 
 	//-
 
@@ -201,6 +295,8 @@ private:
 	//-
 
 	//internal clock
+
+	//based on threaded timer using ofxDawMetro
 #pragma mark - DAW METRO
 	void reSync();
 	ofParameter<bool> bSync_Trig;
@@ -236,14 +332,14 @@ private:
 
 	//-
 
-#pragma mark - DRAW STUFF:
+#pragma mark - DRAW_STUFF:
 
 	//FONT
 
-	string TTF_message;
-	ofTrueTypeFont TTF_small;
-	ofTrueTypeFont TTF_medium;
-	ofTrueTypeFont TTF_big;
+	string messageInfo;
+	ofTrueTypeFont fontSmall;
+	ofTrueTypeFont fontMedium;
+	ofTrueTypeFont fontBig;
 
 	//-
 
@@ -268,26 +364,33 @@ private:
 
 	//-
 
-#pragma mark - CURRENT BPM CLOCK VALUES
+#pragma mark - CURRENT_BPM_CLOCK_VALUES
 public:
 	void Reset_clockValuesAndStop();
 
-	//TODO: could be nice to add listener system..
+	//TODO: could be nice to add some listener system..
 
-	ofParameter<int> BPM_bar_current;
-	ofParameter<int> BPM_beat_current;
-	ofParameter<int> BPM_16th_current;
+	ofParameter<int> Bar_current;
+	ofParameter<int> Beat_current;
+	ofParameter<int> Tick_16th_current;
+
+	//TODO: LINK
+#ifdef USE_ofxAbletonLink
+	int Beat_current_PRE;
+	float Beat_float_current;
+	string Beat_float_string;
+#endif
 
 private:
 	//STRINGS FOR MONITOR DRAWING
 
 	//1:1:1
-	string BPM_bar_str;
-	string BPM_beat_str;
-	string BPM_16th_str;
+	string Bar_string;
+	string Beat_string;
+	string Tick_16th_string;
 
-	string BPM_input_str;//internal/external
-	string BPM_name_str;//midi in port
+	string clockActive_Type;//internal/external
+	string clockActive_Info;//midi in port
 
 	//-
 
@@ -364,6 +467,7 @@ private:
 #pragma mark - STEP LIMITING
 
 	//we don't need to use long song patterns
+	//and we will limit bars to 4 like a simple step sequencer.
 	bool ENABLE_pattern_limits;
 	int pattern_BEAT_limit;
 	int pattern_BAR_limit;
