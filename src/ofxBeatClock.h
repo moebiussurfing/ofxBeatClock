@@ -256,6 +256,9 @@ private:
 	//-
 
 #pragma mark - PARAMS
+	public:
+		ofParameter<bool> PLAYING_Global_State;//for all different source clock modes
+
 private:
 	ofParameterGroup params_CONTROL;
 	ofParameter<bool> PLAYING_State;//player state
