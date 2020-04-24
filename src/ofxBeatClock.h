@@ -1,21 +1,25 @@
 #pragma once
 
-///TODO:
-///+ On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
-///+ Add filter to smooth / stabilize BPM number when using external midi clock mode.
-///+ A better link between play button / params in both internal / external modes with one unique play button.
+/// TODO:
+///
+/// + On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
+/// + Add filter to smooth / stabilize BPM number when using external midi clock mode.
+/// + Add audio output selector to metronome sounds. maybe share audioBuffer with better timer mode
+///	 	on USE_AUDIO_BUFFER_TIMER_MODE. still disabled by default yet
 
 #include "ofMain.h"
 
 #include "ofxMidiClock.h"//used for external midi clock sync (1)
 #include "ofxMidi.h"
 #include "ofxMidiTimecode.h"
-#include "ofxDawMetro.h"//used for internal clock (2)
+#include "ofxDawMetro.h"//used for internal (using threaded timer) clock (2)
 #include "ofxGuiExtended2.h"
+
+//----
 
 #define USE_ofxAbletonLink
 #ifdef USE_ofxAbletonLink
-#include "ofxAbletonLink.h"//used for external Ableton Live LINK engine (3)
+#include "ofxAbletonLink.h"//used for external Ableton Live Link engine (3)
 #endif
 ///What is Ableton Link?
 ///"This is the codebase for Ableton Link, a technology that synchronizes musical beat,
@@ -27,15 +31,19 @@
 ///https://github.com/Ableton/link
 ///https://www.ableton.com/en/link/
 
+//----
+
 ///TODO:
+//#define USE_AUDIO_BUFFER_TIMER_MODE
 ///WIP: alternative and better timer approach using the audio - buffer to avoid out - of - sync problems of current timers
 ///(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). Problems happen when minimizing or moving the app window.. Any help is welcome!
-///audioBuffer alternative timer mode
+///audioBuffer alternative timer mode (4)
 ///(code is at the bottom)
 ///un-comment to enable this NOT WORKING yet alternative mode
 ///THE PROBLEM: clock drift very often.. maybe in wasapi sound api?
 ///help on improve this is welcome!
-//#define USE_AUDIO_BUFFER_TIMER_MODE
+
+//----
 
 ///TODO:
 ///smooth global bpm clock
@@ -43,6 +51,7 @@
 ///#define BPM_MIDI_CLOCK_REFRESH_RATE 1000
 /////refresh received MTC by clock. disabled/commented to "realtime" by every-frame-update
 
+//----
 
 //only to long song mode on external midi sync vs simpler 4 bars / 16 beats
 #define ENABLE_PATTERN_LIMITING//comment to disable
@@ -55,38 +64,489 @@
 
 class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
 
+	//-
+
+#pragma mark - OF_MAIN
+
+public:
+	void setup();
+	void update();
+	void draw();
+	void exit();
+
+	//-
+
+#pragma mark - MIDI_IN_CLOCK
+
+private:
+	ofxMidiIn midiIn;
+	ofxMidiMessage midiIn_Clock_Message;
+	ofxMidiClock midiIn_Clock; //< clock message parser
+
+	void newMidiMessage(ofxMidiMessage& eventArgs);
+
+	double midiIn_Clock_Bpm; //< song tempo in bpm, computed from clock length
+	bool bMidiInClockRunning; //< is the clock sync running?
+	unsigned int MIDI_beats; //< song pos in beats
+	double MIDI_seconds; //< song pos in seconds, computed from beats
+	int MIDI_quarters; //convert total # beats to # quarters
+	int MIDI_bars; //compute # of bars
+	//TEST
+	//int MIDI_ticks;//16th ticks are not implemented on the used ofxMidi example
+	
+	//-
+
+	ofParameter<int> midiIn_BeatsInBar;//compute remainder as # TARGET_NOTES_params within the current bar
+	void Changed_midiIn_BeatsInBar(int & beatsInBar);//only used in midiIn clock sync 
+	int beatsInBar_PRE;//not required
+
+	//-
+
+#pragma mark - EXTERNAL_CLOCK
+
+	void setup_MidiIn_Clock();
+
+	//-
+
+#pragma mark - LAYOUT
+
+private:
+	bool DEBUG_moreInfo = false;//more debug
+
+	glm::vec2 pos_Global;//main anchor to reference all the other above gui elements
+	glm::vec2 pos_ClockInfo;
+	glm::vec2 pos_BpmInfo;
+	int pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_width;
+	int pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_radius;
+
+	//TODO:
+	//ofParameter<glm::vec2> position_BeatBoxes;
+	//ofParameter<glm::vec2> position_BeatBall;
+	//ofParameter<glm::vec2> position_ClockInfo;
+	//ofParameter<glm::vec2> position_BpmInfo;
+
+public:
+	//api setters
+	void setPosition_GuiGlobal(int x, int y);//main global position setter for gui panel and extra elements
+
+	void setPosition_GuiExtra(int x, int y);//extra elements position setter with default layout of the other elements
+	void setPosition_BeatBoxes(int x, int y, int w);//position x, y and w = width of all 4 squares
+	void setPosition_BeatBall(int x, int y, int w);//position x, y and w = width of ball
+	void setPosition_ClockInfo(int _x, int _y);//all clock source info
+	void setPosition_BpmInfo(int _x, int _y);//current bpm
+
+	//beat boxes
+	void draw_BeatBoxes(int x, int y, int w);
+
+	//beat tick ball
+	void draw_BeatBall(int x, int y, int radius);
+
+	//beat tick ball
+	void draw_ClockInfo(int x, int y);
+
+	//beat tick ball
+	void draw_BpmInfo(int x, int y);
+
+	//big clock
+	void draw_BigClockTime(int x, int y);
+
 	//--
 
+	//debug helpers
+
+	//red anchor circle to debug mark
+	bool DEBUG_Layout = false;
+	void draw_Anchor(int x, int y)
+	{
+		if (DEBUG_Layout)
+		{
+			ofPushStyle();
+			ofFill();
+			ofSetColor(ofColor::red);
+			ofDrawCircle(x, y, 3);
+			int pad;
+			if (y < 15) pad = 10;
+			else pad = -10;
+			ofDrawBitmapStringHighlight(ofToString(x) + "," + ofToString(y), x, y + pad);
+			ofPopStyle();
+		}
+	}
+	void setDebug_Clock(bool b)
+	{
+		DEBUG_moreInfo = b;
+	}
+	void toggleDebug_Clock()
+	{
+		DEBUG_moreInfo = !DEBUG_moreInfo;
+	}
+	void setDebug_Layout(bool b)
+	{
+		DEBUG_Layout = b;
+	}
+	void toggleDebug_Layout()
+	{
+		DEBUG_Layout = !DEBUG_Layout;
+	}
+
+	//--
+
+private:
+	//main text color
+	ofColor colorText;
+
+	//-
+
+#pragma mark - MONITOR_VISUAL_FEEDBACK
+
+private:
+	//beat ball
+	ofPoint circlePos;
+	float fadeOut_animTime, fadeOut_animCounter;
+	bool fadeOut_animRunning;
+	float dt = 1.0f / 60.f;
+
+	//main receiver
+	//trigs sound and gui drawing ball visual feedback
+	void beatTick_MONITOR(int beat);
+
+public:
+	ofParameter<bool> BeatTick_TRIG;
+
+	//-
+
+////TODO:
+//private:
+//smooth clock for midi input clock sync
+//#pragma mark - REFRESH_FEQUENCY
+////used only when BPM_MIDI_CLOCK_REFRESH_RATE is defined
+//unsigned long BPM_LAST_Tick_Time_LAST;//test
+//unsigned long BPM_LAST_Tick_Time_ELLAPSED;//test
+//unsigned long BPM_LAST_Tick_Time_ELLAPSED_PRE;//test
+//long ELLAPSED_diff;//test
+//unsigned long bpm_CheckUpdated_lastTime;
+
+	//-
+
+#pragma mark - GUI
+
+public:
+	void setup_GuiPanel();
+	void refresh_Gui();
+	ofxGui gui;
+
+private:
+	ofxGuiGroup2* group_BEAT_CLOCK;//nested folder
+	ofxGuiGroup2* group_Controls;
+	ofxGuiGroup2* group_BpmTarget;
+	ofxGuiGroup2* group_INTERNAL;
+	ofxGuiGroup2* group_EXTERNAL_MIDI;
+	ofParameterGroup params_INTERNAL;
+	ofParameterGroup params_EXTERNAL_MIDI;
+	ofJson confg_Button, confg_Sliders;//json theme
+
+	//-
+
+#pragma mark - PARAMS
+private:
+	ofParameterGroup params_CONTROL;
+	ofParameter<bool> PLAYING_State;//player state
+	ofParameter<bool> ENABLE_CLOCKS;//enable clock
+	ofParameter<bool> ENABLE_INTERNAL_CLOCK;//enable internal clock
+	ofParameter<bool> ENABLE_EXTERNAL_MIDI_CLOCK;//enable midi clock sync
+	ofParameter<int> midiIn_Port_SELECT;
+	int midiIn_numPorts = 0;
+
+	ofParameterGroup params_Advanced;
+
+	//----
+
+public:
+	//this is the final target bpm, is the destinations of all other clocks (internal, external midi sync or ableton link)
+	ofParameter<float> BPM_Global;//global tempo bpm.
+	ofParameter<int> BPM_Global_TimeBar;//ms time of 1 bar = 4 beats
+
+	//----
+
+private:
+	ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig the measurements of tap tempo
+
+	//helpers to modify current bpm
+	ofParameter<bool> RESET_BPM_Global;
+	ofParameter<bool> BPM_half_TRIG;//divide bpm by 2
+	ofParameter<bool> BPM_double_TRIG;//multiply bpm by 2
+
+	//-
+
+	//API
+
+public:
+	float getBPM();
+	int getTimeBar();
+
+	bool getInternalClockModeState()
+	{
+		return ENABLE_INTERNAL_CLOCK;
+	}
+	bool getExternalClockModeState()
+	{
+		return ENABLE_EXTERNAL_MIDI_CLOCK;
+	}
+#ifdef USE_ofxAbletonLink
+	bool getLinkClockModeState()
+	{
+		return ENABLE_LINK_SYNC;
+	}
+#endif
+
+	//-
+
+private:
+	//main callback handler
+	void Changed_Params(ofAbstractParameter& e);
+
+	//-
+
+	//internal clock
+
+	//based on threaded timer using ofxDawMetro
+#pragma mark - INTERNAL_CLOCK
+
+	ofxDawMetro clockInternal;
+
+	//callbacks defined inside the addon class. can't be renamed here
+	//overide ofxDawMetro::MetroListener's method if necessary
+	void onBarEvent(int & bar) override;
+	void onBeatEvent(int & beat) override;
+	void onSixteenthEvent(int & sixteenth) override;
+
+	ofParameterGroup params_ClockInternal;
+	ofParameter<float> clockInternal_Bpm;
+	ofParameter<bool> clockInternal_Active;
+	void Changed_ClockInternal_Bpm(float & value);
+	void Changed_ClockInternal_Active(bool & value);
+
+	//TODO:
+	void reSync();
+	ofParameter<bool> bSync_Trig;
+
+public:
+	void setBpm_ClockInternal(float bpm);//to set bpm from outside
+
+	//-
+
+	//settings
+#pragma mark - XML SETTINGS
+private:
+	void saveSettings(string path);
+	void loadSettings(string path);
+	string pathSettings;
+	string filenameControl = "BeatClock_Settings.xml";
+	string filenameMidiPort = "MidiInputPort_Settings.xml";
+
+	//-
+
+#pragma mark - DRAW_STUFF:
+
+	//font
+	string messageInfo;
+	ofTrueTypeFont fontSmall;
+	ofTrueTypeFont fontMedium;
+	ofTrueTypeFont fontBig;
+
+	//-
+
+	//beat ball
+	ofPoint metronome_ball_pos;
+	int metronome_ball_radius;
+
+	//-
+
+	ofParameter<bool> SHOW_Extra;//beat boxes, text info and beat ball
+
+	//-
+
+#pragma mark - SOUND
+	//sound metronome
+	ofParameter<bool> ENABLE_sound;//enable sound ticks
+	ofParameter<float> volumeSound;//sound ticks volume
+	ofSoundPlayer tic;
+	ofSoundPlayer tac;
+	ofSoundPlayer tapBell;
+
+	//-
+
+#pragma mark - CURRENT_BPM_CLOCK_VALUES
+public:
+	void reset_clockValuesAndStop();
+
+	//TODO: could be nice to add some listener system..
+	ofParameter<int> Bar_current;
+	ofParameter<int> Beat_current;
+	ofParameter<int> Tick_16th_current;
+
+	//TODO: 
+	//link
+#ifdef USE_ofxAbletonLink
+	int Beat_current_PRE;
+	float Beat_float_current;
+	string Beat_float_string;
+#endif
+
+private:
+
+	//strings for monitor drawing
+	//1:1:1
+	string Bar_string;
+	string Beat_string;
+	string Tick_16th_string;
+
+	string clockActive_Type;//internal/external/link clock types name
+	string clockActive_Info;//midi in port, and extra info for any clock source
+
+	//----
+
+#pragma mark - API
+
+	//----
+
+public:
+
+	//transport control
+	void start();
+	void stop();
+	void togglePlay();
+
+	//----
+
+	//layout
+	void setPosition_GuiPanel(int x, int y, int w);//gui panel
+	ofPoint getPosition_GuiPanel();
+	void setVisible_GuiPanel(bool b);
+	void setVisible_BeatBall(bool b);
+
+	bool getVisible_GuiPanel()
+	{
+		return gui.getVisible();
+	}
+	void toggleVisible_GuiPanel()
+	{
+		bool b = getVisible_GuiPanel();
+		setVisible_GuiPanel(!b);
+	}
+
+	bool isPlaying()
+	{
+		return bIsPlaying;
+	}
+
+	//NOTE: take care with the path font defined on the config json 
+	//because ofxGuiExtended crashes if fonts are not located on /data
+	void loadTheme(string s)
+	{
+		group_BEAT_CLOCK->loadTheme(s);
+		group_Controls->loadTheme(s);
+		group_BpmTarget->loadTheme(s);
+		group_INTERNAL->loadTheme(s);
+		group_EXTERNAL_MIDI->loadTheme(s);
+	}
+
+private:
+	int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
+
+	bool bIsPlaying;
+
+	//-
+
+#pragma mark - TAP_ENGINE
+
+public:
+	void tap_Trig();
+	void tap_Update();
+
+private:
+	float tap_BPM;
+	int tap_Count, tap_LastTime, tap_AvgBarMillis;
+	vector<int> tap_Intervals;
+	bool bTap_Running;
+	bool SOUND_wasDisabled = false;//sound disbler to better user workflow
+
+	//-
+
+#pragma mark - CHANGE_MIDI_IN_PORT
+
+	void setup_MidiIn_Port(int p);
+	int midiIn_Clock_Port_OPENED;
+	int midiIn_Port_PRE = -1;
+	ofParameter<string> midiIn_PortName{ "","" };
+
+	//-
+
+#pragma mark - STEP LIMITING
+
+	//we don't need to use long song patterns
+	//and we will limit bars to 4 like a simple step sequencer.
+	bool ENABLE_pattern_limits;
+	int pattern_BEAT_limit;
+	int pattern_BAR_limit;
+
+	//----
+
+	//TODO:
+	//audioBuffer alternative timer mode to get a a more accurate clock!
+	//based on:
+	//https://forum.openframeworks.cc/t/audio-programming-basics/34392/10?u=moebiussurfing
+	//by davidspry:
+	//"the way I’m generating the clock is naive and simple.I’m simply counting the number of samples written to the buffer and sending a notification each time the number of samples is equal to one subdivided “beat”, as in BPM.
+	//Presumably there’s some inconsistency because the rate of writing samples to the buffer is faster than the sample rate, but it seems fairly steady with a small buffer size."
+
+	//NOTE: we will want maybe to use the same soundStream used for the sound tick also for the audiBuffer timer..
+	//maybe will be a better solution to put this timer into ofxDawMetro class!!
+
+#ifdef USE_AUDIO_BUFFER_TIMER_MODE
+private:
+	void setupAudioBuffer(int _device);
+	void closeAudioBuffer();
+	ofParameter<bool> MODE_AudioBufferTimer;
+	ofSoundStream soundStream;
+	int deviceOut;
+	int samples = 0;
+	int ticksPerBeat = 4;
+	//default is 4. 
+	//is this a kind of resolution if we set bigger like 16?
+	int samplesPerTick;
+	int sampleRate;
+	int bufferSize;
+	int DEBUG_ticks = 0;
+	bool DEBUG_bufferAudio = false;
+public:
+	void audioOut(ofSoundBuffer &buffer);
+#endif
+
+	//----
+	
 #ifdef USE_ofxAbletonLink
 private:
 
 	ofxAbletonLink link;
 
+	ofxGuiGroup2* group_LINK;
+	ofParameterGroup params_LINK;
+
 	ofParameter<bool> ENABLE_LINK_SYNC;
 
-	void LINK_bpmChanged(double &bpm)
-	{
-		ofLogNotice("ofxBeatClock") << "LINK_bpmChanged" << bpm;
-
-		BPM_Global = (float)bpm;
-		clockInternal_Bpm = (float)bpm;
-	}
-
-	void LINK_numPeersChanged(std::size_t &peers)
-	{
-		ofLogNotice("ofxBeatClock") << "LINK_numPeersChanged" << peers;
-	}
-
-	void LINK_playStateChanged(bool &state)
-	{
-		ofLogNotice("ofxBeatClock") << "LINK_playStateChanged" << (state ? "play" : "stop");
-
-		PLAYING_State = state;
-	}
+	//ofParameter<bool> LINK_Play;//control and get Ableton Live playing too, mirrored like Link does
+	ofParameter<float> LINK_Phase;//phase on the bar. cycled from 0.0f to 4.0f
+	ofParameter<bool> LINK_RestartBeat;//set beat 0
+	ofParameter<bool> LINK_ResetBeats;//reset "unlimited-growing" beat counter
+	ofParameter<string> LINK_Beat_string;//monitor beat counter
+	ofParameter<string> LINK_Peers_string;//number of synced devices/apps on your network
+	ofParameter<int> LINK_Beat_Selector;//TODO: TEST
 
 	void LINK_setup()
 	{
 		link.setup();
+
+		////TODO: required to avoid remove a not created listener if link is disabled on loading?
 		//ofAddListener(link.bpmChanged, this, &ofxBeatClock::LINK_bpmChanged);
 		//ofAddListener(link.numPeersChanged, this, &ofxBeatClock::LINK_numPeersChanged);
 		//ofAddListener(link.playStateChanged, this, &ofxBeatClock::LINK_playStateChanged);
@@ -182,7 +642,30 @@ private:
 	//should add some control into the gui too. 
 	//maybe creating a LINK dedicated transport bar
 	//control
+
+	void LINK_bpmChanged(double &bpm)
+	{
+		ofLogNotice("ofxBeatClock") << "LINK_bpmChanged" << bpm;
+
+		BPM_Global = (float)bpm;
+		clockInternal_Bpm = (float)bpm;
+	}
+
+	void LINK_numPeersChanged(std::size_t &peers)
+	{
+		ofLogNotice("ofxBeatClock") << "LINK_numPeersChanged" << peers;
+	}
+
+	void LINK_playStateChanged(bool &state)
+	{
+		ofLogNotice("ofxBeatClock") << "LINK_playStateChanged" << (state ? "play" : "stop");
+
+		PLAYING_State = state;
+	}
+
 public:
+
+	//control
 	void LINK_keyPressed(int key)
 	{
 		if (key == OF_KEY_LEFT)
@@ -208,470 +691,6 @@ public:
 	}
 #endif
 
-	//-
-
-#pragma mark - OF_MAIN
-
-public:
-	void setup();
-	void update();
-	void draw();
-	void exit();
-
-	//-
-
-#pragma mark - MIDI_IN_CLOCK
-
-private:
-	ofxMidiIn midiIn;
-	ofxMidiMessage midiIn_Clock_Message;
-	ofxMidiClock midiIn_Clock; //< clock message parser
-
-	void newMidiMessage(ofxMidiMessage& eventArgs);
-
-	bool bMidiInClockRunning; //< is the clock sync running?
-	unsigned int MIDI_beats; //< song pos in beats
-	double MIDI_seconds; //< song pos in seconds, computed from beats
-	double midiIn_Clock_Bpm; //< song tempo in bpm, computed from clock length
-	int MIDI_quarters; //convert total # beats to # quarters
-	int MIDI_bars; //compute # of bars
 	
-	//TEST
-	//int MIDI_ticks;//16th ticks are not implemented on the used ofxMidi example
-	
-	//-
-
-	ofParameter<int> MIDI_beatsInBar;//compute remainder as # TARGET_NOTES_params within the current bar
-	void Changed_MIDI_beatsInBar(int & beatsInBar);//only used in midiIn clock sync 
-	int beatsInBar_PRE;//not required
-
-	//-
-
-#pragma mark - EXTERNAL_CLOCK
-
-	void setup_MidiIn_Clock();
-
-	//-
-
-#pragma mark - LAYOUT
-
-private:
-	bool DEBUG_moreInfo = false;//more debug
-
-	//TODO:
-	////layout
-	//ofParameter<glm::vec2> position_BeatBoxes;
-	//ofParameter<glm::vec2> position_BeatBall;
-	//ofParameter<glm::vec2> position_ClockInfo;
-	//ofParameter<glm::vec2> position_BpmInfo;
-
-	glm::vec2 pos_Global;//main anchor to reference all other gui elements
-	glm::vec2 pos_ClockInfo;
-	glm::vec2 pos_BpmInfo;
-	int pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_width;
-	int pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_radius;
-
-public:
-	//api setters
-	void setPosition_GuiExtra(int x, int y);//global position setter with default layout of the other elements
-	void setPosition_BeatBoxes(int x, int y, int w);//position x, y and w = width of all 4 squares
-	void setPosition_BeatBall(int x, int y, int w);//position x, y and w = width of ball
-	void setPosition_ClockInfo(int _x, int _y);
-	void setPosition_BpmInfo(int _x, int _y);
-	//void setPosition_Gui_ALL(int _x, int _y, int _w);//TODO:
-
-	//beat boxes
-	void draw_BeatBoxes(int x, int y, int w);
-
-	//beat tick ball
-	void draw_BeatBall(int x, int y, int radius);
-
-	//beat tick ball
-	void draw_ClockInfo(int x, int y);
-
-	//beat tick ball
-	void draw_BpmInfo(int x, int y);
-
-	//big clock
-	void draw_BigClockTime(int x, int y);
-
-	//--
-
-	//debug helpers
-
-	//red anchor to debug mark
-	bool DEBUG_Layout = false;
-	void draw_Anchor(int x, int y)
-	{
-		if (DEBUG_Layout)
-		{
-			ofPushStyle();
-			ofFill();
-			ofSetColor(ofColor::red);
-			ofDrawCircle(x, y, 3);
-			int pad;
-			if (y < 15) pad = 10;
-			else pad = -10;
-			ofDrawBitmapStringHighlight(ofToString(x) + "," + ofToString(y), x, y + pad);
-			ofPopStyle();
-		}
-	}
-	void setDebug_Clock(bool b)
-	{
-		DEBUG_moreInfo = b;
-	}
-	void toggleDebug_Clock()
-	{
-		DEBUG_moreInfo = !DEBUG_moreInfo;
-	}
-	void setDebug_Layout(bool b)
-	{
-		DEBUG_Layout = b;
-	}
-	void toggleDebug_Layout()
-	{
-		DEBUG_Layout = !DEBUG_Layout;
-	}
-
-	//--
-
-private:
-	//main text color
-	ofColor colorText;
-
-	//-
-
-#pragma mark - MONITOR_VISUAL_FEEDBACK
-
-private:
-	//beat ball
-	ofPoint circlePos;
-	float fadeOut_animTime, fadeOut_animCounter;
-	bool fadeOut_animRunning;
-	float dt = 1.0f / 60.f;
-
-	//main receiver
-	void beatTick_MONITOR(int beat);///trigs sound and gui drawing ball visual feedback
-
-public:
-	ofParameter<bool> BeatTick_TRIG;
-
-	//-
-
-////TODO:
-//private:
-//smooth clock for midi input clock sync
-//#pragma mark - REFRESH_FEQUENCY
-////used only when BPM_MIDI_CLOCK_REFRESH_RATE is defined
-//unsigned long BPM_LAST_Tick_Time_LAST;//test
-//unsigned long BPM_LAST_Tick_Time_ELLAPSED;//test
-//unsigned long BPM_LAST_Tick_Time_ELLAPSED_PRE;//test
-//long ELLAPSED_diff;//test
-//unsigned long bpm_CheckUpdated_lastTime;
-
-	//-
-
-#pragma mark - GUI
-
-public:
-	void setup_Gui();
-	void refresh_Gui();
-	ofxGui gui;
-
-private:
-	ofxGuiGroup2* group_BEAT_CLOCK;//nested folder
-	ofxGuiGroup2* group_Controls;
-	ofxGuiGroup2* group_BpmTarget;
-	ofxGuiGroup2* group_INTERNAL;
-	ofxGuiGroup2* group_EXTERNAL;
-	ofParameterGroup params_INTERNAL;
-	ofParameterGroup params_EXTERNAL;
-	ofJson confg_Button, confg_Sliders;//json theme
-
-	//-
-
-#pragma mark - PARAMS
-private:
-	ofParameterGroup params_CONTROL;
-	ofParameter<bool> PLAYING_State;//player state
-	ofParameter<bool> ENABLE_CLOCKS;//enable clock
-	ofParameter<bool> ENABLE_INTERNAL_CLOCK;//enable internal clock
-	ofParameter<bool> ENABLE_EXTERNAL_MIDI_CLOCK;//enable midi clock sync
-	ofParameter<int> MIDI_Port_SELECT;
-	int midiIn_numPorts = 0;
-
-	ofParameterGroup params_BpmTarget;
-
-	//----
-
-public:
-	//this is the final target bpm, is the destinations of all other clocks (internal, external midi sync or ableton link)
-	ofParameter<float> BPM_Global;//global tempo bpm.
-	ofParameter<int> BPM_Global_TimeBar;//ms time of 1 bar = 4 beats
-
-	//----
-
-private:
-	ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig the measurements of tap tempo
-
-	//helpers to modify current bpm
-	ofParameter<bool> RESET_BPM_Global;
-	ofParameter<bool> BPM_half_TRIG;//divide bpm by 2
-	ofParameter<bool> BPM_double_TRIG;//multiply bpm by 2
-
-	//-
-
-	//API
-
-public:
-	bool getInternalClockModeState()
-	{
-		return ENABLE_INTERNAL_CLOCK;
-	}
-	bool getExternalClockModeState()
-	{
-		return ENABLE_EXTERNAL_MIDI_CLOCK;
-	}
-	float getBPM();
-	int getTimeBar();
-
-	//private:
-	//	bool bBallAutoPos = true;
-	//
-	//public:
-	//	void setPosition_BeatBall_Auto(bool b)
-	//	{
-	//		bBallAutoPos = b;
-	//	}
-
-		//-
-
-private:
-	void Changed_Params(ofAbstractParameter& e);
-
-	//-
-
-	//internal clock
-
-	//based on threaded timer using ofxDawMetro
-#pragma mark - INTERNAL_CLOCK
-
-	ofxDawMetro clockInternal;
-
-	//callbacks defined inside the addon class. can't be renamed here
-	//overide ofxDawMetro::MetroListener's method if necessary
-	void onBarEvent(int & bar) override;
-	void onBeatEvent(int & beat) override;
-	void onSixteenthEvent(int & sixteenth) override;
-
-	ofParameterGroup params_ClockInternal;
-	ofParameter<float> clockInternal_Bpm;
-	ofParameter<bool> clockInternal_Active;
-	void Changed_ClockInternal_Bpm(float & value);
-	void Changed_ClockInternal_Active(bool & value);
-	//ofxGuiContainer* container_daw;
-
-	//TODO:
-	void reSync();
-	ofParameter<bool> bSync_Trig;
-
-public:
-	void setBpm_ClockInternal(float bpm);//to set bpm from outside
-
-	//-
-
-	//settings
-#pragma mark - XML SETTINGS
-private:
-	void saveSettings(string path);
-	void loadSettings(string path);
-	string pathSettings;
-	string filenameControl = "BeatClock_Settings.xml";
-	string filenameMidiPort = "MidiInputPort_Settings.xml";
-
-	//-
-
-#pragma mark - DRAW_STUFF:
-
-	//FONT
-	string messageInfo;
-	ofTrueTypeFont fontSmall;
-	ofTrueTypeFont fontMedium;
-	ofTrueTypeFont fontBig;
-
-	//-
-
-	//BEAT BALL
-	ofPoint metronome_ball_pos;
-	int metronome_ball_radius;
-
-	//-
-
-	ofParameter<bool> SHOW_Extra;//beat boxes, text info and beat ball
-
-	//-
-
-#pragma mark - SOUND
-	//sound metronome
-	ofParameter<bool> ENABLE_sound;//enable sound ticks
-	ofParameter<float> volumeSound;//sound ticks volume
-	ofSoundPlayer tic;
-	ofSoundPlayer tac;
-	ofSoundPlayer tapBell;
-
-	//-
-
-#pragma mark - CURRENT_BPM_CLOCK_VALUES
-public:
-	void reset_clockValuesAndStop();
-
-	//TODO: could be nice to add some listener system..
-	ofParameter<int> Bar_current;
-	ofParameter<int> Beat_current;
-	ofParameter<int> Tick_16th_current;
-
-	//TODO: LINK
-#ifdef USE_ofxAbletonLink
-	int Beat_current_PRE;
-	float Beat_float_current;
-	string Beat_float_string;
-#endif
-
-private:
-
-	//strings for monitor drawing
-	//1:1:1
-	string Bar_string;
-	string Beat_string;
-	string Tick_16th_string;
-
-	string clockActive_Type;//internal/external/link clock types name
-	string clockActive_Info;//midi in port, and extra info for any clock source
-
-	//----
-
-#pragma mark - API
-
-	//----
-
-public:
-
-	//transport control
-	void start();
-	void stop();
-	void togglePlay();
-
-	//----
-
-	//layout
-	void setPosition_GuiPanel(int x, int y, int w);//gui panel
-	ofPoint getPosition_GuiPanel();
-	void setVisible_GuiPanel(bool b);
-	void setVisible_BeatBall(bool b);
-
-	bool get_Gui_visible()
-	{
-		return gui.getVisible();
-	}
-	void toggle_Gui_visible()
-	{
-		bool b = get_Gui_visible();
-		setVisible_GuiPanel(!b);
-	}
-
-	bool isPlaying()
-	{
-		return bIsPlaying;
-	}
-
-	//NOTE: take care with the path font defined on the config json 
-	//because ofxGuiExtended crashes if fonts are not located on /data
-	void loadTheme(string s)
-	{
-		group_BEAT_CLOCK->loadTheme(s);
-		group_Controls->loadTheme(s);
-		group_BpmTarget->loadTheme(s);
-		group_INTERNAL->loadTheme(s);
-		group_EXTERNAL->loadTheme(s);
-	}
-
-private:
-	int gui_Panel_W, gui_Panel_posX, gui_Panel_posY, gui_Panel_padW;
-
-	bool bIsPlaying;
-
-	//-
-
-#pragma mark - TAP_ENGINE
-
-public:
-	void tap_Trig();
-	void tap_Update();
-
-private:
-	float tap_BPM;
-	int tap_Count, tap_LastTime, tap_AvgBarMillis;
-	vector<int> tap_Intervals;
-	bool bTap_Running;
-	bool SOUND_wasDisabled = false;//sound disbler to better user workflow
-
-	//-
-
-#pragma mark - CHANGE_MIDI_PORT
-
-	int midiIn_Clock_Port_OPENED;
-	void setup_MidiIn_Port(int p);
-	int MIDI_Port_PRE = -1;
-	ofParameter <string> midiPortName{ "","" };
-
-	//-
-
-#pragma mark - STEP LIMITING
-
-	//we don't need to use long song patterns
-	//and we will limit bars to 4 like a simple step sequencer.
-	bool ENABLE_pattern_limits;
-	int pattern_BEAT_limit;
-	int pattern_BAR_limit;
-
-	//--
-
-	//string myTTF;//gui font path
-	//int sizeTTF;
-
-	//----
-
-	//TODO:
-	//audioBuffer alternative timer mode to get a a more accurate clock
-	//based on:
-	//https://forum.openframeworks.cc/t/audio-programming-basics/34392/10?u=moebiussurfing
-	//by davidspry:
-	//"the way I’m generating the clock is naive and simple.I’m simply counting the number of samples written to the buffer and sending a notification each time the number of samples is equal to one subdivided “beat”, as in BPM.
-	//Presumably there’s some inconsistency because the rate of writing samples to the buffer is faster than the sample rate, but it seems fairly steady with a small buffer size."
-
-	//we can maybe use the same soundStream used for the sound tick also for the audiBuffer timer..
-	//maybe will be a better solution to put this timer into ofxDawMetro class!!
-
-#ifdef USE_AUDIO_BUFFER_TIMER_MODE
-private:
-	void setupAudioBuffer(int _device);
-	void closeAudioBuffer();
-	ofParameter<bool> MODE_AudioBufferTimer;
-	ofSoundStream soundStream;
-	int deviceOut;
-	int samples = 0;
-	int ticksPerBeat = 4;
-	//default is 4. 
-	//is this a kind of resolution if we set bigger like 16?
-	int samplesPerTick;
-	int sampleRate;
-	int bufferSize;
-	int DEBUG_ticks = 0;
-	bool DEBUG_bufferAudio = false;
-public:
-	void audioOut(ofSoundBuffer &buffer);
-#endif
-
-	//----
 };
 
