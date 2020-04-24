@@ -555,3 +555,5 @@ MigrationBackup/
 *.xml
 *.xml
 *.json
+2_ofxBeatClock_example/bin/data/ofxBeatClock/settings/BeatClock_Settings.xml
+2_ofxBeatClock_example/bin/data/ofxBeatClock/settings/BeatClock_Settings.xml
