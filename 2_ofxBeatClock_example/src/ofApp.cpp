@@ -82,15 +82,14 @@ void ofApp::keyPressed(int key) {
 		beatClock.toggle_Gui_visible();
 		break;
 
-	case OF_KEY_RETURN://get some beatClock info
+	case OF_KEY_RETURN://get some beatClock info. look api methods into ofxBeatClock.h/.cpp
 		ofLogWarning("ofApp") << "BPM: " << beatClock.getBPM();
 		ofLogWarning("ofApp") << "BAR TIME: " << beatClock.getTimeBar() << "ms";
 		break;
 	
 	case 'd':
-		DEBUG_Layout = !DEBUG_Layout;
-		beatClock.setDebug(DEBUG_Layout);
-		//beatClock.toggleDebugMode();
+		//DEBUG_Layout = !DEBUG_Layout;
+		beatClock.toggleDebug_Clock();
 		break;
 	
 	default:
