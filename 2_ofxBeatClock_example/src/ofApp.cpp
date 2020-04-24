@@ -19,7 +19,7 @@ void ofApp::setup() {
 	beatClock.setup();
 
 	////customize positions and sizes
-	//beatClock.setPosition_Gui(10, 10, 100);
+	//beatClock.setPosition_GuiPanel(10, 10, 100);
 	//beatClock.setPosition_BeatBoxes(400, 100, 300);
 	//beatClock.setPosition_BeatBall_Auto(false);//must disable auto to customize pos/size
 	//beatClock.setPosition_BeatBall(400, 400, 50);
@@ -27,15 +27,15 @@ void ofApp::setup() {
 	//-
 
 	//callback beat tick
-	listener = beatClock.TRIG_TICK.newListener([&](bool&) {this->callback_Tick(); });
+	listener = beatClock.BeatTick_TRIG.newListener([&](bool&) {this->callback_BeatTick(); });
 }
 
 //--------------------------------------------------------------
-void ofApp::callback_Tick()
+void ofApp::callback_BeatTick()
 {
 	//TODO:
 	//improve callback to get bool value too to avoid to check state like this..
-	if (beatClock.TRIG_TICK)
+	if (beatClock.BeatTick_TRIG)
 		ofLogWarning("ofApp") << "TICK! " << beatClock.Beat_current;
 }
 
@@ -43,7 +43,7 @@ void ofApp::callback_Tick()
 void ofApp::update() {
 	beatClock.update();
 
-	////add a log line every x frames to spread received and logged TICK callbacks
+	////add a log line every x frames to spread received and logged BEAT TICK callbacks
 	//if (ofGetFrameNum() % 15 == 0 && true)
 	//	ofLogWarning("ofApp") << "";
 }
@@ -51,6 +51,8 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
 	beatClock.draw();
+
+	draw_Anchor(ofGetMouseX(), ofGetMouseY());
 }
 
 //--------------------------------------------------------------
@@ -65,27 +67,35 @@ void ofApp::keyPressed(int key) {
 
 	//-
 
-	switch (key) {
+	switch (key) 
+	{
 
-	case ' ':
-		beatClock.PLAYER_TOGGLE();
+	case ' '://toggle play
+		beatClock.togglePlay();
 		break;
 
-	case 't':
-		beatClock.Tap_Trig();
+	case 't'://trig tap when using internal clock only
+		beatClock.tap_Trig();
 		break;
 
 	case 'g':
 		beatClock.toggle_Gui_visible();
 		break;
 
-	case OF_KEY_RETURN:
-		ofLogWarning("ofApp") << "BPM: " << beatClock.get_BPM();
-		ofLogWarning("ofApp") << "BAR TIME: " << beatClock.get_TimeBar() << "ms";
+	case OF_KEY_RETURN://get some beatClock info
+		ofLogWarning("ofApp") << "BPM: " << beatClock.getBPM();
+		ofLogWarning("ofApp") << "BAR TIME: " << beatClock.getTimeBar() << "ms";
+		break;
+	
+	case 'd':
+		DEBUG_Layout = !DEBUG_Layout;
+		beatClock.setDebug(DEBUG_Layout);
+		//beatClock.toggleDebugMode();
 		break;
 	
 	default:
 		break;
+	
 	}
 }
 
@@ -96,7 +106,7 @@ void ofApp::keyReleased(int key) {
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y) {
-
+	
 }
 
 //--------------------------------------------------------------
