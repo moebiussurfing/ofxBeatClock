@@ -1,7 +1,7 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup() 
+void ofApp::setup()
 {
 	ofBackground(32);
 
@@ -21,16 +21,21 @@ void ofApp::setup()
 
 	//--
 
-	//optional customize all layout elements "grouped" with default settings
-	//beatClock.setPosition_GuiGlobal(10, 10);
+	//optional (you can uncomment one of the 3 blocks)
 
+	////customize all layout elements "grouped" with default positions/distances/sizes
+	//beatClock.setPosition_GuiGlobal(200, 50);
+
+	////or customize positions with separated gui panel and gui extra elements
 	//beatClock.setPosition_GuiExtra(500, 10);
 	//beatClock.setPosition_GuiPanel(100, 100, 300);
 
-	////or customize positions and sizes element by element
-	//beatClock.setPosition_GuiPanel(10, 10, 100);
-	//beatClock.setPosition_BeatBoxes(400, 100, 300);
-	//beatClock.setPosition_BeatBall(400, 400, 50);
+	//or heavier customize positions and sizes element by element
+	beatClock.setPosition_GuiPanel(30, 400, 300);
+	beatClock.setPosition_BpmInfo(ofGetWidth()*0.5 - 100, ofGetHeight() - 50);
+	beatClock.setPosition_BeatBoxes(10, 10, ofGetWidth() - 20);
+	beatClock.setPosition_BeatBall(ofGetWidth()*0.5 - 100, ofGetHeight()*0.5 - 100, 200);
+	beatClock.setPosition_ClockInfo(ofGetWidth() - 200, ofGetHeight()*0.5 - 100);
 
 	//-
 
@@ -48,7 +53,7 @@ void ofApp::callback_BeatTick()
 }
 
 //--------------------------------------------------------------
-void ofApp::update() 
+void ofApp::update()
 {
 	beatClock.update();
 
@@ -58,7 +63,7 @@ void ofApp::update()
 }
 
 //--------------------------------------------------------------
-void ofApp::draw() 
+void ofApp::draw()
 {
 	beatClock.draw();
 
@@ -68,7 +73,7 @@ void ofApp::draw()
 }
 
 //--------------------------------------------------------------
-void ofApp::exit() 
+void ofApp::exit()
 {
 	beatClock.exit();
 }
