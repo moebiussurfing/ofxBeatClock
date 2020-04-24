@@ -12,12 +12,6 @@ void ofxBeatClock::setup()
 	setup_MidiIn_Clock();
 	//should be defined before rest of gui to list midi ports being included on gui
 
-	//-
-
-#ifdef USE_ofxAbletonLink
-#pragma mark - ABLETON_LINK
-	LINK_setup();
-#endif
 
 	//--
 
@@ -27,7 +21,7 @@ void ofxBeatClock::setup()
 
 	params_CONTROL.setName("CONTROL");
 	params_CONTROL.add(ENABLE_CLOCKS.set("ENABLE", true));
-	params_CONTROL.add(PLAYING_Global_State.set("PLAY", false));
+	//params_CONTROL.add(PLAYING_Global_State.set("PLAY", false));//TEST
 	params_CONTROL.add(clockInternal_Bpm.set("BPM", BPM_INIT, BPM_INIT_MIN, BPM_INIT_MAX));
 	params_CONTROL.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
 	params_CONTROL.add(ENABLE_EXTERNAL_MIDI_CLOCK.set("EXTERNAL MIDI", true));
@@ -59,6 +53,9 @@ void ofxBeatClock::setup()
 	params_INTERNAL.setName("INTERNAL CLOCK");
 	params_INTERNAL.add(PLAYING_State.set("PLAY", false));
 	params_INTERNAL.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
+	//TODO: should better gui-behavior-feel being a button not toggle
+
+	//-
 
 	//TODO:
 	///trig resync to closest beat? (not so simple as to go to bar start)
@@ -77,18 +74,29 @@ void ofxBeatClock::setup()
 
 	//1.4 ableton link
 
+	//-
+
+#ifdef USE_ofxAbletonLink
+#pragma mark - ABLETON_LINK
+	LINK_setup();
+#endif
+
+	//-
+
 #ifdef USE_ofxAbletonLink
 	params_LINK.setName("ABLETON LINK");
+	params_LINK.add(LINK_Enable.set("ENABLE", true));
 	params_LINK.add(LINK_Peers_string.set("PEERS", "0"));
+	params_LINK.add(LINK_Beat_string.set("BEAT", ""));
 	params_LINK.add(LINK_Play.set("PLAY", false));
 	params_LINK.add(LINK_Phase.set("PHASE", 0.f, 0.f, 4.f));
 	params_LINK.add(LINK_Bpm.set("BPM", BPM_INIT, BPM_INIT_MIN, BPM_INIT_MAX));
-	params_LINK.add(LINK_Beat_string.set("BEAT", ""));
 	params_LINK.add(LINK_RestartBeat.set("RESTART", false));
 	params_LINK.add(LINK_ResetBeats.set("RESET", false));
-	params_LINK.add(LINK_Beat_Selector.set("GO BEAT", 0, 0, 100));//TODO: TEST
+	//params_LINK.add(LINK_Beat_Selector.set("GO BEAT", 0, 0, 100));//TODO: TEST
 
-	//not required
+	//not required..
+	LINK_Enable.setSerializable(false);
 	LINK_Bpm.setSerializable(false);
 	LINK_Play.setSerializable(false);
 	LINK_Phase.setSerializable(false);
@@ -96,7 +104,7 @@ void ofxBeatClock::setup()
 	LINK_RestartBeat.setSerializable(false);
 	LINK_ResetBeats.setSerializable(false);
 	LINK_Peers_string.setSerializable(false);
-	LINK_Beat_Selector.setSerializable(false);
+	//LINK_Beat_Selector.setSerializable(false);
 #endif
 
 	//--
@@ -202,7 +210,8 @@ void ofxBeatClock::setup()
 
 	//---
 
-	//draw ball trigger for sound and visual feedback monitor
+	//draw beat ball trigger for sound and visual feedback monitor
+	//this trigs to draw a flashing circle for a frame only
 	BeatTick_TRIG = false;
 
 	//---
@@ -324,7 +333,7 @@ void ofxBeatClock::setup_GuiPanel()
 
 	//1.1
 	group_Controls->getControl("ENABLE")->setConfig(confg_Button);
-	group_Controls->getToggle("PLAY")->setConfig(confg_Button);//global play
+	//group_Controls->getToggle("PLAY")->setConfig(confg_Button);//global play//TEST
 	group_Controls->getControl("INTERNAL")->setConfig(confg_Button);
 	group_Controls->getControl("EXTERNAL MIDI")->setConfig(confg_Button);
 #ifdef USE_ofxAbletonLink
@@ -339,10 +348,12 @@ void ofxBeatClock::setup_GuiPanel()
 
 	//1.4
 #ifdef USE_ofxAbletonLink
+	group_LINK->getToggle("ENABLE")->setConfig(confg_ButtonSmall);
 	group_LINK->getToggle("PLAY")->setConfig(confg_Button);
 	group_LINK->getToggle("RESTART")->setConfig(confg_ButtonSmall);
 	group_LINK->getToggle("RESET")->setConfig(confg_ButtonSmall);
-
+	group_LINK->getFloatSlider("PHASE")->setConfig(ofJson{
+		{"precision", 1} });
 #endif
 
 	//1.5
@@ -566,8 +577,7 @@ void ofxBeatClock::update()
 {
 	//--
 
-	//TAP
-
+	//tap engine
 	if (bTap_Running) tap_Update();
 
 	//--
@@ -881,7 +891,7 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 	metronome_ball_pos.x = px + metronome_ball_radius;
 	metronome_ball_pos.y = py;
 
-	//all beats 1 will be highlighted on red color
+	//highlight 1st beat
 	ofColor c;
 	if (Beat_current == 1)
 		c = (ofColor::red);
@@ -960,6 +970,8 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 	//-
 
 	//first beat circle of bar is drawed red. other ones are white
+	//this circle flahses will not be drawed when measuring tap tempo engine
+
 	if (ENABLE_CLOCKS && !bTap_Running &&
 #ifndef USE_ofxAbletonLink
 	(ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK))
@@ -967,10 +979,12 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 		(ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK || ENABLE_LINK_SYNC))
 #endif
 	{
+		//this trigs to draw a flashing circle for a frame only
 		if (BeatTick_TRIG)
 		{
 			BeatTick_TRIG = false;
 
+			//highlight 1st beat
 			if (Beat_current == 1)
 				ofSetColor(ofColor::red);
 			else
@@ -1249,6 +1263,7 @@ void ofxBeatClock::beatTick_MONITOR(int beat)
 		ofLogNotice("ofxBeatClock") << "> BeatTick : " << Beat_string;
 
 		BeatTick_TRIG = true;
+		//this trigs to draw a flashing circle for a frame only
 
 #ifdef USE_VISUAL_FEEDBACK_FADE
 		//bit ball alpha fade setted to transparent, no alpha
@@ -1334,30 +1349,41 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 	//-
 
-	//else if (name == "BPM")
-	//{
-	//	//ofLogVerbose"ofxBeatClock") << "NEW BPM: " << BPM_Global;
-	//}
-
-	//-
-
 	else if (name == "GLOBAL BPM")
 	{
 		ofLogVerbose("ofxBeatClock") << "GLOBAL BPM   : " << BPM_Global;
 
+		//calculate bar duration to the new tempo
 		BPM_Global_TimeBar = 60000.0f / (float)BPM_Global;//60,000 / BPM = one beat in milliseconds
+
+		//---
+
+		//NOTE: this update maybe can cause a kind of loop,
+		//because clockInternal_Bpm, BPM_Global and LINK_Bpm
+		//are updated each others too...
+		//TODO: we need some flag to avoid multiple updates when they are not required?
 
 		//TODO:
 		clockInternal_Bpm = BPM_Global;
 
-		//ofLogNotice("ofxBeatClock") << "TIME BEAT : " << BPM_TimeBar << "ms";
-		//ofLogNotice("ofxBeatClock") << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
+		//-
+
+		//TODO:
+#ifdef USE_ofxAbletonLink
+		LINK_Bpm = BPM_Global;
+#endif
+
+		//---
 
 		//TODO:
 #ifdef USE_AUDIO_BUFFER_TIMER_MODE
 		samplesPerTick = (sampleRate * 60.0f) / BPM_Global / ticksPerBeat;
 		ofLogNotice("ofxBeatClock") << "samplesPerTick: " << samplesPerTick;
 #endif
+		//-
+
+		//ofLogVerbose("ofxBeatClock") << "TIME BEAT : " << BPM_TimeBar << "ms";
+		//ofLogVerbose("ofxBeatClock") << "TIME BAR  : " << 4 * BPM_TimeBar << "ms";
 	}
 
 	//-
@@ -1367,6 +1393,11 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		ofLogVerbose("ofxBeatClock") << "BAR ms: " << BPM_Global_TimeBar;
 
 		BPM_Global = 60000.0f / (float)BPM_Global_TimeBar;
+
+		//NOTE: this update maybe can cause a kind of loop,
+		//because clockInternal_Bpm, BPM_Global and LINK_Bpm
+		//are updated each others too...
+		//TODO: we need some flag to avoid multiple updates when they are not required?
 	}
 
 	//--
@@ -1388,6 +1419,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			//display text
 			clockActive_Type = "INTERNAL";
 			clockActive_Info = "";
+
+			//-
 
 			group_INTERNAL->maximize();
 		}
@@ -1415,10 +1448,6 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 			//-
 
-			//workflow
-			//if (!ENABLE_EXTERNAL_MIDI_CLOCK)
-			//	ENABLE_EXTERNAL_MIDI_CLOCK = true;
-
 			group_INTERNAL->minimize();
 		}
 	}
@@ -1435,8 +1464,11 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 #ifdef USE_ofxAbletonLink
 			ENABLE_LINK_SYNC = false;
 #endif
+			//workflow
+			//autostop
 			if (PLAYING_State)
 				PLAYING_State = false;
+			//disable internal
 			if (clockInternal_Active)
 				clockInternal_Active = false;
 
@@ -1449,6 +1481,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			//clockActive_Info += ofToString(midiIn.getPort());
 
 			midiIn_PortName = midiIn.getName();
+
+			//-
 
 			group_EXTERNAL_MIDI->maximize();
 		}
@@ -1467,10 +1501,6 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 			//-
 
-			//workflow
-			//if (!ENABLE_INTERNAL_CLOCK)
-			//	ENABLE_INTERNAL_CLOCK = true;
-
 			group_EXTERNAL_MIDI->minimize();
 		}
 	}
@@ -1484,7 +1514,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 		if (ENABLE_LINK_SYNC)
 		{
-			ofLogNotice("ofxBeatClock") << "add link listeners";
+			ofLogNotice("ofxBeatClock") << "Add link listeners";
 			ofAddListener(link.bpmChanged, this, &ofxBeatClock::LINK_bpmChanged);
 			ofAddListener(link.numPeersChanged, this, &ofxBeatClock::LINK_numPeersChanged);
 			ofAddListener(link.playStateChanged, this, &ofxBeatClock::LINK_playStateChanged);
@@ -1492,8 +1522,11 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			ENABLE_INTERNAL_CLOCK = false;
 			ENABLE_EXTERNAL_MIDI_CLOCK = false;
 
+			//workflow
+			//autostop
 			if (PLAYING_State)
 				PLAYING_State = false;
+			//disable internal
 			if (clockInternal_Active)
 				clockInternal_Active = false;
 
@@ -1501,15 +1534,19 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			clockActive_Type = "ABLETON LINK";
 			clockActive_Info = "";
 
+			//-
+
 			//workflow
 			group_LINK->maximize();
 		}
 		else
 		{
-			ofLogNotice("ofxBeatClock") << "remove link listeners";
+			ofLogNotice("ofxBeatClock") << "Remove link listeners";
 			ofRemoveListener(link.bpmChanged, this, &ofxBeatClock::LINK_bpmChanged);
 			ofRemoveListener(link.numPeersChanged, this, &ofxBeatClock::LINK_numPeersChanged);
 			ofRemoveListener(link.playStateChanged, this, &ofxBeatClock::LINK_playStateChanged);
+
+			//-
 
 			//workflow
 			group_LINK->minimize();
@@ -1528,8 +1565,10 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		//workflow
 		if (!ENABLE_CLOCKS)
 		{
+			//autostop
 			if (PLAYING_State)
 				PLAYING_State = false;
+			//disable internal
 			if (clockInternal_Active)
 				clockInternal_Active = false;
 		}
@@ -1545,7 +1584,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 		//-
 
-		//workflow: if none clock mode is selected, selectect internal by default
+		//workflow
+		//if none clock mode is selected, we select the internal clock by default
 #ifndef USE_ofxAbletonLink
 		else if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_MIDI_CLOCK)
 #else
@@ -1558,6 +1598,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 	//---
 
+	//external midi clock
 	else if (name == "MIDI INPUT PORT")
 	{
 		ofLogNotice("ofxBeatClock") << "midiIn_Port_SELECT: " << midiIn_Port_SELECT;
@@ -1577,13 +1618,18 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		}
 	}
 
+	//--
+
 #ifdef USE_AUDIO_BUFFER_TIMER_MODE
 	else if (name == "MODE AUDIO BUFFER")
 	{
 		ofLogNotice("ofxBeatClock") << "AUDIO BUFFER: " << MODE_AudioBufferTimer;
 
-		//workflow: stop to avoid freeze bug
+		//workflow
+		//stop to avoid freeze bug
 		PLAYING_State = false;
+
+		//-
 
 		//NOTE: both modes are ready to work and setted up.
 		//this is required only if we want to use only one internal mode at the same time.
@@ -1622,23 +1668,34 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		if (RESET_BPM_Global)
 		{
 			RESET_BPM_Global = false;//should be a button not toggle
-			BPM_Global = 120.00f;
+
 			clockInternal_Bpm = 120.00f;
-			clockInternal.setBpm(clockInternal_Bpm);
+
+			//not required
+			//BPM_Global will be updated on the clockInternal_Bpm callback..etc
+
+			//clockInternal.setBpm(clockInternal_Bpm);
+			//BPM_Global = 120.00f;
+
 			ofLogNotice("ofxBeatClock") << "BPM_Global: " << BPM_Global;
-	}
+		}
 	}
 	else if (name == "HALF")
 	{
 		ofLogNotice("ofxBeatClock") << "HALF: " << BPM_half_TRIG;
 		if (BPM_half_TRIG)
 		{
-			//float tempBPM = BPM_Global / 2;
-			//cout << "temp bpm: " << tempBPM << endl;
-			//BPM_Global = BPM_Global / 2;
 			clockInternal_Bpm = clockInternal_Bpm / 2.0f;
-			//BPM_Global = tempBPM;
-			//clockInternal_Bpm = tempBPM;
+
+			//not required
+			//BPM_Global will be updated on the clockInternal_Bpm callback..etc
+
+//#ifdef USE_ofxAbletonLink
+//			if (ENABLE_LINK_SYNC)
+//			{
+//				LINK_Bpm = clockInternal_Bpm;
+//			}
+//#endif
 		}
 	}
 	else if (name == "DOUBLE")
@@ -1646,12 +1703,17 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		ofLogNotice("ofxBeatClock") << "DOUBLE: " << BPM_double_TRIG;
 		if (BPM_double_TRIG)
 		{
-			//float tempBPM = BPM_Global * 2;
-			//cout << "temp bpm: " << tempBPM << endl;
-			//BPM_Global = BPM_Global * 2;
 			clockInternal_Bpm = clockInternal_Bpm * 2.0f;
-			//BPM_Global = tempBPM;
-			//clockInternal_Bpm = tempBPM;
+
+			//not required
+			//BPM_Global will be updated on the clockInternal_Bpm callback..etc
+
+//#ifdef USE_ofxAbletonLink
+//			if (ENABLE_LINK_SYNC)
+//			{
+//				LINK_Bpm = clockInternal_Bpm;
+//			}
+//#endif
 		}
 	}
 	else if (name == "SHOW ADVANCED")
@@ -1662,7 +1724,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		{
 			group_Advanced->maximize();
 		}
-		else {
+		else
+		{
 			group_Advanced->minimize();
 		}
 	}
@@ -1684,12 +1747,11 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	else if (name == "TAP")
 	{
 		ofLogNotice("ofxBeatClock") << "TAP BUTTON";
-		//BPM_Tap_Tempo_TRIG = !BPM_Tap_Tempo_TRIG;
 
 		if ((BPM_Tap_Tempo_TRIG == true) && (ENABLE_INTERNAL_CLOCK))
 		{
-			BPM_Tap_Tempo_TRIG = false; //TODO: should be button not toggle
-
+			BPM_Tap_Tempo_TRIG = false; 
+			
 			ofLogNotice("ofxBeatClock") << "BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
 
 			tap_Trig();
@@ -1787,7 +1849,9 @@ void ofxBeatClock::reSync()
 void ofxBeatClock::Changed_ClockInternal_Bpm(float &value)
 {
 	clockInternal.setBpm(value);
-	clockInternal.resetTimer();
+
+	//TODO:
+	clockInternal.resetTimer();//(?) is this required (?)
 
 	//-
 
@@ -1903,10 +1967,10 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage &message)
 //--------------------------------------------------------------
 void ofxBeatClock::saveSettings(string path)
 {
+	//save settings
 	ofLogNotice("ofxBeatClock") << "saveSettings";
 	ofLogNotice("ofxBeatClock") << path;
 
-	//save settings
 	ofXml settings;
 	ofSerialize(settings, params_CONTROL);
 	settings.save(path + filenameControl);
@@ -1938,7 +2002,7 @@ void ofxBeatClock::loadSettings(string path)
 //--------------------------------------------------------------
 
 #pragma mark - INTERNAL_CLOCK_ofxDawMetro
-//not used and callbacks disabled on audioBuffer timer mode!
+//not used and callbacks are disabled on audioBuffer timer mode(?)
 
 //--------------------------------------------------------------
 void ofxBeatClock::onBarEvent(int &bar)
@@ -1992,7 +2056,7 @@ void ofxBeatClock::onBeatEvent(int &beat)
 
 			//-
 		}
-	}
+}
 }
 
 //--------------------------------------------------------------
@@ -2047,6 +2111,7 @@ void ofxBeatClock::tap_Trig()
 
 		//-
 
+		////workflow
 		////disable sound to better flow
 		//if (tap_Count == 0 && ENABLE_sound)
 		//{
@@ -2095,6 +2160,7 @@ void ofxBeatClock::tap_Trig()
 			//-
 
 			//TODO:
+			//workflow
 			//if (SOUND_wasDisabled)//sound disbler to better flow
 			//{
 			//	ENABLE_sound = true;
@@ -2103,32 +2169,32 @@ void ofxBeatClock::tap_Trig()
 
 			//-
 
-			//SET OBTAINED BPM
+			//finally, we set the obtained bpm after the 4 trigged-by-user measurements
 			clockInternal_Bpm = tap_BPM;
 		}
 	}
 	else if (tap_Count > 1)
 	{
-		//TODO
+		//TODO:
 		//temp update to last interval...
 		float val = (float)tap_Intervals[tap_Intervals.size() - 1];
 		if (val == 0)
 		{
-			val = 1000;
+			val = 1000.0f;
 			ofLogError("ofxBeatClock") << "Divide by 0!";
 			ofLogError("ofxBeatClock") << "val: " << ofToString(val);
 		}
 		tap_BPM = 60 * 1000 / val;
 		ofLogNotice("ofxBeatClock") << "> TAP < : NEW BPM Tap : " << tap_BPM;
 
-		//SET OBTAINED BPM
+		//finally, we set the obtained bpm after the 4 trigged-by-user measurements
 		clockInternal_Bpm = tap_BPM;
 	}
 
 	//-
 }
 
-//---------------------------
+//--------------------------------------------------------------
 void ofxBeatClock::tap_Update()
 {
 	int time = ofGetElapsedTimeMillis();
@@ -2142,6 +2208,7 @@ void ofxBeatClock::tap_Update()
 
 		//-
 
+		//workflow
 		//if (SOUND_wasDisabled)//sound disbler to better flow
 		//{
 		//	ENABLE_sound = true;
@@ -2298,7 +2365,7 @@ void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
 						beatTick_MONITOR(Beat_current);
 
 						//ofLogNotice("ofxBeatClock") << "[audioBuffer] BEAT: " << Beat_string;
-					}
+}
 				}
 			}
 		}
