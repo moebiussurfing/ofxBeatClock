@@ -134,16 +134,29 @@ void ofxBeatClock::setup()
 
 	setup_Gui();
 
-	//-
+	//---
 
 	//default positions
 	setPosition_Gui(gui_Panel_posX, gui_Panel_posY, gui_Panel_W);
 
 	//--
 
-#pragma mark - DRAW STUFF
+#pragma mark - LAYOUT_GUI_ELEMENTS
 
 	//MONITOR DEFAULT POSITIONS
+
+	////TODO:
+	////improve layout system
+	//int sw, sh;
+	//sw = 1920;
+	//sh = 1080;
+	//position_BeatBoxes.set("position_BeatBoxes", glm::vec2(0, 0), glm::vec2(0, 0), glm::vec2(sw, sh));
+	//position_BeatBall.set("position_BeatBall", glm::vec2(0, 0), glm::vec2(0, 0), glm::vec2(sw, sh));
+	//position_ClockInfo.set("position_ClockInfo", glm::vec2(0, 0), glm::vec2(0, 0), glm::vec2(sw, sh));
+	//position_BpmInfo.set("position_BpmInfo", glm::vec2(0, 0), glm::vec2(0, 0), glm::vec2(sw, sh));
+
+	//-
+
 	//will be used if they are not redefined
 
 	//beat boxes
@@ -152,14 +165,25 @@ void ofxBeatClock::setup()
 	pos_BeatBoxes_w = 200;
 
 	//beat ball
+	//pos_BeatBall_y = 830;
+	//pos_BeatBall_x = 500;
 	pos_BeatBall_y = 830;
-	pos_BeatBall_x = 500;
+	pos_BeatBall_x = 1000;
 	pos_BeatBall_w = 30;
 
-	setPosition_BeatBoxes(pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_w);
-	setPosition_BeatBall(pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_w);
+	//TODO:
+	//setPosition_BeatBoxes(pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_w);
+	//setPosition_BeatBall(pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_w);
 
 	//-
+
+	//TODO:
+	pos_ClockInfo = glm::vec2(350, 10);
+	pos_BpmInfo = glm::vec2(1350, 700);;
+
+	colorText = ofColor(255, 255);
+
+	//---
 
 	//DRAW BALL TRIGGER
 
@@ -529,42 +553,49 @@ void ofxBeatClock::update()
 //--------------------------------------------------------------
 void ofxBeatClock::LINK_update()
 {
-	//TEXT DISPLAY
-	clockActive_Type = "ABLETON LINK";
-	clockActive_Info = "";
-
-	//	<< "bpm:   " << link.getBPM() << std::endl
-	//	<< "beat:  " << link.getBeat() << std::endl
-	//	<< "phase: " << link.getPhase() << std::endl
-	//	<< "peers: " << link.getNumPeers() << std::endl
-	//	<< "play?: " << (link.isPlaying() ? "play" : "stop");
-
-	//BPM_Global = (float)link.getBPM();
-	//DAW_bpm = BPM_Global;
-
-	Beat_float_current = link.getBeat();
-	Beat_float_string = ofToString(Beat_float_current,2);
-
-	if (ENABLE_pattern_limits)
+	if (ENABLE_LINK_SYNC)//not required but prophylactic
 	{
-		Beat_current = ((int)Beat_float_current) % pattern_BEAT_limit;//limited to 16 beats
-	}
-	else
-	{
-		Beat_current = ((int)Beat_float_current);
-	}
-	Beat_string = ofToString(Beat_current);
+		//TEXT DISPLAY
+		clockActive_Type = "ABLETON LINK";
 
-	if (Beat_current != Beat_current_PRE)
-	{
-		cout << "LINK beat changed:" << Beat_current << endl;
-		Beat_current_PRE = Beat_current;
+		//clockActive_Info + = ""
+		clockActive_Info = "BEAT:  " + ofToString(link.getBeat(), 1);
+		clockActive_Info += " BEAT:  " + ofToString(link.getPhase(), 1);
+		clockActive_Info += " PEERS:  " + ofToString(link.getNumPeers(), 1);
 
-		//-
+		//	<< "bpm:   " << link.getBPM() << std::endl
+		//	<< "beat:  " << link.getBeat() << std::endl
+		//	<< "phase: " << link.getPhase() << std::endl
+		//	<< "peers: " << link.getNumPeers() << std::endl
+		//	<< "play?: " << (link.isPlaying() ? "play" : "stop");
 
-		beatTick_MONITOR(Beat_current);
+		//BPM_Global = (float)link.getBPM();
+		//DAW_bpm = BPM_Global;
 
-		//-
+		Beat_float_current = (float)link.getBeat() + 1.0f;
+		Beat_float_string = ofToString(Beat_float_current, 2);
+
+		if (ENABLE_pattern_limits)
+		{
+			Beat_current = ((int)Beat_float_current) % pattern_BEAT_limit;//limited to 16 beats
+		}
+		else
+		{
+			Beat_current = ((int)Beat_float_current);
+		}
+		Beat_string = ofToString(Beat_current);
+
+		if (Beat_current != Beat_current_PRE)
+		{
+			cout << "LINK beat changed:" << Beat_current << endl;
+			Beat_current_PRE = Beat_current;
+
+			//-
+
+			beatTick_MONITOR(Beat_current);
+
+			//-
+		}
 	}
 }
 #endif
@@ -578,189 +609,92 @@ void ofxBeatClock::draw()
 
 	if (SHOW_Extra)
 	{
-		//beat boxes & text
-
-		drawBeatBoxes(pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_w);
+		draw_BeatBoxes(pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_w);
+		draw_BeatBall(pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_w);
+		draw_ClockInfo(pos_ClockInfo.x, pos_ClockInfo.y);
+		draw_BpmInfo(pos_BpmInfo.x, pos_BpmInfo.y);
 
 		//-
 
-		//beat ball (visual feedback)
+		////beat ball (visual feedback)
 
-		if (bBallAutoPos)
-		{
-			//above squares auto position
-			draw_BeatBall(pos_BeatBoxes_x + 0.5f*pos_BeatBoxes_w - pos_BeatBall_w,
-				pos_BeatBall_y, pos_BeatBall_w);
-		}
-		else
-		{
-			//custom position mode
-			draw_BeatBall(pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_w);
-		}
+		////TODO:
+		//if (bBallAutoPos)
+		//{
+		//	//above squares auto position
+		//	draw_BeatBall(pos_BeatBoxes_x + 0.5f*pos_BeatBoxes_w - pos_BeatBall_w,
+		//		pos_BeatBall_y, pos_BeatBall_w);
+		//}
+		//else
+		//{
+		//	//custom position mode
+		//	draw_BeatBall(pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_w);
+		//}
 	}
 
-#ifdef USE_ofxAbletonLink
-	if (ENABLE_LINK_SYNC)
-	{
-		LINK_draw();
-	}
-#endif
+	//#ifdef USE_ofxAbletonLink
+	//	//if (ENABLE_LINK_SYNC && SHOW_moreInfo)
+	//	//{
+	//	//	LINK_draw();
+	//	//}
+	//#endif
 
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::drawBeatBoxes(int px, int py, int w)///draws text info and boxes
+void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and boxes
 {
-	//TODO:
-	//should make better all this "layout system"
-	ofPushStyle();
-
-	ofColor c;
-	c = ofColor(255, 255);
-
-	int colorBoxes = 192;//grey
-	int alpha = 200;
-
-	bool SHOW_moreInfo = false;//more debug
+	draw_Anchor(px, py);
 
 	//sizes and paddings
-	int padToSquares = 0;
-	int padToBigTime = 0;
 	int squaresW;//squares beats size
+	squaresW = w / 4;
 	int xPad = 5;
 	int interline = 15; //text line heigh
-	int i = 0;//accumulate text lines
+	int i = 0;//vertical spacer to accumulate text lines
 
-	squaresW = w / 4;
+	//colors
+	int colorBoxes = 192;//grey
+	int alphaBoxes = 200;//alpha of several above draw fills
 
-	//--
+	ofPushStyle();
 
-	//1. TEXT INFO:
-
-	ofSetColor(c);
-
-	//-
-
-	ofPushMatrix();
-	{
-		ofTranslate(px, py);
-
-		//-
-
-		//bpm
-		//i = 3;//spacer
-		messageInfo = "BPM: " + ofToString(BPM_Global.get(), 2);
-		fontBig.drawString(messageInfo, xPad, interline * i++);
-		//fontBig.drawString(messageInfo, xPad, 0);
-		//i++;//spacer
-
-		//-
-
-		//tap mode
-		int speed = 10;//blink speed when measuring taps
-		bool b = (ofGetFrameNum() % (2 * speed) < speed);
-		ofSetColor(255, b ? 128 : 255);
-
-		if (bTap_running)
-		{
-			messageInfo = "TAP " + ofToString(ofMap(tapCount, 1, 4, 3, 0));
-		}
-		else
-		{
-			messageInfo = "";
-		}
-		i++;//one line spacer
-		fontBig.drawString(messageInfo, 3 * xPad, interline * i++);
-		i++;//one line spacer
-
-		//-
-
-		ofSetColor(c);
-
-		//clock
-		messageInfo = "CLOCK: " + clockActive_Type;
-		fontSmall.drawString(messageInfo, xPad, interline * i++);
-
-		//midi port
-		if (ENABLE_EXTERNAL_CLOCK)
-		{
-			messageInfo = ofToString(clockActive_Info);
-			fontSmall.drawString(messageInfo, xPad, interline * i++);
-		}
-
-		//-
-
-		py = py + (interline * (i + 2));//accumulate heigh distance
-
-		//-
-
-		if (SHOW_moreInfo)
-		{
-			//ofTranslate(paddingAlign, 7);
-
-			messageInfo = ("BPM: " + ofToString(BPM_Global));
-			fontSmall.drawString(messageInfo, 4 * xPad, interline * i++);
-
-			messageInfo = ("BAR: " + Bar_string);
-			fontSmall.drawString(messageInfo, 4 * xPad, interline * i++);
-
-			messageInfo = ("BEAT: " + Beat_string);
-			fontSmall.drawString(messageInfo, 4 * xPad, interline * i++);
-
-			messageInfo = ("16th: " + Tick_16th_string);
-			fontSmall.drawString(messageInfo, 4 * xPad, interline * i++);
-
-			//-
-
-			py = py + (interline * i);//acumulate heigh distance
-		}
-
-		//-
-	}
-	ofPopMatrix();//TODO: pop could be at function ending
-
-	//--
-
-	//py += padToBigTime;
-	draw_BigClockTime(px, py);
-
-	py = py + (fontBig.getSize());//acumulate heigh distance
-
-	ofPopStyle();
-
-	//--
+	//----
 
 	//2. BEATS SQUARES
-
-	py += padToSquares;
 
 	for (int i = 0; i < 4; i++)
 	{
 		ofPushStyle();
 
-		//--
-
 		//DEFINE SQUARES COLORS:
-
+#ifdef USE_ofxAbletonLink
+		if (ENABLE_CLOCKS & (ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK || ENABLE_LINK_SYNC))
+#else
 		if (ENABLE_CLOCKS & (ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK))
+#endif
 		{
 			if (i <= (Beat_current - 1))
 			{
+#ifdef USE_ofxAbletonLink
+				if (ENABLE_LINK_SYNC || ENABLE_INTERNAL_CLOCK)
+					PLAYER_state ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);
+#else
 				if (ENABLE_INTERNAL_CLOCK)
-					PLAYER_state ? ofSetColor(colorBoxes, alpha) : ofSetColor(32, alpha);
-
+					PLAYER_state ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);
+#endif
 				else if (ENABLE_EXTERNAL_CLOCK)
-					bMidiClockRunning ? ofSetColor(colorBoxes, alpha) : ofSetColor(32, alpha);
+					bMidiClockRunning ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);
 			}
 			else
-				ofSetColor(32, alpha);
+				ofSetColor(32, alphaBoxes);
 		}
 
 		//-
 
 		else//disabled both modes
 		{
-			ofSetColor(32, alpha);//black
+			ofSetColor(32, alphaBoxes);//black
 		}
 
 		//--
@@ -773,40 +707,183 @@ void ofxBeatClock::drawBeatBoxes(int px, int py, int w)///draws text info and bo
 		////alpha faded 16th blink hearth-pulse mode for visual feedback only
 		//if (i == Beat_current - 1 && Tick_16th_current % 2 == 0)
 		//{
-		//	ofSetColor(colorBoxes, alpha - 64);
+		//	ofSetColor(colorBoxes, alphaBoxes - 64);
 		//}
 
 		ofDrawRectRounded(px + i * squaresW, py, squaresW, squaresW, 3.0f);
 
 		//only border
 		ofNoFill();
-		ofSetColor(8, alpha);
+		ofSetColor(8, alphaBoxes);
 		ofSetLineWidth(2.0f);
 
 		ofDrawRectRounded(px + i * squaresW, py, squaresW, squaresW, 3.0f);
 
-		ofPopStyle();
-
 		//--
+
+		ofPopStyle();
 	}
+	ofPopStyle();
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::draw_BeatBall(int px, int py, int w)
+void ofxBeatClock::draw_ClockInfo(int px, int py)
 {
+	draw_Anchor(px, py);
+
+	int xPad = 5;
+	int interline = 15; //text line heigh
+	int i = 0;//vertical spacer to accumulate text lines
+
+	int h = fontBig.getSize();
+
+	//--
+
+	//1. TEXT INFO:
+
+	ofPushStyle();
+	ofSetColor(colorText);
+
+	//-
+
+	ofPushMatrix();
+	{
+		ofTranslate(px, py);
+
+		//-
+
+		//i++;//one line vertical spacer
+
+		//1.2. tap mode
+
+		int speed = 10;//blink speed when measuring taps
+		bool b = (ofGetFrameNum() % (2 * speed) < speed);
+		ofSetColor(255, b ? 128 : 255);
+		if (bTap_running)
+		{
+			messageInfo = "TAP " + ofToString(ofMap(tapCount, 1, 4, 3, 0));
+		}
+		else
+		{
+			messageInfo = "";
+		}
+		fontBig.drawString(messageInfo, 3 * xPad, h + interline * i++);
+
+		i++;//one extra line vertical spacer
+
+		//-
+
+		ofSetColor(colorText);
+
+		//1.3. clock
+
+		//show clock source (internal, external or link)
+		messageInfo = "CLOCK: " + clockActive_Type;
+		fontSmall.drawString(messageInfo, xPad, interline * i++);
+
+		//-
+
+		//midi in port. id number and name
+		if (ENABLE_EXTERNAL_CLOCK)
+		{
+			messageInfo = ofToString(clockActive_Info);
+			fontSmall.drawString(messageInfo, xPad, interline * i++);
+		}
+
+		//-
+
+#ifdef USE_ofxAbletonLink
+		//ableton link
+		else if (ENABLE_LINK_SYNC)
+		{
+			messageInfo = ofToString(clockActive_Info);
+			fontSmall.drawString(messageInfo, xPad, interline * i++);
+		}
+#endif
+
+		//-
+
+		////1.4 more debug info
+		//if (SHOW_moreInfo)
+		//{
+		//	//vertical spacer
+		//	py = py + (interline * (i + 2));//accumulate heigh distance
+
+		//	messageInfo = ("BPM: " + ofToString(BPM_Global));
+		//	fontSmall.drawString(messageInfo, 4 * xPad, interline * i++);
+
+		//	messageInfo = ("BAR: " + Bar_string);
+		//	fontSmall.drawString(messageInfo, 4 * xPad, interline * i++);
+
+		//	messageInfo = ("BEAT: " + Beat_string);
+		//	fontSmall.drawString(messageInfo, 4 * xPad, interline * i++);
+
+		//	messageInfo = ("16th: " + Tick_16th_string);
+		//	fontSmall.drawString(messageInfo, 4 * xPad, interline * i++);
+
+		//	//-
+
+		//	py = py + (interline * i);//acumulate heigh distance
+		//}
+
+		//-
+
+		//1.5 main clock: bar:beat:tick
+
+		ofSetColor(colorText);
+		i = i + 2;
+		draw_BigClockTime(xPad, interline * i++);
+
+		//py = py + (fontBig.getSize());//acumulate heigh distance
+	}
+	ofPopMatrix();
+
+	ofPopStyle();
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::draw_BpmInfo(int px, int py)
+{
+	draw_Anchor(px, py);
+
+	int xPad = 5;
+	int interline = 15; //text line heigh
+	int i = 0;//vertical spacer to accumulate text lines
+
+	ofPushStyle();
+	ofSetColor(colorText);
+
+	int h = fontBig.getSize();
+
+	//-
+
+	//1.1. BPM
+
+	messageInfo = "BPM: " + ofToString(BPM_Global.get(), 2);
+	fontBig.drawString(messageInfo, px + xPad, py + h + interline * i++);
+
+	ofPopStyle();
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
+{
+	draw_Anchor(px, py);
+
+	ofPushStyle();
+
+	//-
+
 	//3. TICK BALL:
 
 	//TODO: alpha tick could be tweened to better heartbeat feeling..
-	metronome_ball_radius = w;
+	metronome_ball_radius = _radius;
 	int padToBall = 0;
-
 	py += padToBall + metronome_ball_radius;
 	metronome_ball_pos.x = px + metronome_ball_radius;
 	metronome_ball_pos.y = py;
 
-	ofPushStyle();
-
-	ofColor c;
+	ofColor c;//beat 1 mark color
 	if (Beat_current == 1)
 		c = (ofColor::red);
 	else
@@ -851,6 +928,8 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int w)
 		ofDrawCircle(circlePos, animCounter * radius);
 	}
 
+	//-
+
 	//border circle
 	ofNoFill();
 	ofSetLineWidth(2.0f);
@@ -865,7 +944,11 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int w)
 	//first beat circle of bar is drawed red. other ones are white
 
 	if (ENABLE_CLOCKS && !bTap_running &&
+#ifndef USE_ofxAbletonLink
 		(ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK))
+#else
+		(ENABLE_EXTERNAL_CLOCK || ENABLE_INTERNAL_CLOCK || ENABLE_LINK_SYNC))
+#endif
 	{
 		if (TRIG_TICK)
 		{
@@ -880,9 +963,9 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int w)
 		}
 	}
 
-	ofPopStyle();
-
 	//-
+
+	ofPopStyle();
 }
 
 //--------------------------------------------------------------
@@ -890,8 +973,7 @@ void ofxBeatClock::draw_BigClockTime(int x, int y)
 {
 	//BIG LETTERS:
 	ofPushStyle();
-
-	ofSetColor(ofColor::white);
+	ofSetColor(colorText);
 
 	int pad = 12;
 	std::string timePos =
@@ -964,9 +1046,15 @@ void ofxBeatClock::setPosition_BeatBall(int x, int y, int w)
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::setPosition_TextBpm(int x, int y)
+void ofxBeatClock::setPosition_ClockInfo(int x, int y)
 {
-	pos_TextBpm = glm::vec2(x, y);
+	pos_ClockInfo = glm::vec2(x, y);
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::setPosition_BpmInfo(int x, int y)
+{
+	pos_BpmInfo = glm::vec2(x, y);
 }
 
 //--------------------------------------------------------------
@@ -1490,7 +1578,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		//	dawMetro.addBarListener(this);
 		//	dawMetro.addSixteenthListener(this);
 		//}
-	}
+}
 #endif
 
 	//metronome ticks volume
