@@ -668,23 +668,29 @@ void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and b
 
 	//----
 
-	//2. BEATS SQUARES
+	//2. BEATS [4] SQUARES
 
 	for (int i = 0; i < 4; i++)
 	{
 		ofPushStyle();
 
-		//DEFINE SQUARES COLORS:
+		//define squares colors:
 #ifdef USE_ofxAbletonLink
-		if (ENABLE_CLOCKS & (ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK || ENABLE_LINK_SYNC))
+		if (ENABLE_CLOCKS && (ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK || ENABLE_LINK_SYNC))
 #else
-		if (ENABLE_CLOCKS & (ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK))
+		if (ENABLE_CLOCKS && (ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK))
 #endif
 		{
+			//ligther color (colorBoxes) for beat squares that "has been passed [left]"
 			if (i <= (Beat_current - 1))
 			{
 #ifdef USE_ofxAbletonLink
-				if (ENABLE_LINK_SYNC || ENABLE_INTERNAL_CLOCK)
+				//TEST:
+				if (ENABLE_LINK_SYNC) 
+					/*(link.isPlaying()) ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);*/
+					(true) ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);
+
+				if (ENABLE_INTERNAL_CLOCK)
 					PLAYING_State ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);
 #else
 				if (ENABLE_INTERNAL_CLOCK)
@@ -693,13 +699,14 @@ void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and b
 				else if (ENABLE_EXTERNAL_MIDI_CLOCK)
 					bMidiInClockRunning ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);
 			}
-			else
-				ofSetColor(32, alphaBoxes);
+			
+			//dark color if beat square "is comming [right]"..
+			else ofSetColor(32, alphaBoxes);
 		}
 
 		//-
 
-		else//disabled both modes
+		else//disabled all the 3 source clock modes
 		{
 			ofSetColor(32, alphaBoxes);//black
 		}
