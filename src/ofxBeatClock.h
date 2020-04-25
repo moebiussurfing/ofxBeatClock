@@ -585,16 +585,32 @@ private:
 			Beat_float_current = (float)link.getBeat() + 1.0f;
 			Beat_float_string = ofToString(Beat_float_current, 2);
 
+			//---
+
+			//if (ENABLE_pattern_limits)
+			//{
+			//	Beat_current = 1 + ((int)Beat_float_current) % pattern_BEAT_limit;//limited to 16 beats
+			//}
+			//else
+			//{
+			//	Beat_current = 1 + ((int)Beat_float_current);
+			//}
+			//Beat_string = ofToString(Beat_current);
+
+			//---
+
 			if (ENABLE_pattern_limits)
 			{
-				Beat_current = 1 + ((int)Beat_float_current) % pattern_BEAT_limit;//limited to 16 beats
+				Beat_current = 1 + (((int)Beat_float_current) % 4);//limited to 4 beats
 			}
 			else
 			{
-				Beat_current = 1 + ((int)Beat_float_current);
+				Beat_current = 1 + (((int)Beat_float_current));
 			}
 			Beat_string = ofToString(Beat_current);
 
+			//---
+			
 			if (Beat_current != Beat_current_PRE)
 			{
 				ofLogNotice("ofxBeatClock") << "LINK beat changed:" << Beat_current;
