@@ -17,7 +17,7 @@
 
 //----
 
-#define USE_ofxAbletonLink
+//#define USE_ofxAbletonLink
 #ifdef USE_ofxAbletonLink
 #include "ofxAbletonLink.h"//used for external Ableton Live Link engine (3)
 #endif
