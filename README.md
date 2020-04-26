@@ -22,10 +22,9 @@ External clock MIDI Sync mode:
 
 Create the example project or your own with OF ProjectGenerator as usual. Take care of required addons and the included /data files.
 
-
-```c++
 ofApp.h:
 
+```c++
 #include "ofxBeatClock.h"
 
 ...
@@ -37,9 +36,9 @@ ofEventListener beatListener;
 void callback_BeatTick();
 ```
 
-```
 ofApp.cpp:
 
+```
 //setup()
 beatClock.setup();
 
