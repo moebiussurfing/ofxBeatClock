@@ -43,6 +43,11 @@ void ofApp::setup()
 
 	//callback to receive BeatTicks
 	beatListener = beatClock.BeatTick_TRIG.newListener([&](bool&) {this->callback_BeatTick(); });
+
+	//-
+
+	//set lower level log
+	ofSetLogLevel("ofxBeatClock", OF_LOG_VERBOSE);
 }
 
 //--------------------------------------------------------------
