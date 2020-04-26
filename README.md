@@ -1,6 +1,6 @@
 # ofxBeatClock
 
-openFrameworks addon to run a DAW styled BPM-Beat clock with tap tempo and external MIDI sync (slave) and Ableton Link (master/slave).
+openFrameworks addon to run a DAW styled BPM-Beat clock with tap tempo and external MIDI sync (slave) and Ableton LINK (master/slave).
 
 
 ## Screencast
@@ -20,7 +20,7 @@ External clock MIDI Sync mode:
 
 ## Usage
 
-Create the example project or your own with OF ProjectGenerator as usual. Take care of required addons and the included /data files.
+Create the example project or your own with OF ProjectGenerator as usual. Take care of required addons and the included `/data` files.
 
 **ofApp.h**
 
@@ -29,7 +29,7 @@ Create the example project or your own with OF ProjectGenerator as usual. Take c
 
 ofxBeatClock beatClock;
 
-//callback to receive beat-ticks
+//callback to receive beatTicks
 ofEventListener beatListener;
 void callback_BeatTick();
 ```
@@ -63,7 +63,7 @@ void ofApp::callback_BeatTick()
 
 ## Features
 
-- **New feature**: **Ableton LINK** sync engine (master/slave). __[WIP but almost working]__
+- **New feature**: **Ableton LINK** sync engine (master/slave). **_[WIP but almost working]_**
   Link engine is (maybe) disabled by default. To enable Link:
   1. add ofxAbletonLink addon to your app project. 
   2. uncomment `#define USE_ofxAbletonLink` on `ofxBeatClock.h`. 
@@ -73,7 +73,7 @@ void ofApp::callback_BeatTick()
   Easy to sync to Ableton Live or any sequencer with midi clock.
 - Cute tap tempo engine.
 - Save/load of all settings.
-- Cute customizable GUI by editing the JSON file theme. ("theme_bleurgh.json". Based on a @transat theme)
+- Cute customizable GUI by editing the JSON file theme. (`"theme_bleurgh.json"`. From @transat)
 - Customizable GUI positions by code. Check other methods too.
 - Nice metronome sound ticks.
 
@@ -91,7 +91,7 @@ void ofApp::callback_BeatTick()
 
 https://github.com/danomatika/ofxMidi  
 https://github.com/castovoid/ofxDawMetro  
-https://github.com/moebiussurfing/ofxGuiExtended2 (my fork)
+https://github.com/moebiussurfing/ofxGuiExtended2 (my fork) 
 https://github.com/2bbb/ofxAbletonLink (optional)
 
 Take care of data folder:
@@ -103,7 +103,7 @@ xml settings, gui font file, and json theme. (app may crash if not present)
 ## About
 
 An addon by **MoebiusSurfing**, 2020.  
-_Thanks to developers of the included add-ons! @danomatika, @2bb, @castovoid & @frauzufall._
+**_Thanks to developers of the included add-ons! @danomatika, @2bb, @castovoid & @frauzufall._**
 
 
 
