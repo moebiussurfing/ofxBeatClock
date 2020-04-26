@@ -22,21 +22,19 @@ External clock MIDI Sync mode:
 
 Create the example project or your own with OF ProjectGenerator as usual. Take care of required addons and the included /data files.
 
-ofApp.h:
+**ofApp.h**
 
 ```c++
 #include "ofxBeatClock.h"
 
-...
-
 ofxBeatClock beatClock;
 
-//callback to receive beat-clock beat-ticks
+//callback to receive beat-ticks
 ofEventListener beatListener;
 void callback_BeatTick();
 ```
 
-ofApp.cpp:
+**ofApp.cpp**
 
 ```
 //setup()
@@ -58,7 +56,7 @@ beatClock.draw();
 void ofApp::callback_BeatTick()
 {
 	if (beatClock.BeatTick_TRIG)
-		ofLogWarning("ofApp") << "BeatTick ! " << beatClock.Beat_current;
+		ofLogWarning("ofApp") << "BeatTick !  Number: " << beatClock.Beat_current;
 }
 ```
 
@@ -105,7 +103,7 @@ xml settings, gui font file, and json theme. (app may crash if not present)
 ## About
 
 An addon by **MoebiusSurfing**, 2020.  
-__Thanks to developers of the included add-ons! @danomatika, @2bb, @castovoid & @frauzufall.__
+_Thanks to developers of the included add-ons! @danomatika, @2bb, @castovoid & @frauzufall._
 
 
 
@@ -113,7 +111,7 @@ __Thanks to developers of the included add-ons! @danomatika, @2bb, @castovoid & 
 
 - BUG: Repair problems when sometimes beat 1 tick it's displaced to beat 2...
 - BUG: Some log errors must be repaired on ofxAbletonLink that seems drop down fps/performance...
-~~- Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers (https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). Problems happen when minimizing or moving the app window.. Any help is welcome!~~
+- ~~Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers (https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). Problems happen when minimizing or moving the app window.. Any help is welcome!~~
 - On-the-fly re-sync to bar beat start.
 - A better link between play button/params in all internal/external clock source modes with one unique play button.  
 - Add filter to smooth/stabilize BPM number when using external midi clock mode.
@@ -121,4 +119,4 @@ __Thanks to developers of the included add-ons! @danomatika, @2bb, @castovoid & 
 <br/>
 
 
-**_PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!_**
+**PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!_**
