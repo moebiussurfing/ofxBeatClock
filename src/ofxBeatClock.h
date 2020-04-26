@@ -10,12 +10,15 @@
 /// BUG: [1]
 ///sometimes metronome ticks goes on beat 2 instead 1.
 ///works better with 0 and 4 detectors, but why?
+///SOLUTION:
 ///we must check better all the beat%limit bc should be the problem!!
+///maybe we can add another beat_current varialbe, independent of the received beat from source clocks
+///then to eliminate the all the limiters.
 ///must check each source clock type what's the starting beat: 0 or 1!!
 
 ///BUG: [2]
 ///VS2017. Release/x64: 
-///I am getting several log errors maybe related to LINK addon (?)
+///I am getting several log errors maybe related to LINK addon ofxAbletonLink(?)
 ///Maybe are affecting the app performance, reducing the FPS but I am not sure...
 ///Exception thrown at 0x00007FFF91DDA799 in 2_ofxBeatClock_example.exe: Microsoft C++ exception : std::system_error at memory location 0x000000000AB1F1F0.
 ///The thread 0x22120 has exited with code 0 (0x0).
@@ -39,7 +42,7 @@
 
 //* OPTIONAL : Ableton Link feature *
 
-#define USE_ofxAbletonLink
+//#define USE_ofxAbletonLink
 #ifdef USE_ofxAbletonLink
 #include "ofxAbletonLink.h"//used for external Ableton Live Link engine (3)
 #endif
@@ -294,7 +297,8 @@ private:
 	//void draw_BeatBalFlash(int _onBeat){}
 
 public:
-	ofParameter<bool> BeatTick_TRIG;//also this trigs to draw a flashing circle for a frame only
+	ofParameter<bool> BeatTick_TRIG;//get bang beat!!
+	//also this trigs to draw a flashing circle for a frame only
 	//this variable is used to subscribe external (in ofApp) listeners to get the beat bangs!
 
 	//-
@@ -446,6 +450,8 @@ private:
 	string pathSettings;
 	string filenameControl = "BeatClock_Settings.xml";
 	string filenameMidiPort = "MidiInputPort_Settings.xml";
+	string filenameApp = "AppSettings.xml";
+	ofParameterGroup params_App;
 
 	//-
 
@@ -779,7 +785,11 @@ private:
 	void Changed_LINK_Params(ofAbstractParameter &e)
 	{
 		string name = e.getName();
-		ofLogVerbose("ofxBeatClock") << "Changed_LINK_Params '" << name << "': " << e;
+		
+		if (name != "PEERS")//exclude log
+		{
+			ofLogVerbose("ofxBeatClock") << "Changed_LINK_Params '" << name << "': " << e;
+		}
 
 		//-
 
