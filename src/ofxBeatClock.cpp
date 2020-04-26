@@ -137,6 +137,13 @@ void ofxBeatClock::setup()
 
 	//--
 
+	//other settings only to storing
+	params_App.setName("AppSettings");
+	params_App.add(ENABLE_sound);
+	params_App.add(volumeSound);
+
+	//--
+
 	//tap tempo engine
 	bTap_Running = false;
 	tap_Count = 0;
@@ -1342,11 +1349,12 @@ void ofxBeatClock::beatTick_MONITOR(int _beat)
 			//BUG:
 			//sometimes metronome ticks goes on beat 2 instead 1.
 			//works better with 0 and 4 detectors, but why?
+			//!!
 			//we must check better all the beat%limit bc should be the problem!!
 			//must check each source clock type what's the starting beat: 0 or 1!!
 
-			if (_beat == 0 || _beat == 4 )
-			//if (Beat_current == 1)
+			//if (_beat == 0 || _beat == 4 )
+			if (Beat_current == 1)
 			{
 				tic.play();
 			}
@@ -2088,6 +2096,10 @@ void ofxBeatClock::saveSettings(string path)
 	ofXml settings2;
 	ofSerialize(settings2, params_EXTERNAL_MIDI);
 	settings2.save(path + filenameMidiPort);
+
+	ofXml settings3;
+	ofSerialize(settings3, params_App);
+	settings3.save(path + filenameApp);
 }
 
 //--------------------------------------------------------------
@@ -2107,6 +2119,10 @@ void ofxBeatClock::loadSettings(string path)
 	ofLogNotice("ofxBeatClock") << path + filenameMidiPort << " : " << settings2.toString();
 	ofDeserialize(settings2, params_EXTERNAL_MIDI);
 
+	ofXml settings3;
+	settings3.load(path + filenameApp);
+	ofLogNotice("ofxBeatClock") << path + filenameApp << " : " << settings3.toString();
+	ofDeserialize(settings3, params_App);
 }
 
 //--------------------------------------------------------------
