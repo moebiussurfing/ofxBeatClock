@@ -17,7 +17,6 @@ void ofApp::setup()
 
 	//----
 
-
 	beatClock.setup();
 
 	//--
@@ -46,8 +45,8 @@ void ofApp::setup()
 
 	//-
 
-	//set lower level log
-	ofSetLogLevel("ofxBeatClock", OF_LOG_VERBOSE);
+	////set lower level log
+	//ofSetLogLevel("ofxBeatClock", OF_LOG_VERBOSE);
 }
 
 //--------------------------------------------------------------
