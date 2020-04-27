@@ -1,6 +1,6 @@
 # ofxBeatClock
 
-openFrameworks addon to run a DAW styled BPM-Beat clock with tap tempo and external MIDI sync (slave) and Ableton LINK (master/slave).
+openFrameworks addon to run a DAW styled BPM-Beat clock with tap tempo and external MIDI sync (slave) and Ableton Link (master/slave).
 
 
 ## Screencast
@@ -13,7 +13,7 @@ Internal clock mode:
 
 ![Alt text](/screenshot1.JPG?raw=true "screenshot1")
 
-External clock MIDI Sync mode:
+External MIDI clock sync mode (slave):
 
 ![Alt text](/screenshot2.JPG?raw=true "screenshot2")
 
@@ -38,6 +38,7 @@ void callback_BeatTick();
 
 ```
 //setup()
+
 beatClock.setup();
 
 //callback to receive BeatTicks
@@ -46,13 +47,18 @@ beatListener = beatClock.BeatTick_TRIG.newListener([&](bool&) {this->callback_Be
 //-
 
 //update()
+
 beatClock.update();
 
 //-
 
 //draw()
+
 beatClock.draw();
 
+//-
+
+//callback
 void ofApp::callback_BeatTick()
 {
 	if (beatClock.BeatTick_TRIG)
@@ -63,7 +69,8 @@ void ofApp::callback_BeatTick()
 
 ## Features
 
-- **New feature**: **Ableton LINK** sync engine (master/slave). **_[WIP but almost working]_**
+- **New feature**: **Ableton LINK** sync engine (master/slave). 
+  **_[WIP but almost working]_**
   Link engine is (maybe) disabled by default. To enable Link:
   1. add ofxAbletonLink addon to your app project. 
   2. uncomment `#define USE_ofxAbletonLink` on `ofxBeatClock.h`. 
@@ -73,7 +80,7 @@ void ofApp::callback_BeatTick()
   Easy to sync to Ableton Live or any sequencer with midi clock.
 - Cute tap tempo engine.
 - Save/load of all settings.
-- Cute customizable GUI by editing the JSON file theme. (`"theme_bleurgh.json"`. From @transat)
+- Cute customizable GUI by editing the JSON file theme. (`"theme_bleurgh.json"` from @transat)
 - Customizable GUI positions by code. Check other methods too.
 - Nice metronome sound ticks.
 
@@ -91,7 +98,7 @@ void ofApp::callback_BeatTick()
 
 https://github.com/danomatika/ofxMidi  
 https://github.com/castovoid/ofxDawMetro  
-https://github.com/moebiussurfing/ofxGuiExtended2 (my fork) 
+https://github.com/moebiussurfing/ofxGuiExtended2 (my fork to avoid collide with ofxGui)  
 https://github.com/2bbb/ofxAbletonLink (optional)
 
 Take care of data folder:
@@ -111,12 +118,12 @@ An addon by **MoebiusSurfing**, 2020.
 
 - BUG: Repair problems when sometimes beat 1 tick it's displaced to beat 2...
 - BUG: Some log errors must be repaired on ofxAbletonLink that seems drop down fps/performance...
-- ~~Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers (https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). Problems happen when minimizing or moving the app window.. Any help is welcome!~~
 - On-the-fly re-sync to bar beat start.
 - A better link between play button/params in all internal/external clock source modes with one unique play button.  
 - Add filter to smooth/stabilize BPM number when using external midi clock mode.
+- ~~Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers (https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). Problems happen when minimizing or moving the app window.. Any help is welcome!~~
 
 <br/>
 
 
-**PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!_**
+**_PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!_**
