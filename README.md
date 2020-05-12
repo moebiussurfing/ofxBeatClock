@@ -43,12 +43,8 @@ beatClock.setup();
 //callback to receive BeatTicks
 beatListener = beatClock.BeatTick_TRIG.newListener([&](bool&) {this->callback_BeatTick(); });
 
-//-
-
 //update()
 beatClock.update();
-
-//-
 
 //draw()
 beatClock.draw();
