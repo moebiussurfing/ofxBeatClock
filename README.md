@@ -8,13 +8,14 @@
 
 ## Screenshots
 
-Internal clock mode:
-
+1 - Internal Clock mode:
 ![image](/readme_images/Capture1.PNG?raw=true "image")
 
-External MIDI clock sync mode (slave):
-
+2 - External MidiClock mode:
 ![image](/readme_images/Capture2.PNG?raw=true "image")
+
+3 - Ableton Link mode:
+![image](/readme_images/Capture3.PNG?raw=true "image")
 
 
 ## Usage
@@ -60,7 +61,7 @@ void ofApp::Changed_BeatTick()
   You can uncomment `#define USE_AUDIO_BUFFER_TIMER_MODE` on `ofxBeatClock.h` to enable *BETA* alternative timer.
 * **External Clock Source** as **input MIDI Clock** (*Slave*) using **ofxMidi** from **@danomatika**.
   Easy to sync to **Ableton Live** or any sequencer app with midi clock.
-* Cute **Tap tempo Engine**.
+* Cute **Tap Tempo Engine**.
 * Auto Save/Lload of all settings.
 * Cute **customizable GUI** by editing the **JSON file theme**.
 * Customizable GUI positions by code. Check other *API* methods too.
@@ -78,13 +79,15 @@ https://github.com/danomatika/ofxMidi
 * ofxGuiExtended2  
 https://github.com/moebiussurfing/ofxGuiExtended2 [fork]  
 
-(my fork to avoid collide with ofxGui)  
 * ofxAbletonLink  
 https://github.com/2bbb/ofxAbletonLink [optional]  
 
 * ofxDawMetro  
 (allready included into ```OF_ADDON/libs```. No need to add manually!)  
 https://github.com/castovoid/ofxDawMetro
+
+* ofxSurfingHelpers
+https://github.com/moebiussurfing/ofxSurfingHelpers
 
 Take care of data folder files:
 ```/data/ofxBeatClock/```  
