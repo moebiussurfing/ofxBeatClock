@@ -1,0 +1,5 @@
+ofxBeatClock
+ofxGuiExtended2
+ofxMidi
+ofxSurfingHelpers
+ofxWindowApp
