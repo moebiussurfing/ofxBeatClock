@@ -9,17 +9,8 @@ public:
 	void setup();
 	void keyPressed(int key);
 
-	//-
-
 	ofxBeatClock beatClock;
 
-	//callback to receive beat-ticks
 	ofEventListener listenerBeat;
 	void Changed_BeatTick();
-
-	//-
-
-#ifdef USE_ofxWindowApp
-	ofxWindowApp windowApp;
-#endif
 };
