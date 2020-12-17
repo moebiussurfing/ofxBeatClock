@@ -11,12 +11,12 @@ ofxBeatClock::ofxBeatClock() {
 }
 
 //--------------------------------------------------------------
- ofxBeatClock::~ofxBeatClock() {
-	 exit();
+ofxBeatClock::~ofxBeatClock() {
+	exit();
 
-	 ofRemoveListener(ofEvents().update, this, &ofxBeatClock::update);
-	 ofRemoveListener(ofEvents().draw, this, &ofxBeatClock::draw);
- }
+	ofRemoveListener(ofEvents().update, this, &ofxBeatClock::update);
+	ofRemoveListener(ofEvents().draw, this, &ofxBeatClock::draw);
+}
 
 //--------------------------------------------------------------
 void ofxBeatClock::setup()
@@ -31,6 +31,34 @@ void ofxBeatClock::setup()
 	//--
 
 	//define all parameters
+
+	//gui layout
+	window_W = ofGetWidth();
+	window_H = ofGetHeight();
+
+	pos_Global.set("GUI POSITION GLOBAL",
+		glm::vec2(window_W * 0.5, window_H * 0.5),
+		glm::vec2(10, 10),
+		glm::vec2(window_W, window_H)
+	);
+
+	pos_ClockInfo.set("GUI POSITION CLOCK INFO",
+		glm::vec2(window_W * 0.5, window_H * 0.5),
+		glm::vec2(210, 10),
+		glm::vec2(window_W, window_H)
+	);
+
+	pos_BpmInfo.set("GUI POSITION BPM INFO",
+		glm::vec2(window_W * 0.5, window_H * 0.5),
+		glm::vec2(420, 10),
+		glm::vec2(window_W, window_H)
+	);
+
+	pos_Gui.set("GUI POSITION PANEL",
+		glm::vec2(window_W * 0.5, window_H * 0.5),
+		glm::vec2(420, 10),
+		glm::vec2(window_W, window_H)
+	);
 
 	//1.1 controls
 
@@ -47,8 +75,14 @@ void ofxBeatClock::setup()
 #ifdef USE_ofxAbletonLink
 	params_CONTROL.add(ENABLE_LINK_SYNC.set("ABLETON LINK", false));
 #endif
-	params_CONTROL.add(SHOW_Extra.set("SHOW PREVIEW", true));
+	params_CONTROL.add(SHOW_PreviewExtra.set("SHOW PREVIEW", true));
 	params_CONTROL.add(SHOW_Advanced.set("SHOW ADVANCED", false));
+
+	MODE_Editor.set("EDIT LAYOUT", false);
+	SHOW_Editor.set("SHOW BG", false);
+
+	params_CONTROL.add(MODE_Editor);
+	params_CONTROL.add(SHOW_Editor);
 
 	//--
 
@@ -73,7 +107,7 @@ void ofxBeatClock::setup()
 	params_INTERNAL.add(PLAYING_State.set("PLAY", false));
 	params_INTERNAL.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
 	//TODO: should better gui-behavior-feel being a button not toggle
-	
+
 	//-
 
 	//TODO:
@@ -148,8 +182,8 @@ void ofxBeatClock::setup()
 	params_Advanced.add(MODE_AudioBufferTimer);
 #endif
 
-	params_Advanced.add(ENABLE_sound.set("SOUND TICK", false));
-	params_Advanced.add(volumeSound.set("VOLUME", 0.5f, 0.f, 1.f));
+	params_Advanced.add(ENABLE_sound.set("TICK SOUND", false));
+	params_Advanced.add(volumeSound.set("TICK VOLUME", 0.5f, 0.f, 1.f));
 
 	//--
 
@@ -157,6 +191,11 @@ void ofxBeatClock::setup()
 	params_App.setName("AppSettings");
 	params_App.add(ENABLE_sound);
 	params_App.add(volumeSound);
+	params_App.add(pos_Gui);
+	//TODO:
+	//params_App.add(pos_Global);
+	//params_App.add(pos_ClockInfo);
+	//params_App.add(pos_BpmInfo);
 
 	//-
 
@@ -164,6 +203,7 @@ void ofxBeatClock::setup()
 	midiIn_PortName.setSerializable(false);
 	PLAYING_External_State.setSerializable(false);
 	RESET_BPM_Global.setSerializable(false);
+	MODE_Editor.setSerializable(false);
 
 	//--
 
@@ -214,8 +254,7 @@ void ofxBeatClock::setup()
 
 	//--
 
-	//default gui extra position
-	//pos_Global = glm::vec2(5, 720);//TODO:
+	//default preview position
 	setPosition_GuiExtra(5, 770);
 
 	//-
@@ -247,17 +286,17 @@ void ofxBeatClock::setup()
 #pragma mark - METRONOME_SOUNDS
 
 	//beat 1 sound
-	tic.load("ofxBeatClock/sounds/click1.wav");
+	tic.load(path_Global + "sounds/click1.wav");
 	tic.setVolume(1.0f);
 	tic.setMultiPlay(false);
 
 	//beats 2-3-4 sound
-	tac.load("ofxBeatClock/sounds/click2.wav");
+	tac.load(path_Global + "sounds/click2.wav");
 	tac.setVolume(0.25f);
 	tac.setMultiPlay(false);
 
 	//tap tempo measure done sound
-	tapBell.load("ofxBeatClock/sounds/tapBell.wav");
+	tapBell.load(path_Global + "sounds/tapBell.wav");
 	tapBell.setVolume(1.0f);
 	tapBell.setMultiPlay(false);
 
@@ -292,23 +331,24 @@ void ofxBeatClock::setup()
 //--------------------------------------------------------------
 void ofxBeatClock::startup()
 {
-	//load last session settings
+	//load settings
 
 	//folder to both (control and midi input port) settings files
 	loadSettings(path_Global);
 
 	//-
 
-	//rectanglePresetClicker.width = getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w;
-	//rectanglePresetClicker.height = getPresetClicker_Height() + 2 * _RectClick_Pad;
-	//rectanglePresetClicker.x = getPresetClicker_Position().x - _RectClick_Pad - _RectClick_w;
-	//rectanglePresetClicker.y = getPresetClicker_Position().y - _RectClick_Pad;
-	//_rectRatio = rectanglePresetClicker.width / rectanglePresetClicker.height;
+	// edit layout
 
-	//// load settings
-	//rectanglePresetClicker.loadSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
-	//clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
-	//clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
+	////A. hardcoded init. comment to use settings file
+	//rPreview.enableEdit();
+	rPreview.disableEdit();
+	rPreview.setRect(225, 325, 35, 70);
+
+	//B. load settings
+	//rPreview.loadSettings(name_r1, name_r2, false);
+	rPreview.loadSettings();
+	//setPosition_GuiExtra(rPreview.x + padx, rPreview.y + pady);// ?
 
 	//-
 
@@ -324,8 +364,6 @@ void ofxBeatClock::startup()
 #ifdef USE_AUDIO_BUFFER_TIMER_MODE
 	setupAudioBuffer(0);
 #endif
-
-	//-----
 }
 
 //--------------------------------------------------------------
@@ -352,27 +390,29 @@ void ofxBeatClock::setup_GuiPanel()
 	//--
 
 	//1. main panel
-	group_BeatClock = gui.addGroup("BEAT CLOCK");//main container
+	panel_BeatClock = gui.addPanel("BEAT CLOCK");//main container
+	//panel_BeatClock = gui.addGroup("BEAT CLOCK");//main container
+	panel_BeatClock->setShowHeader(true);
 
 	//1.1 control
-	group_Controls = group_BeatClock->addGroup(params_CONTROL);
+	group_Controls = panel_BeatClock->addGroup(params_CONTROL);
 
 	//1.2 internal
-	group_INTERNAL = group_BeatClock->addGroup("INTERNAL CLOCK");
+	group_INTERNAL = panel_BeatClock->addGroup("INTERNAL CLOCK");
 	group_INTERNAL->add(params_INTERNAL);
 
 	//1.3 external midi
-	group_EXTERNAL_MIDI = group_BeatClock->addGroup("EXTERNAL MIDI CLOCK");
+	group_EXTERNAL_MIDI = panel_BeatClock->addGroup("EXTERNAL MIDI CLOCK");
 	group_EXTERNAL_MIDI->add(params_EXTERNAL_MIDI);
 
 	//1.4 link
 #ifdef USE_ofxAbletonLink
-	group_LINK = group_BeatClock->addGroup("ABLETON LINK");
+	group_LINK = panel_BeatClock->addGroup("ABLETON LINK");
 	group_LINK->add(params_LINK);
 #endif
 
 	//1.5 extra and advanced settings
-	group_Advanced = group_BeatClock->addGroup(params_Advanced);
+	group_Advanced = panel_BeatClock->addGroup(params_Advanced);
 
 	//--
 
@@ -406,7 +446,7 @@ void ofxBeatClock::setup_GuiPanel()
 	group_LINK->getFloatSlider("PHASE")->setConfig(ofJson{
 		{"precision", 1},
 		{"fill-color", "rgb(128,128,0)"}
-		});
+});
 #endif
 
 	//1.5
@@ -428,7 +468,7 @@ void ofxBeatClock::setup_GuiPanel()
 	loadTheme(path_Theme);
 
 	////customize panel width over the loaded json theme
-	//group_BeatClock->setWidth(gui_Panel_Width);
+	//panel_BeatClock->setWidth(gui_Panel_Width);
 	//group_INTERNAL->setWidth(gui_Panel_Width);
 	//group_Controls->setWidth(gui_Panel_Width);
 	//group_Advanced->setWidth(gui_Panel_Width);
@@ -436,7 +476,7 @@ void ofxBeatClock::setup_GuiPanel()
 	//--
 
 	//expand/collapse pannels
-	group_BeatClock->maximize();
+	panel_BeatClock->maximize();
 	group_Controls->maximize();
 	group_Advanced->minimize();
 
@@ -473,7 +513,7 @@ void ofxBeatClock::setup_GuiPanel()
 //--------------------------------------------------------------
 void ofxBeatClock::refresh_Gui()
 {
-	//kind of init state after loaded settings just in case not open correct(?)
+	//workflow
 
 	if (ENABLE_INTERNAL_CLOCK)
 	{
@@ -523,12 +563,10 @@ void ofxBeatClock::refresh_Gui()
 		//display text
 		clockActive_Type = "ABLETON LINK";
 		clockActive_Info = "";
-	}
+}
 #endif
 
-	//--
-
-	//gui workflow
+	//-
 
 	if (ENABLE_INTERNAL_CLOCK)
 	{
@@ -539,6 +577,8 @@ void ofxBeatClock::refresh_Gui()
 		group_INTERNAL->minimize();
 	}
 
+	//-
+
 	if (ENABLE_EXTERNAL_MIDI_CLOCK)
 	{
 		group_EXTERNAL_MIDI->maximize();
@@ -547,6 +587,8 @@ void ofxBeatClock::refresh_Gui()
 	{
 		group_EXTERNAL_MIDI->minimize();
 	}
+
+	//-
 
 #ifdef USE_ofxAbletonLink
 	if (ENABLE_LINK_SYNC)
@@ -676,36 +718,40 @@ void ofxBeatClock::update(ofEventArgs & args)
 #pragma mark - DRAW
 
 //--------------------------------------------------------------
-void ofxBeatClock::drawPreviewExtra()
+void ofxBeatClock::draw_PreviewExtra()
 {
+	ofPushMatrix();
+
+	// rectangle editor
+	if (SHOW_Editor)
+	{
+		ofPushStyle();
+		ofFill();
+		ofSetColor(ofColor(0, 220));
+		rPreview.draw();
+		ofDrawRectRounded(rPreview, 5);
+		ofPopStyle();
+	}
+
+	// get clicker position from being edited rectangle
+	//if (MODE_Editor.get())
+	{
+		setPosition_GuiExtra(rPreview.x + padx, rPreview.y + pady);
+		//sets all below variables...
+	}
 
 	//-
 
-	//// bg rectangle editor
-	//if (SHOW_BackGround_EditPresetClicker)
-	//{
-	//	ofFill();
-	//	ofSetColor(_colorBg);
-	//	rectanglePresetClicker.draw();
-	//	ofDrawRectRounded(rectanglePresetClicker, _round);
-	//}
+	//TODO:
+	//use my beatCircle class from surfingHelpers !
+	//improve reducing stuff..
 
-	//// get clicker position from being edited rectangle
-	//if (MODE_EditPresetClicker)
-	//{
-	//	_RectClick_w = getGroupNamesWidth();
-	//	clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
-	//	clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
-	//	//rectanglePresetClicker.width = MIN(getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w, 1000);
-	//	//rectanglePresetClicker.height = rectanglePresetClicker.width / _rectRatio;
-	//}
-
-	//-
-
-	draw_BpmInfo(pos_BpmInfo.x, pos_BpmInfo.y);
-	draw_ClockInfo(pos_ClockInfo.x, pos_ClockInfo.y);
+	draw_BpmInfo(pos_BpmInfo.get().x, pos_BpmInfo.get().y);
+	draw_ClockInfo(pos_ClockInfo.get().x, pos_ClockInfo.get().y);
 	draw_BeatBoxes(pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_width);
 	draw_BeatBall(pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_radius);
+
+	ofPopMatrix();
 }
 
 //--------------------------------------------------------------
@@ -713,9 +759,9 @@ void ofxBeatClock::draw(ofEventArgs & args)
 {
 	//TODO: maybe could improve performance with fbo drawings for all BeatBoxes/text/ball?
 
-	if (SHOW_Extra)
+	if (SHOW_PreviewExtra)
 	{
-		drawPreviewExtra();
+		draw_PreviewExtra();
 
 		//-
 
@@ -731,6 +777,8 @@ void ofxBeatClock::draw(ofEventArgs & args)
 //--------------------------------------------------------------
 void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and boxes
 {
+	ofPushStyle();
+
 	if (DEBUG_Layout) ofxSurfingHelpers::draw_Anchor(px, py);
 
 	//sizes and paddings
@@ -747,8 +795,6 @@ void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and b
 	//----
 
 	//2. BEATS [4] SQUARES
-
-	ofPushStyle();
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -822,6 +868,8 @@ void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and b
 //--------------------------------------------------------------
 void ofxBeatClock::draw_ClockInfo(int px, int py)
 {
+	ofPushStyle();
+
 	if (DEBUG_Layout) ofxSurfingHelpers::draw_Anchor(px, py);
 
 	//this method draws: tap debug, clock source, clock info, bar-beat-tick16th clock 
@@ -834,7 +882,6 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 
 	//clock info:
 
-	ofPushStyle();
 	ofSetColor(colorText);
 
 	//-
@@ -950,12 +997,13 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 //--------------------------------------------------------------
 void ofxBeatClock::draw_BpmInfo(int px, int py)
 {
+	ofPushStyle();
+
 	if (DEBUG_Layout) ofxSurfingHelpers::draw_Anchor(px, py);
 
 	int xPad = 5;
 	int h = fontBig.getSize();
 
-	ofPushStyle();
 	ofSetColor(colorText);
 
 	messageInfo = "BPM: " + ofToString(BPM_Global.get(), 2);
@@ -967,13 +1015,13 @@ void ofxBeatClock::draw_BpmInfo(int px, int py)
 //--------------------------------------------------------------
 void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 {
-	if (DEBUG_Layout) ofxSurfingHelpers::draw_Anchor(px, py);
-
 	ofPushStyle();
+
+	if (DEBUG_Layout) ofxSurfingHelpers::draw_Anchor(px, py);
 
 	//-
 
-	//tick ball:
+	//tick ball
 
 	metronome_ball_radius = _radius;
 	py += metronome_ball_radius;
@@ -982,10 +1030,8 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 
 	//highlight 1st beat
 	ofColor c;
-	if (Beat_current == 1)
-		c = (ofColor::red);
-	else
-		c = (ofColor::white);
+	if (Beat_current == 1) c = (ofColor::red);
+	else c = (ofColor::white);
 
 	//-
 
@@ -1082,7 +1128,7 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 				ofSetColor(ofColor::white);
 
 			ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
-		}
+	}
 	}
 
 	//-
@@ -1094,6 +1140,7 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 void ofxBeatClock::draw_BigClockTime(int x, int y)
 {
 	ofPushStyle();
+
 	ofSetColor(colorText);
 
 	int xpad = 12;
@@ -1132,9 +1179,9 @@ void ofxBeatClock::setPosition_GuiPanel(int _x, int _y, int _w)
 	gui_Panel_posY = _y;
 	gui_Panel_Width = _w;
 
-	group_BeatClock->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
+	panel_BeatClock->setPosition(ofPoint(gui_Panel_posX, gui_Panel_posY));
 
-	group_BeatClock->setWidth(gui_Panel_Width);
+	panel_BeatClock->setWidth(gui_Panel_Width);
 	group_INTERNAL->setWidth(gui_Panel_Width);
 	group_Controls->setWidth(gui_Panel_Width);
 	group_Advanced->setWidth(gui_Panel_Width);
@@ -1143,26 +1190,28 @@ void ofxBeatClock::setPosition_GuiPanel(int _x, int _y, int _w)
 //--------------------------------------------------------------
 void ofxBeatClock::setPosition_GuiExtra(int x, int y)
 {
-	//will be used if they are not redefined
-
 	//pos global
-	//main anchor to reference all other gui elements
+	//main anchor
+	//to reference all other gui elements
+
 	pos_Global = glm::vec2(x, y);
 
+	//-
+
 	//bpm big text info
-	pos_BpmInfo = glm::vec2(pos_Global.x, pos_Global.y);
+	pos_BpmInfo = glm::vec2(pos_Global.get().x, pos_Global.get().y);
 
 	//clock info
-	pos_ClockInfo = glm::vec2(pos_Global.x, pos_BpmInfo.y + 20);
+	pos_ClockInfo = glm::vec2(pos_Global.get().x, pos_BpmInfo.get().y + 20);
 
 	//beat boxes
 	pos_BeatBoxes_width = 200;
-	pos_BeatBoxes_x = pos_Global.x;
-	pos_BeatBoxes_y = pos_ClockInfo.y + 130;
+	pos_BeatBoxes_x = pos_Global.get().x;
+	pos_BeatBoxes_y = pos_ClockInfo.get().y + 130;
 
 	//beat ball
 	pos_BeatBall_radius = 30;
-	pos_BeatBall_x = pos_Global.x + pos_BeatBoxes_width * 0.5f - pos_BeatBall_radius;
+	pos_BeatBall_x = pos_Global.get().x + pos_BeatBoxes_width * 0.5f - pos_BeatBall_radius;
 	pos_BeatBall_y = pos_BeatBoxes_y + 62;
 }
 
@@ -1170,10 +1219,17 @@ void ofxBeatClock::setPosition_GuiExtra(int x, int y)
 ofPoint ofxBeatClock::getPosition_GuiPanel()
 {
 	ofPoint p;
-	//p = group_BeatClock->getShape().getTopLeft();
+	//p = panel_BeatClock->getShape().getTopLeft();
 	p = ofPoint(gui_Panel_posX, gui_Panel_posY);
 	return p;
 }
+
+////--------------------------------------------------------------
+//glm::vec2 ofxBeatClock::getPosition_GuiPanel()
+//{
+//	glm::vec2 p = glm::vec2(gui_Panel_posX, gui_Panel_posY);
+//	return p;
+//}
 
 //--------------------------------------------------------------
 void ofxBeatClock::setPosition_BeatBoxes(int x, int y, int w)
@@ -1204,9 +1260,9 @@ void ofxBeatClock::setPosition_BpmInfo(int x, int y)
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::setVisible_BeatBall(bool b)
+void ofxBeatClock::setVisible_GuiPreview(bool b)
 {
-	SHOW_Extra = b;
+	SHOW_PreviewExtra = b;
 }
 
 //--------------------------------------------------------------
@@ -1220,7 +1276,9 @@ void ofxBeatClock::exit()
 {
 	ofLogNotice(__FUNCTION__);
 
-	//rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
+	rPreview.disableEdit();
+	//rPreview.saveSettings(name_r1, path_Global + name_r2, false);
+	rPreview.saveSettings("", "", false);
 
 	//-
 
@@ -1445,7 +1503,7 @@ int ofxBeatClock::getTimeBar()
 void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 {
 	string name = e.getName();
-	ofLogVerbose(__FUNCTION__) << name << " : " << e;
+	ofLogNotice(__FUNCTION__) << name << " : " << e;
 
 	//-
 
@@ -1453,21 +1511,18 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 	//-
 
-	//else if (name == MODE_EditPresetClicker.getName())
-	//{
-	//	if (MODE_EditPresetClicker.get())
-	//	{
-	//		rectanglePresetClicker.enableEdit();
-
-	//		// workflow
-	//		//SHOW_BackGround_EditPresetClicker = true;
-	//		if (!SHOW_Panel_Click) SHOW_Panel_Click = true;
-	//	}
-	//	else
-	//	{
-	//		rectanglePresetClicker.disableEdit();
-	//	}
-	//}
+	else if (name == MODE_Editor.getName())
+	{
+		ofLogNotice(__FUNCTION__) << name << (MODE_Editor ? "TRUE" : "FALSE");
+		if (MODE_Editor.get())
+		{
+			rPreview.enableEdit();
+		}
+		else
+		{
+			rPreview.disableEdit();
+		}
+	}
 
 	else if (name == "PLAY")//button for internal only
 	{
@@ -1844,7 +1899,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//helpers
 	else if (name == "RESET BPM")
 	{
-	ofLogNotice(__FUNCTION__) << "RESET BPM";
+		ofLogNotice(__FUNCTION__) << "RESET BPM";
 
 		if (RESET_BPM_Global)
 		{
@@ -1863,7 +1918,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	}
 	else if (name == "DOUBLE")
 	{
-	ofLogNotice(__FUNCTION__) << "DOUBLE BPM";
+		ofLogNotice(__FUNCTION__) << "DOUBLE BPM";
 		if (BPM_double_TRIG)
 		{
 			BPM_double_TRIG = false;
@@ -1873,7 +1928,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	}
 	else if (name == "HALF")
 	{
-	ofLogNotice(__FUNCTION__) << "HALF BPM";
+		ofLogNotice(__FUNCTION__) << "HALF BPM";
 		if (BPM_half_TRIG)
 		{
 			BPM_half_TRIG = false;
@@ -1898,7 +1953,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//-
 
 	//metronome ticks volume
-	else if (name == "VOLUME")
+	else if (name == "TICK VOLUME")
 	{
 		ofLogNotice(__FUNCTION__) << "VOLUME: " << ofToString(volumeSound, 1);
 		tic.setVolume(volumeSound);
@@ -1935,7 +1990,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//		reSync();
 	//	}
 	//}
-}
+	}
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_midiIn_BeatsInBar(int &beatsInBar)
@@ -2147,20 +2202,22 @@ void ofxBeatClock::saveSettings(std::string path)
 {
 	if (DEBUG_Layout) ofxSurfingHelpers::CheckFolder(path);
 
+	pos_Gui = glm::vec2(panel_BeatClock->getPosition().x, panel_BeatClock->getPosition().y);
+
 	//save settings
 	ofLogNotice(__FUNCTION__) << path;
 
-	ofXml settings;
-	ofSerialize(settings, params_CONTROL);
-	settings.save(path + filenameControl);
+	ofXml settings1;
+	ofSerialize(settings1, params_CONTROL);
+	settings1.save(path + file_BeatClock);
 
 	ofXml settings2;
 	ofSerialize(settings2, params_EXTERNAL_MIDI);
-	settings2.save(path + filenameMidiPort);
+	settings2.save(path + file_Midi);
 
 	ofXml settings3;
 	ofSerialize(settings3, params_App);
-	settings3.save(path + filenameApp);
+	settings3.save(path + file_App);
 }
 
 //--------------------------------------------------------------
@@ -2169,20 +2226,22 @@ void ofxBeatClock::loadSettings(std::string path)
 	//load settings
 	ofLogNotice(__FUNCTION__) << path;
 
-	ofXml settings;
-	settings.load(path + filenameControl);
-	ofLogNotice(__FUNCTION__) << path + filenameControl << " : " << settings.toString();
-	ofDeserialize(settings, params_CONTROL);
+	ofXml settings1;
+	settings1.load(path + file_BeatClock);
+	ofLogNotice(__FUNCTION__) << path + file_BeatClock << " : " << settings1.toString();
+	ofDeserialize(settings1, params_CONTROL);
 
 	ofXml settings2;
-	settings2.load(path + filenameMidiPort);
-	ofLogNotice(__FUNCTION__) << path + filenameMidiPort << " : " << settings2.toString();
+	settings2.load(path + file_Midi);
+	ofLogNotice(__FUNCTION__) << path + file_Midi << " : " << settings2.toString();
 	ofDeserialize(settings2, params_EXTERNAL_MIDI);
 
 	ofXml settings3;
-	settings3.load(path + filenameApp);
-	ofLogNotice(__FUNCTION__) << path + filenameApp << " : " << settings3.toString();
+	settings3.load(path + file_App);
+	ofLogNotice(__FUNCTION__) << path + file_App << " : " << settings3.toString();
 	ofDeserialize(settings3, params_App);
+
+	panel_BeatClock->setPosition(pos_Gui.get().x, pos_Gui.get().y);
 }
 
 //--------------------------------------------------------------
@@ -2204,16 +2263,16 @@ void ofxBeatClock::onBarEvent(int &bar)
 			if (ENABLE_pattern_limits)
 			{
 				Bar_current = bar % pattern_BAR_limit;
-			}
+		}
 			else
 			{
 				Bar_current = bar;
 			}
 
 			Bar_string = ofToString(Bar_current);
-		}
 	}
 }
+	}
 
 //--------------------------------------------------------------
 void ofxBeatClock::onBeatEvent(int &beat)
@@ -2230,7 +2289,7 @@ void ofxBeatClock::onBeatEvent(int &beat)
 			{
 				Beat_current = beat % pattern_BEAT_limit;//limited to 16 beats
 				//TODO: this are 16th ticks not beat!
-			}
+		}
 			else
 			{
 				Beat_current = beat;
@@ -2242,9 +2301,9 @@ void ofxBeatClock::onBeatEvent(int &beat)
 			beatTick_MONITOR(Beat_current);
 
 			//-
-		}
 	}
 }
+	}
 
 //--------------------------------------------------------------
 void ofxBeatClock::onSixteenthEvent(int &sixteenth)
@@ -2561,3 +2620,28 @@ void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
 	}
 }
 #endif
+
+
+//--------------------------------------------------------------
+void ofxBeatClock::windowResized(int _w, int _h)
+{
+	//	//if (!DISABLE_Callbacks)
+	//	//{
+	//	window_W = _w;
+	//	window_H = _h;
+	//	//window_X = ofGetWindowPositionX();
+	//	//window_Y = ofGetWindowPositionY();
+	//
+	////	ofLogNotice(__FUNCTION__) << "size: " << window_W << "," << window_H;;
+	////	ofLogNotice(__FUNCTION__) << "position: " << window_X << "," << window_Y;;
+	//
+	////	//--
+	//
+	////	//gui
+	//
+	////	//--
+	//
+	////	//1. video player
+	////	hapSkipper.windowResized(window_W, window_H);
+	////}
+}
