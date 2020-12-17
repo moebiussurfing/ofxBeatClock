@@ -1,8 +1,0 @@
-ofxAbletonLink
-ofxBeatClock
-ofxDawMetro
-ofxGuiExtended2
-ofxMidi
-ofxSerializer
-ofxWindowApp
-ofxXmlSettings
