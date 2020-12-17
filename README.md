@@ -1,6 +1,6 @@
 # ofxBeatClock
 
-openFrameworks addon to run a DAW styled ```BPM Beat-Clock``` with ```Tap Tempo``` and ```external MIDI Sync``` (slave) and ```Ableton Link``` (Master/Slave).
+**openFrameworks** addon to run a *DAW-Styled* ```BPM Beat-Clock``` with ```Internal Clock``` (Master) with ```Tap Tempo``` and ```External MIDI Sync``` (Slave) and ```Ableton Link``` (Master/Slave).
 
 ## Screencast
 
@@ -10,11 +10,11 @@ openFrameworks addon to run a DAW styled ```BPM Beat-Clock``` with ```Tap Tempo`
 
 Internal clock mode:
 
-![image](/readme_images/Capture1.JPG?raw=true "image")
+![image](/readme_images/Capture1.PNG?raw=true "image")
 
 External MIDI clock sync mode (slave):
 
-![image](/readme_images/Capture2.JPG?raw=true "image")
+![image](/readme_images/Capture2.PNG?raw=true "image")
 
 
 ## Usage
@@ -28,7 +28,6 @@ Take care of required addons and the included ```bin/data``` files.
 
 ofxBeatClock beatClock;
 
-//callback to receive beat-ticks
 ofEventListener listenerBeat;
 void Changed_BeatTick();
 ```
@@ -46,8 +45,7 @@ listenerBeat = beatClock.BeatTick_TRIG.newListener([&](bool&) {this->Changed_Bea
 //callback
 void ofApp::Changed_BeatTick()
 {
-	if (beatClock.BeatTick_TRIG)
-		ofLogWarning("ofApp") << "BeatTick ! Number: " << beatClock.Beat_current;
+	if (beatClock.BeatTick_TRIG) ofLogWarning("ofApp") << "BeatTick ! Number: " << beatClock.Beat_current;
 }
 ```
 
@@ -66,7 +64,7 @@ void ofApp::Changed_BeatTick()
 * Auto Save/Lload of all settings.
 * Cute **customizable GUI** by editing the **JSON file theme**.
 * Customizable GUI positions by code. Check other *API* methods too.
-* Nice **metronome sound ticks**.
+* Nice **Metronome Sound Ticks**.
 
 ## Tested Systems
 - **Windows10** / **VS2017** / **OF ~0.11**
@@ -78,11 +76,11 @@ void ofApp::Changed_BeatTick()
 https://github.com/danomatika/ofxMidi  
 
 * ofxGuiExtended2  
-https://github.com/moebiussurfing/ofxGuiExtended2  
+https://github.com/moebiussurfing/ofxGuiExtended2 [fork]  
 
 (my fork to avoid collide with ofxGui)  
 * ofxAbletonLink  
-https://github.com/2bbb/ofxAbletonLink (optional)  
+https://github.com/2bbb/ofxAbletonLink [optional]  
 
 * ofxDawMetro  
 (allready included into ```OF_ADDON/libs```. No need to add manually!)  
