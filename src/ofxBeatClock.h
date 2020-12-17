@@ -121,17 +121,17 @@
 
 //-
 
-class ofxBeatClock : public ofxMidiListener, public ofxDawMetro::MetroListener {
+class ofxBeatClock : public ofBaseApp, public ofxMidiListener, public ofxDawMetro::MetroListener {
 
-#pragma mark - OF_MAIN
+#pragma mark - OF
 
 public:
 	ofxBeatClock();
 	~ofxBeatClock();
 
 	void setup();
-	void update();
-	void draw();
+	void update(ofEventArgs & args);
+	void draw(ofEventArgs & args);
 	void exit();
 
 	//-
@@ -496,7 +496,7 @@ private:
 	std::string filenameControl = "BeatClock_Settings.xml";
 	std::string filenameMidiPort = "Midi_Settings.xml";
 	std::string filenameApp = "App_Settings.xml";
-	
+
 	ofParameterGroup params_App;
 
 	//-
@@ -733,7 +733,7 @@ private:
 				Beat_string = ofToString(Beat_current);
 
 				//-
-				
+
 				//bar
 				int _bars = _beats / 4;
 				if (ENABLE_pattern_limits)
@@ -836,7 +836,7 @@ private:
 	void Changed_LINK_Params(ofAbstractParameter &e)
 	{
 		std::string name = e.getName();
-		
+
 		if (name != "PEERS")//exclude log
 		{
 			ofLogVerbose(__FUNCTION__) << "Changed_LINK_Params '" << name << "': " << e;
@@ -1026,6 +1026,5 @@ private:
 		}
 	}
 #endif
-
 };
 
