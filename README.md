@@ -52,20 +52,22 @@ void ofApp::Changed_BeatTick()
 
 ## Features
 
-* **New feature**: **Ableton LINK** sync engine (master/slave). 
-  **_[WIP but almost working]_**
+* **New feature**:  
+**Ableton LINK** sync engine (master/slave).  
+  **_[WIP but almost working]_**  
   Link engine is (maybe) disabled by default. To enable Link:
   * Add ```ofxAbletonLink``` addon to your app project. 
   * Uncomment ```#define USE_ofxAbletonLink``` on ```ofxBeatClock.h```. 
-* **Internal Clock** based in a threaded timer from **ofxDawMetro** from **@castovoid**.
-  You can uncomment `#define USE_AUDIO_BUFFER_TIMER_MODE` on `ofxBeatClock.h` to enable *BETA* alternative timer.
-* **External Clock Source** as **input MIDI Clock** (*Slave*) using **ofxMidi** from **@danomatika**.
-  Easy to sync to **Ableton Live** or any sequencer app with midi clock.
-* Cute **Tap Tempo Engine**.
-* Auto Save/Lload of all settings.
+* **Internal Clock** based in a threaded timer from **ofxDawMetro** from **@castovoid**.  
+You can uncomment `#define USE_AUDIO_BUFFER_TIMER_MODE` on `ofxBeatClock.h` to enable *BETA* alternative timer. (*WIP*)
+* **External Clock Source** as **input MIDI Clock** (*Slave*) using **ofxMidi** from **@danomatika**.  
+Easy to Sync to **Ableton Live** or any sequencer app with **Midi Clock**.
+* **Tap Tempo Engine**.
+* **Auto Save/Load** of all settings.
 * Cute **customizable GUI** by editing the **JSON file theme**.
 * Customizable GUI positions by code. Check other *API* methods too.
 * Nice **Metronome Sound Ticks**.
+* Draggable box to edit to layout: change preview info and GUI panel positions.
 
 ## Tested Systems
 - **Windows10** / **VS2017** / **OF ~0.11**
@@ -91,20 +93,7 @@ https://github.com/moebiussurfing/ofxSurfingHelpers
 
 Take care of data folder files:
 ```/data/ofxBeatClock/```  
-Xml settings, gui font file, and json theme. (app may crash if not present)
-
-## TODO:
-
-- **BUG**: Repair problems when sometimes beat 1 tick it's displaced to beat 2...
-- **BUG**: Some log errors must be repaired on ofxAbletonLink that seems drop down fps/performance...
-- Add the correct workflow for LINK. Must add some mode toggle.
-- On-the-fly re-sync to bar beat start.
-- A better link between play button/params in all internal/external clock source modes, with one unique play button for all clock sources.  
-- Add filter to smooth/stabilize BPM number when using external midi clock mode.
-- ~~Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers  
-(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10).  
-Problems happen when minimizing or moving the app window.. Any help is welcome!~~
-- Add kind of plugin to add audio input to get Beat on the fly from incomming audio signal. (Using ofxBTrack)  
+Xml settings, gui font file, and JSON theme. (app may crash if not present)
 
 ## Author
 Addon by **@moebiusSurfing**  
