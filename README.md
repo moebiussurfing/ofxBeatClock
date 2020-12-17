@@ -1,6 +1,6 @@
 # ofxBeatClock
 
-**openFrameworks** addon to run a *DAW-Styled* ```BPM Beat-Clock``` with ```Internal Clock``` (Master) with ```Tap Tempo``` and ```External MIDI Sync``` (Slave) and ```Ableton Link``` (Master/Slave).
+**openFrameworks** addon to run a *DAW-Styled* BPM Beat-Clock with Internal Clock with Tap Tempo and External MIDI Sync and Ableton Link.
 
 ## Screencast
 
@@ -8,13 +8,13 @@
 
 ## Screenshots
 
-1 - Internal Clock mode:
+1 - Internal Clock mode:  
 ![image](/readme_images/Capture1.PNG?raw=true "image")
 
-2 - External MidiClock mode:
+2 - External MidiClock mode:  
 ![image](/readme_images/Capture2.PNG?raw=true "image")
 
-3 - Ableton Link mode:
+3 - Ableton Link mode:  
 ![image](/readme_images/Capture3.PNG?raw=true "image")
 
 
