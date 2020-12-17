@@ -1,111 +1,102 @@
 # ofxBeatClock
 
-openFrameworks addon to run a DAW styled BPM-Beat clock with tap tempo and external MIDI sync (slave) and Ableton Link (master/slave).
-
+openFrameworks addon to run a DAW styled ```BPM Beat-Clock``` with ```Tap Tempo``` and ```external MIDI Sync``` (slave) and ```Ableton Link``` (Master/Slave).
 
 ## Screencast
-![Alt text](/ofxBeatClock.gif?raw=true "ofxBeatClock.gif")
 
+![gif](/readme_images/ofxBeatClock.gif?raw=true "gif")
 
 ## Screenshots
 
 Internal clock mode:
 
-![Alt text](/screenshot1.JPG?raw=true "screenshot1")
+![image](/readme_images/Capture1.JPG?raw=true "image")
 
 External MIDI clock sync mode (slave):
 
-![Alt text](/screenshot2.JPG?raw=true "screenshot2")
+![image](/readme_images/Capture2.JPG?raw=true "image")
 
 
 ## Usage
 
-Create the example project or your own with OF ProjectGenerator as usual. Take care of required addons and the included `/data` files.
+Create the example project or your own with ```OF Project Generator``` as usual.  
+Take care of required addons and the included ```bin/data``` files.  
 
-**ofApp.h**
-
+### ofApp.h
 ```cpp
 #include "ofxBeatClock.h"
 
 ofxBeatClock beatClock;
 
-//callback to receive beatTicks
-ofEventListener beatListener;
-void callback_BeatTick();
+//callback to receive beat-ticks
+ofEventListener listenerBeat;
+void Changed_BeatTick();
 ```
 
-**ofApp.cpp**
-
+### ofApp.cpp
 ```cpp
-//setup()
+//ofApp::setup()
 beatClock.setup();
 
 //callback to receive BeatTicks
-beatListener = beatClock.BeatTick_TRIG.newListener([&](bool&) {this->callback_BeatTick(); });
+listenerBeat = beatClock.BeatTick_TRIG.newListener([&](bool&) {this->Changed_BeatTick(); });
 
-//update()
+//ofApp::update()
 beatClock.update();
 
-//draw()
+//ofApp::draw()
 beatClock.draw();
 
 //-
 
 //callback
-void ofApp::callback_BeatTick()
+void ofApp::Changed_BeatTick()
 {
 	if (beatClock.BeatTick_TRIG)
-		ofLogWarning("ofApp") << "BeatTick !  Number: " << beatClock.Beat_current;
+		ofLogWarning("ofApp") << "BeatTick ! Number: " << beatClock.Beat_current;
 }
 ```
 
-
 ## Features
 
-- **New feature**: **Ableton LINK** sync engine (master/slave). 
+* **New feature**: **Ableton LINK** sync engine (master/slave). 
   **_[WIP but almost working]_**
   Link engine is (maybe) disabled by default. To enable Link:
-  1. add ofxAbletonLink addon to your app project. 
-  2. uncomment `#define USE_ofxAbletonLink` on `ofxBeatClock.h`. 
-- Internal clock based in a threaded timer from ofxDawMetro from @castovoid.
+  * Add ofxAbletonLink addon to your app project. 
+  * Uncomment `#define USE_ofxAbletonLink` on `ofxBeatClock.h`. 
+* Internal clock based in a threaded timer from ofxDawMetro from @castovoid.
   You can uncomment `#define USE_AUDIO_BUFFER_TIMER_MODE` on `ofxBeatClock.h` to enable *BETA* alternative timer.
-- External clock source as input MIDI clock (slave) using ofxMidi from @danomatika.
+* External clock source as input MIDI clock (slave) using ofxMidi from @danomatika.
   Easy to sync to Ableton Live or any sequencer with midi clock.
-- Cute tap tempo engine.
-- Save/load of all settings.
-- Cute customizable GUI by editing the JSON file theme. (`"theme_bleurgh.json"` from @transat)
-- Customizable GUI positions by code. Check other methods too.
-- Nice metronome sound ticks.
+* Cute tap tempo engine.
+* Save/load of all settings.
+* Cute customizable GUI by editing the JSON file theme.
+* Customizable GUI positions by code. Check other methods too.
+* Nice metronome sound ticks.
 
-
-
-## Tested systems
-
-- OF 0.11
-- Windows10 / Visual Studio 2017
-- macOS / HighSierra
-
-
+## Tested Systems
+- **Windows10** / **VS2017** / **OF ~0.11**
+- **macOS. High Sierra** / **Xcode9** & **Xcode10** / **OF ~0.11**
 
 ## Requeriments
 
+* ofxMidi  
 https://github.com/danomatika/ofxMidi  
-https://github.com/castovoid/ofxDawMetro  
-https://github.com/moebiussurfing/ofxGuiExtended2 (my fork to avoid collide with ofxGui)  
-https://github.com/2bbb/ofxAbletonLink (optional)
 
-Take care of data folder:
-`/data/ofxBeatClock/`  
-xml settings, gui font file, and json theme. (app may crash if not present)
+* ofxGuiExtended2  
+https://github.com/moebiussurfing/ofxGuiExtended2  
 
+(my fork to avoid collide with ofxGui)  
+* ofxAbletonLink  
+https://github.com/2bbb/ofxAbletonLink (optional)  
 
+* ofxDawMetro  
+(allready included into ```OF_ADDON/libs```. No need to add manually!)  
+https://github.com/castovoid/ofxDawMetro
 
-## About
-
-An addon by **MoebiusSurfing**, 2020.  
-**_Thanks to developers of the included add-ons! @danomatika, @2bb, @castovoid & @frauzufall._**
-
-
+Take care of data folder files:
+```/data/ofxBeatClock/```  
+Xml settings, gui font file, and json theme. (app may crash if not present)
 
 ## TODO:
 
@@ -119,5 +110,13 @@ An addon by **MoebiusSurfing**, 2020.
 - Add kind of plugin to add audio input to get Beat on the fly from incomming audio signal. (Using ofxBTrack)
 <br/>
 
+## Author
+Addon by **@moebiusSurfing**  
+*(ManuMolina). 2020.*
+
+**_Thanks to developers of the included add-ons! @danomatika, @2bb, @castovoid & @frauzufall._**
+
+## License
+*MIT License.*
 
 **_PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!_**
