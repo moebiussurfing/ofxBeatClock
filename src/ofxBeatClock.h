@@ -10,6 +10,8 @@
 //
 //---------------------------------
 
+//-
+
 /*
 	TODO:
 
@@ -24,6 +26,25 @@
 			more info about soundStream timer
 			https://forum.openframeworks.cc/t/pass-this-pointer-from-parent-to-child-object-scheduler-oftimer-system/22088/6?u=moebiussurfing
 */
+
+//-
+
+/*
+## TODO:
+
+- **BUG**: Repair problems when sometimes beat 1 tick it's displaced to beat 2...
+- **BUG**: Some log errors must be repaired on ofxAbletonLink that seems drop down fps/performance...
+- Add the correct workflow for LINK. Must add some mode toggle.
+- On-the-fly re-sync to bar beat start.
+- A better link between play button/params in all internal/external clock source modes, with one unique play button for all clock sources.  
+- Add filter to smooth/stabilize BPM number when using external midi clock mode.
+- ~~Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers  
+(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10).  
+Problems happen when minimizing or moving the app window.. Any help is welcome!~~
+- Add kind of plugin to add audio input to get Beat on the fly from incomming audio signal. (Using ofxBTrack)  
+*/
+
+//-
 
 /// BUG: [1]
 ///sometimes metronome ticks goes on beat 2 instead 1.
