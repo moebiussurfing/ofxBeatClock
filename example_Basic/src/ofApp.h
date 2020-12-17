@@ -3,17 +3,10 @@
 
 #include "ofxBeatClock.h"
 
-//uncomment if you added this addon to handle window settings
-#define USE_ofxWindowApp
-#ifdef USE_ofxWindowApp
-#include "ofxWindowApp.h"
-#endif
-
 class ofApp : public ofBaseApp 
 {
 public:
 	void setup();
-	void update();
 	void keyPressed(int key);
 
 	//-
