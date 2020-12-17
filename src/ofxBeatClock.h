@@ -4,7 +4,7 @@
 //	DEFINES
 //
 //
-//#define USE_ofxAbletonLink
+#define USE_ofxAbletonLink
 //#define USE_AUDIO_BUFFER_TIMER_MODE // alternative clock engine based on audio buffer (WIP)
 //
 //
@@ -391,7 +391,7 @@ private:
 	ofParameterGroup params_EXTERNAL_MIDI;
 	ofParameterGroup params_Advanced;
 
-	ofJson confg_Button, confg_ButtonSmall, confg_Sliders;//json theme
+	ofJson confg_Button_C,confg_Button_L, confg_ButtonSmall, confg_Sliders;//json theme
 
 	//-
 
@@ -719,7 +719,7 @@ private:
 			//display text
 			clockActive_Type = "ABLETON LINK";
 
-			clockActive_Info = "BEAT: " + ofToString(link.getBeat(), 1);
+			clockActive_Info =  "BEAT : " + ofToString(link.getBeat(), 1);
 			clockActive_Info += "\n";
 			clockActive_Info += "PHASE: " + ofToString(link.getPhase(), 1);
 			clockActive_Info += "\n";
@@ -825,8 +825,8 @@ private:
 
 		std::stringstream ss("");
 		ss
-			<< "bpm:   " << ofToString(link.getBPM(), 2) << std::endl
-			<< "beat:  " << ofToString(link.getBeat(), 2) << std::endl
+			<< "bpm  : " << ofToString(link.getBPM(), 2) << std::endl
+			<< "beat : " << ofToString(link.getBeat(), 2) << std::endl
 			<< "phase: " << ofToString(link.getPhase(), 2) << std::endl
 			<< "peers: " << link.getNumPeers() << std::endl
 			<< "play?: " << (link.isPlaying() ? "play" : "stop");
@@ -847,7 +847,6 @@ private:
 	//--------------------------------------------------------------
 	void LINK_exit()
 	{
-		ofLogNotice(__FUNCTION__) << "LINK_exit()";
 		ofLogNotice(__FUNCTION__) << "Remove LINK listeners";
 		ofRemoveListener(link.bpmChanged, this, &ofxBeatClock::LINK_bpmChanged);
 		ofRemoveListener(link.numPeersChanged, this, &ofxBeatClock::LINK_numPeersChanged);
@@ -867,7 +866,7 @@ private:
 
 		if (name != "PEERS")//exclude log
 		{
-			ofLogVerbose(__FUNCTION__) << "Changed_LINK_Params '" << name << "': " << e;
+			ofLogVerbose(__FUNCTION__)<< name << " : " << e;
 		}
 
 		//-
@@ -1023,7 +1022,7 @@ private:
 	//--------------------------------------------------------------
 	void LINK_bpmChanged(double &bpm)
 	{
-		ofLogNotice(__FUNCTION__) << "LINK_bpmChanged" << bpm;
+		ofLogNotice(__FUNCTION__) << bpm;
 
 		LINK_Bpm = bpm;
 
@@ -1034,7 +1033,7 @@ private:
 	//--------------------------------------------------------------
 	void LINK_numPeersChanged(std::size_t &peers)
 	{
-		ofLogNotice(__FUNCTION__) << "LINK_numPeersChanged" << peers;
+		ofLogNotice(__FUNCTION__)  << peers;
 		LINK_Peers_string = ofToString(peers);
 
 		if (peers == 0)
@@ -1046,7 +1045,7 @@ private:
 	//--------------------------------------------------------------
 	void LINK_playStateChanged(bool &state)
 	{
-		ofLogNotice(__FUNCTION__) << "LINK_playStateChanged" << (state ? "play" : "stop");
+		ofLogNotice(__FUNCTION__) << (state ? "play" : "stop");
 
 		if (state != LINK_Play && ENABLE_LINK_SYNC && LINK_Enable)//don't need update if it's already "mirrored"
 		{
