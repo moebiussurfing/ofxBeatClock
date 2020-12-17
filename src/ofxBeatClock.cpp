@@ -34,16 +34,20 @@ void ofxBeatClock::setup()
 
 	//1.1 controls
 
+	RESET_BPM_Global.set("RESET BPM", false);
+
 	params_CONTROL.setName("CONTROL");
 	params_CONTROL.add(ENABLE_CLOCKS.set("ENABLE", true));
 	//params_CONTROL.add(PLAYING_Global_State.set("PLAY", false));//TEST
 	params_CONTROL.add(clockInternal_Bpm.set("BPM", BPM_INIT, BPM_INIT_MIN, BPM_INIT_MAX));
+	params_CONTROL.add(RESET_BPM_Global);
+
 	params_CONTROL.add(ENABLE_INTERNAL_CLOCK.set("INTERNAL", false));
 	params_CONTROL.add(ENABLE_EXTERNAL_MIDI_CLOCK.set("EXTERNAL MIDI", true));
 #ifdef USE_ofxAbletonLink
 	params_CONTROL.add(ENABLE_LINK_SYNC.set("ABLETON LINK", false));
 #endif
-	params_CONTROL.add(SHOW_Extra.set("SHOW EXTRA", true));
+	params_CONTROL.add(SHOW_Extra.set("SHOW PREVIEW", true));
 	params_CONTROL.add(SHOW_Advanced.set("SHOW ADVANCED", false));
 
 	//--
@@ -69,7 +73,7 @@ void ofxBeatClock::setup()
 	params_INTERNAL.add(PLAYING_State.set("PLAY", false));
 	params_INTERNAL.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
 	//TODO: should better gui-behavior-feel being a button not toggle
-
+	
 	//-
 
 	//TODO:
@@ -83,9 +87,6 @@ void ofxBeatClock::setup()
 	params_EXTERNAL_MIDI.add(PLAYING_External_State.set("PLAY SYNC", false));
 	params_EXTERNAL_MIDI.add(midiIn_Port_SELECT.set("MIDI INPUT PORT", 0, 0, midiIn_numPorts - 1));
 	params_EXTERNAL_MIDI.add(midiIn_PortName);
-
-	midiIn_PortName.setSerializable(false);
-	PLAYING_External_State.setSerializable(false);
 
 	//-
 
@@ -134,7 +135,7 @@ void ofxBeatClock::setup()
 	params_Advanced.setName("ADVANCED");
 	params_Advanced.add(BPM_Global.set("GLOBAL BPM", BPM_INIT, BPM_INIT_MIN, BPM_INIT_MAX));
 	params_Advanced.add(BPM_Global_TimeBar.set("BAR ms", (int)60000 / BPM_Global, 100, 2000));
-	params_Advanced.add(RESET_BPM_Global.set("RESET BPM", false));
+	params_Advanced.add(RESET_BPM_Global);
 
 	//added to group in other method (?)
 	BPM_half_TRIG.set("HALF", false);
@@ -156,6 +157,13 @@ void ofxBeatClock::setup()
 	params_App.setName("AppSettings");
 	params_App.add(ENABLE_sound);
 	params_App.add(volumeSound);
+
+	//-
+
+	//exclude
+	midiIn_PortName.setSerializable(false);
+	PLAYING_External_State.setSerializable(false);
+	RESET_BPM_Global.setSerializable(false);
 
 	//--
 
@@ -284,14 +292,23 @@ void ofxBeatClock::setup()
 //--------------------------------------------------------------
 void ofxBeatClock::startup()
 {
-	//-----
-
-	//startup
-
 	//load last session settings
 
 	//folder to both (control and midi input port) settings files
 	loadSettings(path_Global);
+
+	//-
+
+	//rectanglePresetClicker.width = getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w;
+	//rectanglePresetClicker.height = getPresetClicker_Height() + 2 * _RectClick_Pad;
+	//rectanglePresetClicker.x = getPresetClicker_Position().x - _RectClick_Pad - _RectClick_w;
+	//rectanglePresetClicker.y = getPresetClicker_Position().y - _RectClick_Pad;
+	//_rectRatio = rectanglePresetClicker.width / rectanglePresetClicker.height;
+
+	//// load settings
+	//rectanglePresetClicker.loadSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
+	//clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
+	//clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
 
 	//-
 
@@ -659,16 +676,46 @@ void ofxBeatClock::update(ofEventArgs & args)
 #pragma mark - DRAW
 
 //--------------------------------------------------------------
+void ofxBeatClock::drawPreviewExtra()
+{
+
+	//-
+
+	//// bg rectangle editor
+	//if (SHOW_BackGround_EditPresetClicker)
+	//{
+	//	ofFill();
+	//	ofSetColor(_colorBg);
+	//	rectanglePresetClicker.draw();
+	//	ofDrawRectRounded(rectanglePresetClicker, _round);
+	//}
+
+	//// get clicker position from being edited rectangle
+	//if (MODE_EditPresetClicker)
+	//{
+	//	_RectClick_w = getGroupNamesWidth();
+	//	clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
+	//	clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
+	//	//rectanglePresetClicker.width = MIN(getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w, 1000);
+	//	//rectanglePresetClicker.height = rectanglePresetClicker.width / _rectRatio;
+	//}
+
+	//-
+
+	draw_BpmInfo(pos_BpmInfo.x, pos_BpmInfo.y);
+	draw_ClockInfo(pos_ClockInfo.x, pos_ClockInfo.y);
+	draw_BeatBoxes(pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_width);
+	draw_BeatBall(pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_radius);
+}
+
+//--------------------------------------------------------------
 void ofxBeatClock::draw(ofEventArgs & args)
 {
 	//TODO: maybe could improve performance with fbo drawings for all BeatBoxes/text/ball?
 
 	if (SHOW_Extra)
 	{
-		draw_BpmInfo(pos_BpmInfo.x, pos_BpmInfo.y);
-		draw_ClockInfo(pos_ClockInfo.x, pos_ClockInfo.y);
-		draw_BeatBoxes(pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_width);
-		draw_BeatBall(pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_radius);
+		drawPreviewExtra();
 
 		//-
 
@@ -1173,9 +1220,7 @@ void ofxBeatClock::exit()
 {
 	ofLogNotice(__FUNCTION__);
 
-	//ofLogNotice(__FUNCTION__) << ofSetDataPathRoot();
-	//ofLogNotice(__FUNCTION__) << ofRestoreWorkingDirectoryToDefault();
-	//ofRestoreWorkingDirectoryToDefault();
+	//rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 
 	//-
 
@@ -1407,6 +1452,22 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	if (false) {}
 
 	//-
+
+	//else if (name == MODE_EditPresetClicker.getName())
+	//{
+	//	if (MODE_EditPresetClicker.get())
+	//	{
+	//		rectanglePresetClicker.enableEdit();
+
+	//		// workflow
+	//		//SHOW_BackGround_EditPresetClicker = true;
+	//		if (!SHOW_Panel_Click) SHOW_Panel_Click = true;
+	//	}
+	//	else
+	//	{
+	//		rectanglePresetClicker.disableEdit();
+	//	}
+	//}
 
 	else if (name == "PLAY")//button for internal only
 	{
@@ -1783,7 +1844,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//helpers
 	else if (name == "RESET BPM")
 	{
-		ofLogNotice(__FUNCTION__) << "RESET BPM: " << RESET_BPM_Global;
+	ofLogNotice(__FUNCTION__) << "RESET BPM";
 
 		if (RESET_BPM_Global)
 		{
@@ -1800,40 +1861,24 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			ofLogNotice(__FUNCTION__) << "BPM_Global: " << BPM_Global;
 		}
 	}
-	else if (name == "HALF")
-	{
-		ofLogNotice(__FUNCTION__) << "HALF: " << BPM_half_TRIG;
-		if (BPM_half_TRIG)
-		{
-			clockInternal_Bpm = clockInternal_Bpm / 2.0f;
-
-			//not required bc
-			//BPM_Global will be updated on the clockInternal_Bpm callback..etc
-
-//#ifdef USE_ofxAbletonLink
-//			if (ENABLE_LINK_SYNC)
-//			{
-//				LINK_Bpm = clockInternal_Bpm;
-//			}
-//#endif
-		}
-	}
 	else if (name == "DOUBLE")
 	{
-		ofLogNotice(__FUNCTION__) << "DOUBLE: " << BPM_double_TRIG;
+	ofLogNotice(__FUNCTION__) << "DOUBLE BPM";
 		if (BPM_double_TRIG)
 		{
+			BPM_double_TRIG = false;
+
 			clockInternal_Bpm = clockInternal_Bpm * 2.0f;
+		}
+	}
+	else if (name == "HALF")
+	{
+	ofLogNotice(__FUNCTION__) << "HALF BPM";
+		if (BPM_half_TRIG)
+		{
+			BPM_half_TRIG = false;
 
-			//not required bc
-			//BPM_Global will be updated on the clockInternal_Bpm callback..etc
-
-//#ifdef USE_ofxAbletonLink
-//			if (ENABLE_LINK_SYNC)
-//			{
-//				LINK_Bpm = clockInternal_Bpm;
-//			}
-//#endif
+			clockInternal_Bpm = clockInternal_Bpm / 2.0f;
 		}
 	}
 	else if (name == "SHOW ADVANCED")
@@ -1895,7 +1940,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_midiIn_BeatsInBar(int &beatsInBar)
 {
-	ofLogVerbose(__FUNCTION__) << "Changed_midiIn_BeatsInBar: " << beatsInBar;
+	ofLogVerbose(__FUNCTION__) << beatsInBar;
 
 	//only used in midiIn clock sync 
 	//this function trigs when any midi tick (beatsInBar) updating, so we need to filter if (we want beat or 16th..) has changed.
@@ -1984,7 +2029,7 @@ void ofxBeatClock::Changed_ClockInternal_Bpm(float &value)
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_ClockInternal_Active(bool &value)
 {
-	ofLogVerbose(__FUNCTION__) << "Changed_ClockInternal_Active" << value;
+	ofLogVerbose(__FUNCTION__) << value;
 
 	if (value)
 	{

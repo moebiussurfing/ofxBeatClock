@@ -52,6 +52,8 @@
 #include "ofxGuiExtended2.h"
 #include "ofxSurfingHelpers.h"
 
+//#include "ofxInteractiveRect.h" // engine to move the gui. TODO: add resize by mouse too.
+
 //----
 
 //* OPTIONAL : Ableton Link feature *
@@ -133,6 +135,22 @@ public:
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
 	void exit();
+
+	//-
+
+	void drawPreviewExtra();
+
+//	//TODO:
+//private:
+//	// mini preview rectangles positions and sizes
+//	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
+//	string path_RectanglePresetClicker = "_RectanglePresetClicker";
+//	ofParameter<bool> MODE_EditPresetClicker;
+//	ofParameter<float> _rectRatio;
+//	ofParameter<bool> SHOW_BackGround_EditPresetClicker;
+//	//ofParameter<bool> bResetRects;
+//	float _RectClick_w;
+//	float _RectClick_Pad;
 
 	//-
 
