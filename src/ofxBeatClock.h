@@ -5,19 +5,25 @@
 //
 //
 //#define USE_ofxAbletonLink
+//#define USE_AUDIO_BUFFER_TIMER_MODE // alternative clock engine based on audio buffer (WIP)
 //
 //
 //---------------------------------
 
+/*
+	TODO:
 
-/// TODO:
-///
-/// + 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
-/// + 	Add filter to smooth / stabilize BPM number when using external midi clock mode.
-/// + 	Add audio output selector to metronome sounds. maybe share audioBuffer with better timer mode
-///	 		on USE_AUDIO_BUFFER_TIMER_MODE. still disabled by default yet
-/// + 	NOTE: more info about soundStream timer
-///			https://forum.openframeworks.cc/t/pass-this-pointer-from-parent-to-child-object-scheduler-oftimer-system/22088/6?u=moebiussurfing
+		+	Use my beatCircle + tapTempo + circle progress from Ableton Link classes from ofxSurfingHelpers !
+		+ 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
+		+ 	Add fast filter to smooth / stabilize BPM number when using external midi clock mode.
+		+ 	Add audio output selector to metronome sounds. 
+				maybe share audioBuffer with better timer mode
+				on USE_AUDIO_BUFFER_TIMER_MODE. still disabled by default yet
+
+	NOTE: 
+			more info about soundStream timer
+			https://forum.openframeworks.cc/t/pass-this-pointer-from-parent-to-child-object-scheduler-oftimer-system/22088/6?u=moebiussurfing
+*/
 
 /// BUG: [1]
 ///sometimes metronome ticks goes on beat 2 instead 1.
@@ -27,18 +33,6 @@
 ///maybe we can add another beat_current varialbe, independent of the received beat from source clocks
 ///then to eliminate the all the limiters.
 ///must check each source clock type what's the starting beat: 0 or 1!!
-
-///BUG: [2]
-///VS2017. Release/x64: 
-///I am getting several log errors maybe related to LINK addon ofxAbletonLink(?)
-///Maybe are affecting the app performance, reducing the FPS but I am not sure...
-///Exception thrown at 0x00007FFF91DDA799 in 2_ofxBeatClock_example.exe: Microsoft C++ exception : std::system_error at memory location 0x000000000AB1F1F0.
-///The thread 0x22120 has exited with code 0 (0x0).
-///Exception thrown at 0x00007FFF91DDA799 in 2_ofxBeatClock_example.exe: Microsoft C++ exception : std::system_error at memory location 0x000000000AB1F1F0.
-///The thread 0x224dc has exited with code 0 (0x0).
-///The thread 0x213cc has exited with code 0 (0x0).
-///The thread 0x645c has exited with code 0 (0x0).
-
 
 //----
 
@@ -51,8 +45,7 @@
 #include "ofxDawMetro.h"//used for internal (using threaded timer) clock (2)
 #include "ofxGuiExtended2.h"
 #include "ofxSurfingHelpers.h"
-
-//#include "ofxInteractiveRect.h" // engine to move the gui. TODO: add resize by mouse too.
+#include "ofxInteractiveRect.h" // engine to move the gui. TODO: add resize by mouse too.
 
 //----
 
@@ -85,7 +78,6 @@
 //* OPTIONAL : maybe better alternative internal clock *
 
 ///TODO:
-//#define USE_AUDIO_BUFFER_TIMER_MODE
 //used as audioBuffer timer as an alternative for the internal clock (4)
 ///when it's enabled ofxDawMetro is not used and could be not loaded.
 ///WIP: alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers
@@ -114,11 +106,9 @@
 #define ENABLE_PATTERN_LIMITING//comment to disable
 #define PATTERN_STEP_BAR_LIMIT 4
 #define PATTERN_STEP_BEAT_LIMIT 16//TODO: this are 16th ticks not beat!
-
 #define BPM_INIT 120
 #define BPM_INIT_MIN 40
 #define BPM_INIT_MAX 400
-
 #define USE_VISUAL_FEEDBACK_FADE//comment to try improve performance... Could add more optimizations maybe
 
 //-
@@ -135,27 +125,33 @@ public:
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
 	void exit();
-
-	//-
-
-	void drawPreviewExtra();
-
-//	//TODO:
-//private:
-//	// mini preview rectangles positions and sizes
-//	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
-//	string path_RectanglePresetClicker = "_RectanglePresetClicker";
-//	ofParameter<bool> MODE_EditPresetClicker;
-//	ofParameter<float> _rectRatio;
-//	ofParameter<bool> SHOW_BackGround_EditPresetClicker;
-//	//ofParameter<bool> bResetRects;
-//	float _RectClick_w;
-//	float _RectClick_Pad;
-
+	void windowResized(int w, int h);
+	
+	int window_W;
+	int window_H;
+	
 	//-
 
 private:
 	void startup();
+	void draw_PreviewExtra();
+
+	//-
+
+	//TODO:
+private:
+	ofxInteractiveRect rPreview = { "_BeatClock_Gui" };
+	ofParameter<bool> MODE_Editor;
+	ofParameter<bool> SHOW_Editor;
+	std::string name_r1 = "_BeatClock";
+	std::string name_r2 = "Gui_";
+	int padx = 10;
+	int pady = 30;
+	//ofParameter<float> _rectRatio;
+	//float _RectClick_w;
+	//float _RectClick_Pad;
+
+	//-
 
 #pragma mark - MIDI_IN_CLOCK
 
@@ -172,6 +168,7 @@ private:
 	int MIDI_quarters;//convert total # beats to # quarters
 	int MIDI_bars;//compute # of bars
 	double MIDI_seconds;//< song pos in seconds, computed from beats
+
 	//TEST
 	//int MIDI_ticks;//16th ticks are not implemented on the used ofxMidi example
 
@@ -196,11 +193,14 @@ private:
 private:
 	bool DEBUG_moreInfo = false;//more debug
 
-	glm::vec2 pos_Global;//main anchor to reference all the other above gui elements
-	glm::vec2 pos_ClockInfo;
-	glm::vec2 pos_BpmInfo;
+	ofParameter<glm::vec2> pos_Global;//main anchor to reference all the other above gui elements
+	ofParameter<glm::vec2> pos_ClockInfo;
+	ofParameter<glm::vec2> pos_BpmInfo;
+
 	int pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_width;
 	int pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_radius;
+
+	ofParameter<glm::vec2> pos_Gui;
 
 	//TODO:
 	//ofParameter<glm::vec2> position_BeatBoxes;
@@ -220,7 +220,7 @@ private:
 
 		ofLogNotice(__FUNCTION__) << "Loadinoad JSON ofxGuiExtended2 Theme : " << path_Theme;
 
-		group_BeatClock->loadTheme(s);
+		panel_BeatClock->loadTheme(s);
 		group_Controls->loadTheme(s);
 		group_Advanced->loadTheme(s);
 		group_INTERNAL->loadTheme(s);
@@ -235,9 +235,16 @@ public:
 
 	void setPosition_GuiPanel(int x, int y, int w);//gui panel
 	ofPoint getPosition_GuiPanel();
-	void setVisible_GuiPanel(bool b);
-	void setVisible_BeatBall(bool b);
+	//glm::vec2 getPosition_GuiPanel();
 
+	void setVisible_GuiPanel(bool b);
+	void setVisible_GuiPreview(bool b);
+
+	//--------------------------------------------------------------
+	void setToggleVisible_GuiPreview()
+	{
+		SHOW_PreviewExtra = !SHOW_PreviewExtra;
+	}
 	//--------------------------------------------------------------
 	bool getVisible_GuiPanel()
 	{
@@ -286,7 +293,7 @@ public:
 		{
 			ofPushStyle();
 			ofFill();
-			ofSetColor(ofColor::red);
+			ofSetColor(ofColor(0, 200));
 
 			//circle
 			ofDrawCircle(x, y, 3);
@@ -373,14 +380,17 @@ public:
 	ofxGui gui;
 
 private:
-	ofxGuiGroup2* group_BeatClock;//nested folder
+	ofxGuiPanel* panel_BeatClock;//nested folder
+	//ofxGuiGroup2* group_BeatClock;//nested folder
 	ofxGuiGroup2* group_Controls;
 	ofxGuiGroup2* group_Advanced;
 	ofxGuiGroup2* group_INTERNAL;
 	ofxGuiGroup2* group_EXTERNAL_MIDI;
+
 	ofParameterGroup params_INTERNAL;
 	ofParameterGroup params_EXTERNAL_MIDI;
 	ofParameterGroup params_Advanced;
+
 	ofJson confg_Button, confg_ButtonSmall, confg_Sliders;//json theme
 
 	//-
@@ -511,9 +521,9 @@ private:
 	void saveSettings(std::string path);
 	void loadSettings(std::string path);
 
-	std::string filenameControl = "BeatClock_Settings.xml";
-	std::string filenameMidiPort = "Midi_Settings.xml";
-	std::string filenameApp = "App_Settings.xml";
+	std::string file_BeatClock = "BeatClock_Settings.xml";
+	std::string file_Midi = "Midi_Settings.xml";
+	std::string file_App = "App_Settings.xml";
 
 	ofParameterGroup params_App;
 
@@ -535,7 +545,7 @@ private:
 
 	//-
 
-	ofParameter<bool> SHOW_Extra;//beat boxes, text info and beat ball (all except gui panels)
+	ofParameter<bool> SHOW_PreviewExtra;//beat boxes, text info and beat ball (all except gui panels)
 	ofParameter<bool> SHOW_Advanced;//some helpers other secondary settings/controls 
 
 	//-
