@@ -13,13 +13,8 @@ void ofApp::setup()
 
 	//window
 	float fps = 60.f;
-#ifdef USE_ofxWindowApp
-	windowApp.setFrameRate(fps);
-	windowApp.setVerticalSync(true);
-#else
 	ofSetFrameRate(fps);
 	ofSetVerticalSync(true);
-#endif
 
 	//-
 
@@ -33,14 +28,6 @@ void ofApp::setup()
 void ofApp::Changed_BeatTick()
 {
 	if (beatClock.BeatTick_TRIG) ofLogWarning("ofApp") << "BeatTick ! " << beatClock.Beat_current;
-}
-
-//--------------------------------------------------------------
-void ofApp::update()
-{
-	//add a log line every x frames to spread 
-	//received and logged BeatTicks on callbacks
-	if (ofGetFrameNum() % 15 == 0 && false) ofLogWarning("ofApp") << "";
 }
 
 //--------------------------------------------------------------
