@@ -1,3 +1,4 @@
+ofxAbletonLink
 ofxBeatClock
 ofxGuiExtended2
 ofxMidi
