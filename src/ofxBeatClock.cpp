@@ -4,11 +4,18 @@
 ofxBeatClock::ofxBeatClock() {
 	ofSetLogLevel("ofxBeatClock", OF_LOG_NOTICE);
 	path_Global = "ofxBeatClock/settings/";
+
+	// subscribed to auto run update and draw without required 'manual calls'
+	ofAddListener(ofEvents().update, this, &ofxBeatClock::update);
+	ofAddListener(ofEvents().draw, this, &ofxBeatClock::draw);
 }
 
 //--------------------------------------------------------------
  ofxBeatClock::~ofxBeatClock() {
 	 exit();
+
+	 ofRemoveListener(ofEvents().update, this, &ofxBeatClock::update);
+	 ofRemoveListener(ofEvents().draw, this, &ofxBeatClock::draw);
  }
 
 //--------------------------------------------------------------
@@ -600,9 +607,8 @@ void ofxBeatClock::setup_MidiIn_Port(int p)
 }
 
 #pragma mark - UPDATE
-
 //--------------------------------------------------------------
-void ofxBeatClock::update()
+void ofxBeatClock::update(ofEventArgs & args)
 {
 	//--
 
@@ -653,7 +659,7 @@ void ofxBeatClock::update()
 #pragma mark - DRAW
 
 //--------------------------------------------------------------
-void ofxBeatClock::draw()
+void ofxBeatClock::draw(ofEventArgs & args)
 {
 	//TODO: maybe could improve performance with fbo drawings for all BeatBoxes/text/ball?
 
@@ -672,15 +678,13 @@ void ofxBeatClock::draw()
 			LINK_draw();
 		}
 #endif
-
-		//-
 	}
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and boxes
 {
-	ofxSurfingHelpers::draw_Anchor(px, py);
+	if (DEBUG_Layout) ofxSurfingHelpers::draw_Anchor(px, py);
 
 	//sizes and paddings
 	int squaresW;//squares beats size
@@ -771,7 +775,7 @@ void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and b
 //--------------------------------------------------------------
 void ofxBeatClock::draw_ClockInfo(int px, int py)
 {
-	ofxSurfingHelpers::draw_Anchor(px, py);
+	if (DEBUG_Layout) ofxSurfingHelpers::draw_Anchor(px, py);
 
 	//this method draws: tap debug, clock source, clock info, bar-beat-tick16th clock 
 	int xPad = 5;
@@ -899,7 +903,7 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 //--------------------------------------------------------------
 void ofxBeatClock::draw_BpmInfo(int px, int py)
 {
-	ofxSurfingHelpers::draw_Anchor(px, py);
+	if (DEBUG_Layout) ofxSurfingHelpers::draw_Anchor(px, py);
 
 	int xPad = 5;
 	int h = fontBig.getSize();
@@ -916,7 +920,7 @@ void ofxBeatClock::draw_BpmInfo(int px, int py)
 //--------------------------------------------------------------
 void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 {
-	ofxSurfingHelpers::draw_Anchor(px, py);
+	if (DEBUG_Layout) ofxSurfingHelpers::draw_Anchor(px, py);
 
 	ofPushStyle();
 
@@ -2096,7 +2100,7 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage &message)
 //--------------------------------------------------------------
 void ofxBeatClock::saveSettings(std::string path)
 {
-	ofxSurfingHelpers::CheckFolder(path);
+	if (DEBUG_Layout) ofxSurfingHelpers::CheckFolder(path);
 
 	//save settings
 	ofLogNotice(__FUNCTION__) << path;
