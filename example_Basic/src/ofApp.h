@@ -14,8 +14,6 @@ class ofApp : public ofBaseApp
 public:
 	void setup();
 	void update();
-	void draw();
-	void exit();
 	void keyPressed(int key);
 
 	//-
@@ -31,6 +29,4 @@ public:
 #ifdef USE_ofxWindowApp
 	ofxWindowApp windowApp;
 #endif
-
-	bool bDEBUG = false;
 };
