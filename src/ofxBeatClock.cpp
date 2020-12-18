@@ -97,7 +97,7 @@ void ofxBeatClock::setup()
 
 	//-
 
-	params_INTERNAL.setName("INTERNAL CLOCK");
+	params_INTERNAL.setName("1 INTERNAL CLOCK");
 	params_INTERNAL.add(PLAYING_State.set("PLAY", false));
 	params_INTERNAL.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
 	//TODO: should better gui-behavior-feel being a button not toggle
@@ -111,7 +111,7 @@ void ofxBeatClock::setup()
 	//-
 
 	//1.3 external midi
-	params_EXTERNAL_MIDI.setName("EXTERNAL MIDI CLOCK");
+	params_EXTERNAL_MIDI.setName("2 EXTERNAL MIDI CLOCK");
 	params_EXTERNAL_MIDI.add(PLAYING_External_State.set("PLAY SYNC", false));
 	params_EXTERNAL_MIDI.add(midiIn_Port_SELECT.set("MIDI INPUT PORT", 0, 0, midiIn_numPorts - 1));
 	params_EXTERNAL_MIDI.add(midiIn_PortName);
@@ -420,7 +420,7 @@ void ofxBeatClock::setup_GuiPanel()
 
 	//1.4 link
 #ifdef USE_ofxAbletonLink
-	group_LINK = panel_BeatClock->addGroup("3 ABLETON LINK");
+	group_LINK = panel_BeatClock->addGroup("ABLETON LINK");
 	group_LINK->add(params_LINK);
 #endif
 
