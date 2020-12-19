@@ -97,7 +97,7 @@ void ofxBeatClock::setup()
 
 	//-
 
-	params_INTERNAL.setName("1 INTERNAL CLOCK");
+	params_INTERNAL.setName("INTERNAL CLOCK");
 	params_INTERNAL.add(PLAYING_State.set("PLAY", false));
 	params_INTERNAL.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
 	//TODO: should better gui-behavior-feel being a button not toggle
@@ -111,7 +111,7 @@ void ofxBeatClock::setup()
 	//-
 
 	//1.3 external midi
-	params_EXTERNAL_MIDI.setName("2 EXTERNAL MIDI CLOCK");
+	params_EXTERNAL_MIDI.setName("EXTERNAL MIDI CLOCK");
 	params_EXTERNAL_MIDI.add(PLAYING_External_State.set("PLAY SYNC", false));
 	params_EXTERNAL_MIDI.add(midiIn_Port_SELECT.set("MIDI INPUT PORT", 0, 0, midiIn_numPorts - 1));
 	params_EXTERNAL_MIDI.add(midiIn_PortName);
@@ -130,7 +130,7 @@ void ofxBeatClock::setup()
 	//-
 
 #ifdef USE_ofxAbletonLink
-	params_LINK.setName("3 ABLETON LINK");
+	params_LINK.setName("ABLETON LINK");
 	params_LINK.add(LINK_Enable.set("LINK", true));
 	params_LINK.add(LINK_Peers_string.set("PEERS", " "));
 	params_LINK.add(LINK_Beat_string.set("BEAT", ""));
@@ -385,19 +385,19 @@ void ofxBeatClock::setup_GuiPanel()
 	{
 		{"type", "fullsize"},
 		{"text-align", "center"},
-		{"height", 40},
+		{"height", 40}
 	};
 	confg_Button_L =
 	{
 		{"type", "fullsize"},
 		{"text-align", "left"},
-		{"height", 40},
+		{"height", 40}
 	};
 	confg_ButtonSmall =
 	{
 		{"type", "fullsize"},
 		{"text-align", "center"},
-		{"height", 23},
+		{"height", 23}
 	};
 
 	//--
@@ -458,7 +458,8 @@ void ofxBeatClock::setup_GuiPanel()
 	group_LINK->getToggle("FORCE RESET")->setConfig(confg_ButtonSmall);
 	group_LINK->getFloatSlider("PHASE")->setConfig(ofJson{
 		{"precision", 1},
-		{"fill-color", "rgb(128,128,0)"}
+		{"height", 40},
+		{"fill-color", "rgb(128,128,0)"}//yellow
 		});
 #endif
 
@@ -1291,6 +1292,7 @@ void ofxBeatClock::exit()
 {
 	ofLogNotice(__FUNCTION__);
 
+	//gui layout
 	rPreview.disableEdit();
 	//rPreview.saveSettings(name_r1, path_Global + name_r2, false);
 	rPreview.saveSettings("", "", false);
@@ -1299,12 +1301,13 @@ void ofxBeatClock::exit()
 
 	//default desired settings when it will opened
 	PLAYING_State = false;
-#ifdef USE_ofxAbletonLink
-	if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_LINK_SYNC)
-#else
-	if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_MIDI_CLOCK)
-#endif
-		ENABLE_INTERNAL_CLOCK = true;//force to enable one mode, this mode by default
+
+//#ifdef USE_ofxAbletonLink
+//	if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_LINK_SYNC)
+//#else
+//	if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_MIDI_CLOCK)
+//#endif
+//		ENABLE_INTERNAL_CLOCK = true;//force to enable one mode, this mode by default
 
 	//-
 
@@ -1518,6 +1521,10 @@ int ofxBeatClock::getTimeBar()
 void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 {
 	string name = e.getName();
+	if (name != BPM_Global.getName() ||
+		name != BPM_Global_TimeBar.getName() ||
+		name != PLAYING_External_State.getName() 
+		)
 	ofLogNotice(__FUNCTION__) << name << " : " << e;
 
 	//-
@@ -2215,7 +2222,7 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage &message)
 //--------------------------------------------------------------
 void ofxBeatClock::saveSettings(std::string path)
 {
-	if (DEBUG_Layout) ofxSurfingHelpers::CheckFolder(path);
+	ofxSurfingHelpers::CheckFolder(path);
 
 	pos_Gui = glm::vec2(panel_BeatClock->getPosition().x, panel_BeatClock->getPosition().y);
 
