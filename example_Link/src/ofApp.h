@@ -1,9 +1,10 @@
 
 /*	ABOUT:
 	This examples show how to sync with Ableton Live using Link
-	To run the example out-of-the-box, uncomment the line: 
+	To run the example out-of-the-box, go into: ofxBeatClock.h",
+	and uncomment the below line (to enable Link): 
 	#define USE_ofxAbletonLink
-	into: ofxBeatClock.h", to enable Link.
+	
 */
 
 #pragma once
