@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <interactiveRect>
 	<path></path>
-	<x>248</x>
-	<y>52</y>
+	<x>263</x>
+	<y>124</y>
 	<width>207</width>
 	<height>360</height>
 	<nombre>_BeatClock_Gui</nombre>
