@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 ofxBeatClock::ofxBeatClock() {
 	ofSetLogLevel("ofxBeatClock", OF_LOG_NOTICE);
-	path_Global = "ofxBeatClock/settings/";
+	path_Global = "ofxBeatClock/";
 
 	// subscribed to auto run update and draw without required 'manual calls'
 	ofAddListener(ofEvents().update, this, &ofxBeatClock::update);
@@ -184,8 +184,8 @@ void ofxBeatClock::setup()
 	MODE_Editor.set("PREVIEW EDIT", false);
 	SHOW_Editor.set("PREVIEW BOX", false);
 
-	params_Advanced.add(MODE_Editor);
 	params_Advanced.add(SHOW_Editor);
+	params_Advanced.add(MODE_Editor);
 
 	//--
 
@@ -321,7 +321,7 @@ void ofxBeatClock::startup()
 	//load settings
 
 	//folder to both (control and midi input port) settings files
-	loadSettings(path_Global);
+	loadSettings(path_Global + "settings/");
 
 	//-
 
@@ -1244,9 +1244,9 @@ void ofxBeatClock::exit()
 	//#endif
 	//		ENABLE_INTERNAL_CLOCK = true;//force to enable one mode, this mode by default
 
-		//-
+	//-
 
-	saveSettings(path_Global);
+	saveSettings(path_Global + "settings/");
 
 	//--
 
@@ -1406,7 +1406,8 @@ void ofxBeatClock::beatTick_MONITOR(int _beat)
 		//-
 
 		//play metronome sound
-		if (ENABLE_sound) {
+		if (ENABLE_sound) 
+		{
 			if (Beat_current == 1)
 			{
 				bpmTapTempo.trigSound(0);
@@ -1930,7 +1931,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	}
 	else if (name == "TICK SOUND")
 	{
-		ofLogNotice(__FUNCTION__) << "TICK SOUND: " << ofToString(ENABLE_sound ? "ON" : "OFF");
+		ofLogNotice(__FUNCTION__) << "TICK SOUND: " << (ENABLE_sound ? "ON" : "OFF");
+		bpmTapTempo.setEnableSound(ENABLE_sound);
 	}
 
 	//-
