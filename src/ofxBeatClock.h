@@ -18,11 +18,11 @@
 		+	Use my beatCircle + tapTempo + circle progress from Ableton Link classes from ofxSurfingHelpers !
 		+ 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
 		+ 	Add fast filter to smooth / stabilize BPM number when using external midi clock mode.
-		+ 	Add audio output selector to metronome sounds. 
+		+ 	Add audio output selector to metronome sounds.
 				maybe share audioBuffer with better timer mode
 				on USE_AUDIO_BUFFER_TIMER_MODE. still disabled by default yet
 
-	NOTE: 
+	NOTE:
 			more info about soundStream timer
 			https://forum.openframeworks.cc/t/pass-this-pointer-from-parent-to-child-object-scheduler-oftimer-system/22088/6?u=moebiussurfing
 */
@@ -36,17 +36,17 @@
 - **BUG**: Some log errors must be repaired on ofxAbletonLink that seems drop down fps/performance...
 - Add the correct workflow for LINK. Must add some mode toggle.
 - On-the-fly re-sync to bar beat start.
-- A better link between play button/params in all internal/external clock source modes, with one unique play button for all clock sources.  
+- A better link between play button/params in all internal/external clock source modes, with one unique play button for all clock sources.
 - Add filter to smooth/stabilize BPM number when using external midi clock mode.
-- ~~Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers  
-(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10).  
+- ~~Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers
+(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10).
 Problems happen when minimizing or moving the app window.. Any help is welcome!~~
-- Add kind of plugin to add audio input to get Beat on the fly from incomming audio signal. (Using ofxBTrack)  
+- Add kind of plugin to add audio input to get Beat on the fly from incomming audio signal. (Using ofxBTrack)
 */
 
 //-
 
-/// BUG: [1]
+/// BUG: [1] ?
 ///sometimes metronome ticks goes on beat 2 instead 1.
 ///works better with 0 and 4 detectors, but why?
 ///SOLUTION:
@@ -54,6 +54,17 @@ Problems happen when minimizing or moving the app window.. Any help is welcome!~
 ///maybe we can add another beat_current varialbe, independent of the received beat from source clocks
 ///then to eliminate the all the limiters.
 ///must check each source clock type what's the starting beat: 0 or 1!!
+
+/// BUG: [2] ?
+/// kind of thread errors ?
+///Exception thrown at 0x00007FF98CE1D759 in example_Link.exe: Microsoft C++ exception : std::system_error at memory location 0x0000000008B2F1F0.
+///The thread 0x4338 has exited with code 0 (0x0).
+///Exception thrown at 0x00007FF98CE1D759 in example_Link.exe: Microsoft C++ exception : std::system_error at memory location 0x0000000008B2F1F0.
+///The thread 0x2a44 has exited with code 0 (0x0).
+///Exception thrown at 0x00007FF98CE1D759 in example_Link.exe: Microsoft C++ exception : std::system_error at memory location 0x0000000008B2F1F0.
+///The thread 0x2640 has exited with code 0 (0x0).
+///[notice] ofApp: BeatTick !#2
+///[notice] ofApp: BeatTick !#3
 
 //----
 
@@ -66,6 +77,8 @@ Problems happen when minimizing or moving the app window.. Any help is welcome!~
 #include "ofxDawMetro.h"//used for internal (using threaded timer) clock (2)
 #include "ofxGuiExtended2.h"
 #include "ofxSurfingHelpers.h"
+#include "CircleBeat.h"
+#include "BpmTapTempo.h"
 #include "ofxInteractiveRect.h" // engine to move the gui. TODO: add resize by mouse too.
 
 //----
@@ -147,15 +160,18 @@ public:
 	void draw(ofEventArgs & args);
 	void exit();
 	void windowResized(int w, int h);
-	
+
 	int window_W;
 	int window_H;
-	
+
 	//-
 
 private:
 	void startup();
 	void draw_PreviewExtra();
+
+	CircleBeat circleBeat;
+	BpmTapTempo bpmTapTempo;
 
 	//-
 
@@ -361,10 +377,15 @@ private:
 private:
 	//beat ball
 	ofPoint circlePos;
-	float fadeOut_animTime, fadeOut_animCounter;
-	bool fadeOut_animRunning;
-	float dt = 1.0f / 60.f;
-
+	//float fadeOut_animTime, fadeOut_animCounter;
+	//bool fadeOut_animRunning;
+	float dt;
+public:
+	//--------------------------------------------------------------
+	void setFrameRate(float _fps) {
+		dt = 1.0f / _fps;
+	}
+private:
 	//main receiver
 	//trigs sound and gui drawing ball visual feedback
 	void beatTick_MONITOR(int beat);//trigs ball drawing and sound ticker
@@ -412,7 +433,7 @@ private:
 	ofParameterGroup params_EXTERNAL_MIDI;
 	ofParameterGroup params_Advanced;
 
-	ofJson confg_Button_C,confg_Button_L, confg_ButtonSmall, confg_Sliders;//json theme
+	ofJson confg_Button_C, confg_Button_L, confg_ButtonSmall, confg_Sliders;//json theme
 
 	//-
 
@@ -575,9 +596,6 @@ private:
 	//sound metronome
 	ofParameter<bool> ENABLE_sound;//enable sound ticks
 	ofParameter<float> volumeSound;//sound ticks volume
-	ofSoundPlayer tic;
-	ofSoundPlayer tac;
-	ofSoundPlayer tapBell;
 
 	//-
 
@@ -643,9 +661,9 @@ public:
 
 private:
 	float tap_BPM;
-	int tap_Count, tap_LastTime, tap_AvgBarMillis;
-	vector<int> tap_Intervals;
-	bool bTap_Running;
+	//int tap_Count, tap_LastTime, tap_AvgBarMillis;
+	//vector<int> tap_Intervals;
+	//bool bTap_Running;
 	bool SOUND_wasDisabled = false;//sound disbler to better user workflow
 
 	//----
@@ -740,7 +758,7 @@ private:
 			//display text
 			clockActive_Type = "ABLETON LINK";
 
-			clockActive_Info =  "BEAT : " + ofToString(link.getBeat(), 1);
+			clockActive_Info = "BEAT : " + ofToString(link.getBeat(), 1);
 			clockActive_Info += "\n";
 			clockActive_Info += "PHASE: " + ofToString(link.getPhase(), 1);
 			clockActive_Info += "\n";
@@ -887,7 +905,7 @@ private:
 
 		if (name != "PEERS")//exclude log
 		{
-			ofLogVerbose(__FUNCTION__)<< name << " : " << e;
+			ofLogVerbose(__FUNCTION__) << name << " : " << e;
 		}
 
 		//-
@@ -1054,7 +1072,7 @@ private:
 	//--------------------------------------------------------------
 	void LINK_numPeersChanged(std::size_t &peers)
 	{
-		ofLogNotice(__FUNCTION__)  << peers;
+		ofLogNotice(__FUNCTION__) << peers;
 		LINK_Peers_string = ofToString(peers);
 
 		if (peers == 0)
