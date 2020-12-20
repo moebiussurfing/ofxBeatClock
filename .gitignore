@@ -551,3 +551,6 @@ MigrationBackup/
 .ionide/
 example_Link/bin/data/ofxBeatClock/settings/BeatClock_Settings.xml
 example_Link/bin/data/ofxBeatClock/settings/Midi_Settings.xml
+example_Link/bin/data/settings_BeatClock_Gui.xml
+example_Link/bin/data/ofxBeatClock/settings/BeatClock_Settings.xml
+example_Link/bin/data/ofxBeatClock/settings/App_Settings.xml
