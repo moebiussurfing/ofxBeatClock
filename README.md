@@ -81,15 +81,15 @@ https://github.com/danomatika/ofxMidi
 * ofxGuiExtended2  
 https://github.com/moebiussurfing/ofxGuiExtended2 [fork]  
 
+* ofxSurfingHelpers
+https://github.com/moebiussurfing/ofxSurfingHelpers
+
 * ofxAbletonLink  
 https://github.com/2bbb/ofxAbletonLink [optional]  
 
 * ofxDawMetro  
 (allready included into ```OF_ADDON/libs```. No need to add manually!)  
 https://github.com/castovoid/ofxDawMetro
-
-* ofxSurfingHelpers
-https://github.com/moebiussurfing/ofxSurfingHelpers
 
 Take care of data folder files:
 ```/data/ofxBeatClock/```  
