@@ -36,6 +36,8 @@ void ofxBeatClock::setup()
 	window_W = ofGetWidth();
 	window_H = ofGetHeight();
 
+	dt = 1.0f / 60.f;//default speed/fps is 60 fps
+
 	pos_Global.set("GUI POSITION GLOBAL",
 		glm::vec2(window_W * 0.5, window_H * 0.5),
 		glm::vec2(10, 10),
@@ -70,8 +72,8 @@ void ofxBeatClock::setup()
 	params_CONTROL.add(clockInternal_Bpm.set("BPM", BPM_INIT, BPM_INIT_MIN, BPM_INIT_MAX));
 	params_CONTROL.add(RESET_BPM_Global);
 
-	params_CONTROL.add(ENABLE_INTERNAL_CLOCK.set("1 INTERNAL", false));
-	params_CONTROL.add(ENABLE_EXTERNAL_MIDI_CLOCK.set("2 EXTERNAL MIDI", true));
+	params_CONTROL.add(ENABLE_INTERNAL_CLOCK.set("1 INTERNAL CLOCK", false));
+	params_CONTROL.add(ENABLE_EXTERNAL_MIDI_CLOCK.set("2 EXTERNAL MIDI CLOCK", true));
 #ifdef USE_ofxAbletonLink
 	params_CONTROL.add(ENABLE_LINK_SYNC.set("3 ABLETON LINK", false));
 #endif
@@ -207,13 +209,6 @@ void ofxBeatClock::setup()
 	RESET_BPM_Global.setSerializable(false);
 	MODE_Editor.setSerializable(false);
 
-	//--
-
-	//tap tempo engine
-	bTap_Running = false;
-	tap_Count = 0;
-	tap_Intervals.clear();
-
 	//----
 
 #pragma mark - DEFAULT_LAYOUT_POSITIONS
@@ -288,24 +283,9 @@ void ofxBeatClock::setup()
 	//this trigs to draw a flashing circle for a frame only
 	BeatTick_TRIG = false;
 
-	//---
-
-#pragma mark - METRONOME_SOUNDS
-
-	//beat 1 sound
-	tic.load(path_Global + "sounds/click1.wav");
-	tic.setVolume(1.0f);
-	tic.setMultiPlay(false);
-
-	//beats 2-3-4 sound
-	tac.load(path_Global + "sounds/click2.wav");
-	tac.setVolume(0.25f);
-	tac.setMultiPlay(false);
-
-	//tap tempo measure done sound
-	tapBell.load(path_Global + "sounds/tapBell.wav");
-	tapBell.setVolume(1.0f);
-	tapBell.setMultiPlay(false);
+	//swap to a class..
+	bpmTapTempo.setPathSounds(path_Global + "sounds/");
+	bpmTapTempo.setup();
 
 	//-
 
@@ -434,8 +414,8 @@ void ofxBeatClock::setup_GuiPanel()
 	//1.1
 	group_Controls->getControl("ENABLE")->setConfig(confg_Button_C);
 	//group_Controls->getToggle("PLAY")->setConfig(confg_Button_C);//global play//TEST
-	group_Controls->getControl("1 INTERNAL")->setConfig(confg_Button_L);
-	group_Controls->getControl("2 EXTERNAL MIDI")->setConfig(confg_Button_L);
+	group_Controls->getControl("1 INTERNAL CLOCK")->setConfig(confg_Button_L);
+	group_Controls->getControl("2 EXTERNAL MIDI CLOCK")->setConfig(confg_Button_L);
 #ifdef USE_ofxAbletonLink
 	group_Controls->getControl("3 ABLETON LINK")->setConfig(confg_Button_L);
 #endif
@@ -480,12 +460,6 @@ void ofxBeatClock::setup_GuiPanel()
 	path_Theme = "assets/theme/";
 	path_Theme += "theme_ofxGuiExtended2_01.json";
 	loadTheme(path_Theme);
-
-	////customize panel width over the loaded json theme
-	//panel_BeatClock->setWidth(gui_Panel_Width);
-	//group_INTERNAL->setWidth(gui_Panel_Width);
-	//group_Controls->setWidth(gui_Panel_Width);
-	//group_Advanced->setWidth(gui_Panel_Width);
 
 	//--
 
@@ -536,7 +510,7 @@ void ofxBeatClock::refresh_Gui()
 		ENABLE_LINK_SYNC = false;
 #endif
 		//display text
-		clockActive_Type = "1 INTERNAL";
+		clockActive_Type = "1 INTERNAL CLOCK";
 		clockActive_Info = "";
 	}
 
@@ -555,7 +529,7 @@ void ofxBeatClock::refresh_Gui()
 			clockInternal_Active = false;
 
 		//display text
-		clockActive_Type = "2 EXTERNAL MIDI";
+		clockActive_Type = "2 EXTERNAL MIDI CLOCK";
 		clockActive_Info = "MIDI PORT: ";
 		clockActive_Info += "'" + midiIn.getName() + "'";
 		//clockActive_Info += ofToString(midiIn.getPort());
@@ -671,7 +645,7 @@ void ofxBeatClock::setup_MidiIn_Port(int p)
 	ofLogNotice(__FUNCTION__) << "PORT NAME: " << midiIn.getInPortName(p);
 
 	//display text
-	clockActive_Type = "2 EXTERNAL MIDI";
+	clockActive_Type = "2 EXTERNAL MIDI CLOCK";
 	clockActive_Info = "MIDI PORT: ";
 	clockActive_Info += "'" + midiIn.getName() + "'";
 	//clockActive_Info += ofToString(midiIn.getPort());
@@ -686,44 +660,13 @@ void ofxBeatClock::update(ofEventArgs & args)
 	//--
 
 	//tap engine
-	if (bTap_Running) tap_Update();
+	tap_Update();
 
 	//--
 
 #ifdef USE_ofxAbletonLink
 	if (ENABLE_LINK_SYNC) LINK_update();
 #endif
-
-	//--
-
-	//TODO:
-	//smooth clock from received MIDI CLOCK...
-//	//read bpm with a spaced clock refresh or in every frame if not defined time-clock-refresh:
-//
-//#ifdef BPM_MIDI_CLOCK_REFRESH_RATE
-//	if (ofGetElapsedTimeMillis() - bpm_CheckUpdated_lastTime >= (int)BPM_MIDI_CLOCK_REFRESH_RATE)
-//	{
-//#endif
-//		ofLogNotice(__FUNCTION__) << "BPM UPDATED" << ofGetElapsedTimeMillis() - bpm_CheckUpdated_lastTime;
-//
-//		//-
-//
-//#ifdef BPM_MIDI_CLOCK_REFRESH_RATE
-//		bpm_CheckUpdated_lastTime = ofGetElapsedTimeMillis();
-//	}
-//#endif
-
-	//-
-
-	//BPM_LAST_Tick_Time_ELLAPSED_PRE = BPM_LAST_Tick_Time_ELLAPSED;
-	//BPM_LAST_Tick_Time_ELLAPSED = ofGetElapsedTimeMillis() - BPM_LAST_Tick_Time_LAST;//test
-	//BPM_LAST_Tick_Time_LAST = ofGetElapsedTimeMillis();//test
-	//ELLAPSED_diff = BPM_LAST_Tick_Time_ELLAPSED_PRE - BPM_LAST_Tick_Time_ELLAPSED;
-
-	//--
-
-	//metronome sound ticks
-	ofSoundUpdate();
 
 	//--
 }
@@ -755,10 +698,6 @@ void ofxBeatClock::draw_PreviewExtra()
 	}
 
 	//-
-
-	//TODO:
-	//use my beatCircle class from surfingHelpers !
-	//improve reducing stuff..
 
 	draw_BpmInfo(pos_BpmInfo.get().x, pos_BpmInfo.get().y);
 	draw_ClockInfo(pos_ClockInfo.get().x, pos_ClockInfo.get().y);
@@ -853,7 +792,7 @@ void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and b
 
 		//--
 
-		//DRAW EACH i SQUARE
+		//draw each i square
 
 		//filled rectangle
 		////optional:
@@ -874,7 +813,7 @@ void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and b
 		//--
 
 		ofPopStyle();
-}
+	}
 
 	ofPopStyle();
 }
@@ -911,9 +850,9 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 		int speed = 10;//blink speed when measuring taps
 		bool b = (ofGetFrameNum() % (2 * speed) < speed);
 		ofSetColor(255, b ? 128 : 255);
-		if (bTap_Running)
+		if (bpmTapTempo.isRunning())
 		{
-			messageInfo = "     TAP " + ofToString(ofMap(tap_Count, 1, 4, 3, 0));
+			messageInfo = "     TAP " + ofToString(ofMap(bpmTapTempo.getCountTap(), 1, 4, 3, 0));
 		}
 		else
 		{
@@ -923,6 +862,22 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 
 		i++;//one extra line vertical spacer
 		i++;
+
+		//int speed = 10;//blink speed when measuring taps
+		//bool b = (ofGetFrameNum() % (2 * speed) < speed);
+		//ofSetColor(255, b ? 128 : 255);
+		//if (bTap_Running)
+		//{
+		//	messageInfo = "     TAP " + ofToString(ofMap(tap_Count, 1, 4, 3, 0));
+		//}
+		//else
+		//{
+		//	messageInfo = "";
+		//}
+		//fontBig.drawString(messageInfo, xPad, h + interline * i++);
+
+		//i++;//one extra line vertical spacer
+		//i++;
 
 		//-
 
@@ -974,7 +929,7 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 		//1.5 main big clock: [bar:beat:tick16th]
 		//TODO: could split this and allow to draw independently
 		ofSetColor(colorText);
-		
+
 		int yPad = 30;
 
 		i = i + 2;//spacer
@@ -1044,17 +999,23 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 	metronome_ball_pos.x = px + metronome_ball_radius;
 	metronome_ball_pos.y = py;
 
+	//beat circle
+	circleBeat.setPosition(glm::vec2(metronome_ball_pos.x, metronome_ball_pos.y));
+	circleBeat.setRadius(metronome_ball_radius);
+
 	//highlight 1st beat
 	ofColor c;
 	if (Beat_current == 1) c = (ofColor::red);
 	else c = (ofColor::white);
+	circleBeat.setColor(c);
 
 	//-
 
 	//background black ball
-	if (!bTap_Running)
+	if (!bpmTapTempo.isRunning())
 	{
-		ofSetColor(16, 200);//ball background when not tapping
+		//ball background when not tapping
+		circleBeat.setColorBackground(ofColor(16, 200));
 	}
 	else
 	{
@@ -1063,87 +1024,61 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 		float fade = sin(ofMap(t, 0, 1000, 0, 2 * PI));
 		ofLogVerbose(__FUNCTION__) << "fade: " << fade << endl;
 		int alpha = (int)ofMap(fade, -1.0f, 1.0f, 0, 50) + 205;
-		ofSetColor(ofColor(96), alpha);
+		circleBeat.setColorBackground(ofColor(96, alpha));
 	}
-	ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
 
 	//-
 
 	//beat circle
+	circleBeat.draw();
 
-	float radius = metronome_ball_radius;
-	int alphaMax = 128;
-
-#ifdef USE_VISUAL_FEEDBACK_FADE
-	ofPushStyle();
-	//alpha tick is tweened to kid of "heartbeat feeling"..
-	fadeOut_animCounter += 4.0f*dt;//fade out timed speed
-	fadeOut_animRunning = fadeOut_animCounter <= 1;
-	float alpha = 0.0f;
-	if (fadeOut_animRunning && !bTap_Running)
-	{
-		circlePos.set(metronome_ball_pos.x, metronome_ball_pos.y);
-
-		ofFill();
-		alpha = ofMap(fadeOut_animCounter, 0, 1, alphaMax, 0);
-		ofSetColor(c, alpha);//faded alpha
-		ofDrawCircle(circlePos, fadeOut_animCounter * radius);
-	}
-
-	//border circle
-	ofNoFill();
-	ofSetLineWidth(2.0f);
-	ofSetColor(255, alphaMax * 0.5f + alpha * 0.5f);
-	ofDrawCircle(circlePos, radius);
-	ofPopStyle();
-
-#else//TODO:
-	//not doing the candy-fading-out, but it seems that do not improve fps much neither...
-	if (!bTap_Running)
-	{
-		ofPushStyle();
-
-		circlePos.set(metronome_ball_pos.x, metronome_ball_pos.y);
-
-		ofFill();
-		ofSetColor(c, alphaMax);
-		ofDrawCircle(circlePos, radius);
-
-		//border circle
-		ofNoFill();
-		ofSetLineWidth(2.0f);
-		ofSetColor(255, alphaMax * 0.5f);
-		ofDrawCircle(circlePos, radius);
-		ofPopStyle();
-}
-#endif
+	//#else//TODO:
+//	//not doing the candy-fading-out, but it seems that do not improve fps much neither...
+//	if (!bTap_Running)
+//	{
+//		ofPushStyle();
+//
+//		circlePos.set(metronome_ball_pos.x, metronome_ball_pos.y);
+//
+//		ofFill();
+//		ofSetColor(c, alphaMax);
+//		ofDrawCircle(circlePos, radius);
+//
+//		//border circle
+//		ofNoFill();
+//		ofSetLineWidth(2.0f);
+//		ofSetColor(255, alphaMax * 0.5f);
+//		ofDrawCircle(circlePos, radius);
+//		ofPopStyle();
+//}
+//#endif
 
 	//-
 
-	//first beat circle of bar is drawed red. other ones are white
-	//this circle flahses will not be drawed when measuring tap tempo engine
-
-	if (ENABLE_CLOCKS && !bTap_Running &&
-#ifndef USE_ofxAbletonLink
-	(ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK))
-#else
-		(ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK || ENABLE_LINK_SYNC))
-#endif
-	{
-		//this trigs to draw a flashing circle for a frame only
-		if (BeatTick_TRIG)
-		{
-			BeatTick_TRIG = false;
-
-			//TODO: this could be the problem of confusing when beat 1/2 are
-			//highlight 1st beat
-			//if (Beat_current == 1)
-			if (lastBeatFlash == 1) ofSetColor(ofColor::red);
-			else ofSetColor(ofColor::white);
-
-			ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
-		}
-	}
+//	//first beat circle of bar is drawed red. other ones are white
+//	//this circle flahses will not be drawed when measuring tap tempo engine
+//
+//	if (ENABLE_CLOCKS && !bTap_Running &&
+//#ifndef USE_ofxAbletonLink
+//	(ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK))
+//#else
+//		(ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK || ENABLE_LINK_SYNC))
+//#endif
+//	{
+//		//this trigs to draw a flashing circle for a frame only
+//		if (BeatTick_TRIG)
+//		{
+//			BeatTick_TRIG = false;
+//
+//			//TODO: this could be the problem of confusing when beat 1/2 are
+//			//highlight 1st beat
+//			//if (Beat_current == 1)
+//			if (lastBeatFlash == 1) ofSetColor(ofColor::red);
+//			else ofSetColor(ofColor::white);
+//
+//			ofDrawCircle(metronome_ball_pos.x, metronome_ball_pos.y, metronome_ball_radius);
+//		}
+//	}
 
 	//-
 
@@ -1302,14 +1237,14 @@ void ofxBeatClock::exit()
 	//default desired settings when it will opened
 	PLAYING_State = false;
 
-//#ifdef USE_ofxAbletonLink
-//	if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_LINK_SYNC)
-//#else
-//	if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_MIDI_CLOCK)
-//#endif
-//		ENABLE_INTERNAL_CLOCK = true;//force to enable one mode, this mode by default
+	//#ifdef USE_ofxAbletonLink
+	//	if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_LINK_SYNC)
+	//#else
+	//	if (!ENABLE_INTERNAL_CLOCK && !ENABLE_EXTERNAL_MIDI_CLOCK)
+	//#endif
+	//		ENABLE_INTERNAL_CLOCK = true;//force to enable one mode, this mode by default
 
-	//-
+		//-
 
 	saveSettings(path_Global);
 
@@ -1426,6 +1361,10 @@ void ofxBeatClock::stop()//only used in internal mode
 void ofxBeatClock::setTogglePlay()//only used in internal mode
 {
 	ofLogNotice(__FUNCTION__);
+	
+	//worklow
+	if (!ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_LINK_SYNC && !ENABLE_INTERNAL_CLOCK)
+		ENABLE_INTERNAL_CLOCK = true;
 
 	if (ENABLE_INTERNAL_CLOCK && ENABLE_CLOCKS)
 	{
@@ -1459,45 +1398,50 @@ void ofxBeatClock::beatTick_MONITOR(int _beat)
 	if (ENABLE_CLOCKS && (ENABLE_INTERNAL_CLOCK || ENABLE_EXTERNAL_MIDI_CLOCK))
 #endif
 	{
-		//-
-
-		//flash beat ball
 		BeatTick_TRIG = true;
-		lastBeatFlash = _beat;
-		//this trigs to draw a flashing circle for a frame only
 
-#ifdef USE_VISUAL_FEEDBACK_FADE
-		//bit ball alpha fade setted to transparent, no alpha
-		fadeOut_animCounter = 0.0f;
-#endif
+		//gui engine preview
+		circleBeat.bang();
 
 		//-
 
-		//TODO: 
-		//BUG: 
-		//why sometimes sound 1st tick its trigged at second beat??
-
-		//play tic on the first beat of a bar
-		//set metronome silent when measuring tap tempo engine
-		if (ENABLE_sound && !bTap_Running)
-		{
-			//BUG:
-			//sometimes metronome ticks goes on beat 2 instead 1.
-			//works better with 0 and 4 detectors, but why?
-			//!!
-			//we must check better all the beat%limit bc should be the problem!!
-			//must check each source clock type what's the starting beat: 0 or 1!!
-
-			//if (_beat == 0 || _beat == 4 )
+		//play metronome sound
+		if (ENABLE_sound) {
 			if (Beat_current == 1)
 			{
-				tic.play();
+				bpmTapTempo.trigSound(0);
 			}
 			else
 			{
-				tac.play();
+				bpmTapTempo.trigSound(1);
 			}
 		}
+
+		////TODO: 
+		////BUG: 
+		////why sometimes sound 1st tick its trigged at second beat??
+
+		////play tic on the first beat of a bar
+		////set metronome silent when measuring tap tempo engine
+		//if (ENABLE_sound && !bTap_Running)
+		//{
+		//	//BUG:
+		//	//sometimes metronome ticks goes on beat 2 instead 1.
+		//	//works better with 0 and 4 detectors, but why?
+		//	//!!
+		//	//we must check better all the beat%limit bc should be the problem!!
+		//	//must check each source clock type what's the starting beat: 0 or 1!!
+
+		//	//if (_beat == 0 || _beat == 4 )
+		//	if (Beat_current == 1)
+		//	{
+		//		tic.play();
+		//	}
+		//	else
+		//	{
+		//		tac.play();
+		//	}
+		//}
 	}
 }
 
@@ -1521,11 +1465,11 @@ int ofxBeatClock::getTimeBar()
 void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 {
 	string name = e.getName();
-	if (name != BPM_Global.getName() ||
-		name != BPM_Global_TimeBar.getName() ||
-		name != PLAYING_External_State.getName() 
+	if (name != BPM_Global.getName() &&
+		name != BPM_Global_TimeBar.getName() &&
+		name != PLAYING_External_State.getName()
 		)
-	ofLogNotice(__FUNCTION__) << name << " : " << e;
+		ofLogNotice(__FUNCTION__) << name << " : " << e;
 
 	//-
 
@@ -1548,6 +1492,10 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 	else if (name == "PLAY")//button for internal only
 	{
+		//worklow
+		if (!ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_LINK_SYNC && !ENABLE_INTERNAL_CLOCK)
+			ENABLE_INTERNAL_CLOCK = true;
+
 		ofLogNotice(__FUNCTION__) << "PLAYING_State: " << (PLAYING_State ? "TRUE" : "FALSE");
 
 		//clocks are disabled or using external midi clock. dont need playing, just to be enabled
@@ -1631,7 +1579,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 	//source clock type
 
-	else if (name == "1 INTERNAL")
+	else if (name == "1 INTERNAL CLOCK")
 	{
 		ofLogNotice(__FUNCTION__) << "CLOCK INTERNAL: " << ENABLE_INTERNAL_CLOCK;
 
@@ -1644,7 +1592,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			//-
 
 			//display text
-			clockActive_Type = "1 INTERNAL";
+			clockActive_Type = "1 INTERNAL CLOCK";
 			clockActive_Info = "";
 
 			//-
@@ -1681,7 +1629,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 	//-
 
-	else if (name == "2 EXTERNAL MIDI")
+	else if (name == "2 EXTERNAL MIDI CLOCK")
 	{
 		ofLogNotice(__FUNCTION__) << "CLOCK EXTERNAL MIDI-IN: " << ENABLE_EXTERNAL_MIDI_CLOCK;
 
@@ -1714,7 +1662,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			//-
 
 			//display text
-			clockActive_Type = "2 EXTERNAL MIDI";
+			clockActive_Type = "2 EXTERNAL MIDI CLOCK";
 			clockActive_Info = "MIDI PORT: ";
 			clockActive_Info += "'" + midiIn.getName() + "'";
 			//clockActive_Info += ofToString(midiIn.getPort());
@@ -1822,11 +1770,10 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			if (ENABLE_INTERNAL_CLOCK)
 			{
 				//autostop
-				if (PLAYING_State)
-					PLAYING_State = false;
+				if (PLAYING_State) PLAYING_State = false;
+			
 				//disable internal
-				if (clockInternal_Active)
-					clockInternal_Active = false;
+				if (clockInternal_Active) clockInternal_Active = false;
 			}
 		}
 
@@ -1913,7 +1860,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		//	clockInternal.addBarListener(this);
 		//	clockInternal.addSixteenthListener(this);
 		//}
-		}
+	}
 #endif
 
 	//-
@@ -1978,9 +1925,12 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	else if (name == "TICK VOLUME")
 	{
 		ofLogNotice(__FUNCTION__) << "VOLUME: " << ofToString(volumeSound, 1);
-		tic.setVolume(volumeSound);
-		tac.setVolume(volumeSound);
-		tapBell.setVolume(volumeSound);
+
+		bpmTapTempo.setVolume(volumeSound);
+	}
+	else if (name == "TICK SOUND")
+	{
+		ofLogNotice(__FUNCTION__) << "TICK SOUND: " << ofToString(ENABLE_sound ? "ON" : "OFF");
 	}
 
 	//-
@@ -2012,7 +1962,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//		reSync();
 	//	}
 	//}
-	}
+}
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_midiIn_BeatsInBar(int &beatsInBar)
@@ -2371,119 +2321,21 @@ void ofxBeatClock::reset_ClockValues()//set gui display text clock to 0:0:0
 
 #pragma mark - TAP MACHINE
 
-//TODO: implement bpm divider / multiplier x2 x4 /2 /4
+//todo: implement bpm divider / multiplier x2 x4 /2 /4
 //--------------------------------------------------------------
 void ofxBeatClock::tap_Trig()
 {
 	if (ENABLE_INTERNAL_CLOCK)//extra verified, not mandatory
-	{
-		bTap_Running = true;
-
-		//-
-
-		////workflow
-		////disable sound to better flow
-		//if (tap_Count == 0 && ENABLE_sound)
-		//{
-		//	ENABLE_sound = false;
-		//	SOUND_wasDisabled = true;
-		//}
-
-		//-
-
-		int time = ofGetElapsedTimeMillis();
-		tap_Count++;
-		ofLogNotice(">TAP<") << "TRIG: " << tap_Count;
-
-		if (tap_Count != 4)
-			tic.play();
-		else
-			tapBell.play();
-
-		tap_Intervals.push_back(time - tap_LastTime);
-		tap_LastTime = time;
-
-		if (tap_Count > 3)//4th tap
-		{
-			tap_Intervals.erase(tap_Intervals.begin());
-			tap_AvgBarMillis = accumulate(tap_Intervals.begin(), tap_Intervals.end(), 0) / tap_Intervals.size();
-
-			if (tap_AvgBarMillis == 0)
-			{
-				tap_AvgBarMillis = 1000;
-				ofLogError(__FUNCTION__) << "Divide by 0!";
-				ofLogError(__FUNCTION__) << "tap_AvgBarMillis: " << ofToString(tap_AvgBarMillis);
-			}
-
-			tap_BPM = 60 * 1000 / (float)tap_AvgBarMillis;
-
-			ofLogNotice(">TAP<") << "NEW Tap BPM: " << tap_BPM;
-
-			//TODO: target bpm could be tweened..
-
-			//-
-
-			tap_Intervals.clear();
-			tap_Count = 0;
-			bTap_Running = false;
-
-			//-
-
-			//TODO:
-			//workflow
-			//if (SOUND_wasDisabled)//sound disbler to better flow
-			//{
-			//	ENABLE_sound = true;
-			//	SOUND_wasDisabled = false;
-			//}
-
-			//-
-
-			//finally, we set the obtained bpm after the 4 trigged-by-user measurements
-			clockInternal_Bpm = tap_BPM;
-		}
-	}
-	else if (tap_Count > 1)
-	{
-		//TODO:
-		//temp update to last interval...
-		float val = (float)tap_Intervals[tap_Intervals.size() - 1];
-		if (val == 0)
-		{
-			val = 1000.0f;
-			ofLogError(__FUNCTION__) << "Divide by 0!";
-			ofLogError(__FUNCTION__) << "val: " << ofToString(val);
-		}
-		tap_BPM = 60 * 1000 / val;
-		ofLogNotice(__FUNCTION__) << "> TAP < : NEW BPM Tap : " << tap_BPM;
-
-		//finally, we set the obtained bpm after the 4 trigged-by-user measurements
-		clockInternal_Bpm = tap_BPM;
-	}
-
-	//-
+		bpmTapTempo.bang();
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::tap_Update()
 {
-	int time = ofGetElapsedTimeMillis();
-	if (tap_Intervals.size() > 0 && (time - tap_LastTime > 3000))
-	{
-		ofLogNotice(__FUNCTION__) << ">TAP< TIMEOUT: clear tap logs";
-		tap_Intervals.clear();
+	bpmTapTempo.update();
+	if (bpmTapTempo.isUpdatedBpm()) {
 
-		tap_Count = 0;
-		bTap_Running = false;
-
-		//-
-
-		//workflow
-		//if (SOUND_wasDisabled)//sound disbler to better flow
-		//{
-		//	ENABLE_sound = true;
-		//	SOUND_wasDisabled = false;
-		//}
+		BPM_Global = bpmTapTempo.getBpm();
 	}
 }
 
@@ -2635,9 +2487,9 @@ void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
 						beatTick_MONITOR(Beat_current);
 
 						//ofLogNotice(__FUNCTION__) << "[audioBuffer] BEAT: " << Beat_string;
-}
-}
-}
+					}
+				}
+			}
 		}
 	}
 }
