@@ -35,15 +35,17 @@ void Changed_BeatTick();
 
 ### ofApp.cpp
 ```cpp
-//ofApp::setup()
+// ofApp::setup()
 beatClock.setup();
 
 //callback to receive BeatTicks
 listenerBeat = beatClock.BeatTick_TRIG.newListener([&](bool&) {this->Changed_BeatTick(); });
 
+// no need to update/draw/exit.
+
 //-
 
-//callback
+// callback
 void ofApp::Changed_BeatTick()
 {
 	if (beatClock.BeatTick_TRIG) ofLogWarning("ofApp") << "BeatTick ! Number: " << beatClock.Beat_current;
@@ -81,7 +83,7 @@ https://github.com/danomatika/ofxMidi
 * ofxGuiExtended2  
 https://github.com/moebiussurfing/ofxGuiExtended2 [fork]  
 
-* ofxSurfingHelpers
+* ofxSurfingHelpers  
 https://github.com/moebiussurfing/ofxSurfingHelpers
 
 * ofxAbletonLink  
