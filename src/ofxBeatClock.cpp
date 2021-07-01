@@ -356,6 +356,7 @@ void ofxBeatClock::startup()
 //--------------------------------------------------------------
 void ofxBeatClock::setup_GuiPanel()
 {
+#ifdef USE_OFX_GUI_EXTENDED2
 	//to customize some widgets
 	confg_Sliders =
 	{
@@ -445,6 +446,7 @@ void ofxBeatClock::setup_GuiPanel()
 
 	//1.5
 	group_Advanced->getFloatSlider("GLOBAL BPM")->setPrecision(2);
+#endif
 
 	//-
 
@@ -456,6 +458,7 @@ void ofxBeatClock::setup_GuiPanel()
 
 	//--
 
+#ifdef USE_OFX_GUI_EXTENDED2
 	//theme
 	path_Theme = "assets/theme/";
 	path_Theme += "theme_ofxGuiExtended2_01.json";
@@ -495,6 +498,7 @@ void ofxBeatClock::setup_GuiPanel()
 	{
 		group_LINK->minimize();
 	}
+#endif
 #endif
 }
 
@@ -555,7 +559,7 @@ void ofxBeatClock::refresh_Gui()
 #endif
 
 	//-
-
+	#ifdef USE_OFX_GUI_EXTENDED2
 	if (ENABLE_INTERNAL_CLOCK)
 	{
 		group_INTERNAL->maximize();
@@ -575,6 +579,7 @@ void ofxBeatClock::refresh_Gui()
 	{
 		group_EXTERNAL_MIDI->minimize();
 	}
+#endif
 
 	//-
 
@@ -659,7 +664,7 @@ void ofxBeatClock::update(ofEventArgs & args)
 {
 	//--
 
-	//tap engine
+	// tap engine
 	tap_Update();
 
 	//--
@@ -833,7 +838,7 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 
 	//--
 
-	//clock info:
+	// clock info:
 
 	ofSetColor(colorText);
 
@@ -941,7 +946,7 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 
 	//--
 
-	//1.4 more debug info
+	// 1.4 more debug info
 	if (DEBUG_moreInfo)
 	{
 		int xpos = 240;
@@ -1124,6 +1129,7 @@ void ofxBeatClock::setPosition_GuiGlobal(int x, int y)
 //--------------------------------------------------------------
 void ofxBeatClock::setPosition_GuiPanel(int _x, int _y, int _w)
 {
+	#ifdef USE_OFX_GUI_EXTENDED2
 	gui_Panel_posX = _x;
 	gui_Panel_posY = _y;
 	gui_Panel_Width = _w;
@@ -1134,6 +1140,7 @@ void ofxBeatClock::setPosition_GuiPanel(int _x, int _y, int _w)
 	group_INTERNAL->setWidth(gui_Panel_Width);
 	group_Controls->setWidth(gui_Panel_Width);
 	group_Advanced->setWidth(gui_Panel_Width);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -1219,7 +1226,9 @@ void ofxBeatClock::setVisible_GuiPreview(bool b)
 //--------------------------------------------------------------
 void ofxBeatClock::setVisible_GuiPanel(bool b)
 {
+	#ifdef USE_OFX_GUI_EXTENDED2
 	gui.getVisible().set(b);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -1333,10 +1342,8 @@ void ofxBeatClock::stop()//only used in internal mode
 	{
 		ofLogNotice(__FUNCTION__) << "STOP";
 
-		if (PLAYING_State)
-			PLAYING_State = false;
-		if (clockInternal_Active)
-			clockInternal_Active = false;
+		if (PLAYING_State) PLAYING_State = false;
+		if (clockInternal_Active) clockInternal_Active = false;
 
 		//bIsPlaying = false;
 
@@ -1363,8 +1370,13 @@ void ofxBeatClock::setTogglePlay()//only used in internal mode
 	ofLogNotice(__FUNCTION__);
 	
 	//worklow
+#ifdef USE_ofxAbletonLink
 	if (!ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_LINK_SYNC && !ENABLE_INTERNAL_CLOCK)
 		ENABLE_INTERNAL_CLOCK = true;
+#else	
+	if (!ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_INTERNAL_CLOCK)
+	ENABLE_INTERNAL_CLOCK = true;
+#endif
 
 	if (ENABLE_INTERNAL_CLOCK && ENABLE_CLOCKS)
 	{
@@ -1494,8 +1506,13 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	else if (name == "PLAY")//button for internal only
 	{
 		//worklow
+		#ifdef USE_ofxAbletonLink
 		if (!ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_LINK_SYNC && !ENABLE_INTERNAL_CLOCK)
 			ENABLE_INTERNAL_CLOCK = true;
+#else
+		if (!ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_INTERNAL_CLOCK)
+			ENABLE_INTERNAL_CLOCK = true;
+#endif
 
 		ofLogNotice(__FUNCTION__) << "PLAYING_State: " << (PLAYING_State ? "TRUE" : "FALSE");
 
@@ -1597,8 +1614,9 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			clockActive_Info = "";
 
 			//-
-
+			#ifdef USE_OFX_GUI_EXTENDED2
 			group_INTERNAL->maximize();
+#endif
 		}
 		else
 		{
@@ -1623,8 +1641,9 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			}
 
 			//-
-
+#ifdef USE_OFX_GUI_EXTENDED2
 			group_INTERNAL->minimize();
+#endif
 		}
 	}
 
@@ -1671,8 +1690,9 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			midiIn_PortName = midiIn.getName();
 
 			//-
-
+#ifdef USE_OFX_GUI_EXTENDED2
 			group_EXTERNAL_MIDI->maximize();
+#endif
 		}
 		else
 		{
@@ -1688,8 +1708,9 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			}
 
 			//-
-
+#ifdef USE_OFX_GUI_EXTENDED2
 			group_EXTERNAL_MIDI->minimize();
+#endif
 		}
 	}
 
@@ -1909,7 +1930,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	else if (name == "SHOW ADVANCED")
 	{
 		ofLogNotice(__FUNCTION__) << "SHOW ADVANCED: " << SHOW_Advanced;
-
+#ifdef USE_OFX_GUI_EXTENDED2
 		if (SHOW_Advanced)
 		{
 			group_Advanced->maximize();
@@ -1918,6 +1939,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		{
 			group_Advanced->minimize();
 		}
+#endif
 	}
 
 	//-
@@ -2176,7 +2198,9 @@ void ofxBeatClock::saveSettings(std::string path)
 {
 	ofxSurfingHelpers::CheckFolder(path);
 
+#ifdef USE_OFX_GUI_EXTENDED2
 	pos_Gui = glm::vec2(panel_BeatClock->getPosition().x, panel_BeatClock->getPosition().y);
+#endif
 
 	//save settings
 	ofLogNotice(__FUNCTION__) << path;
@@ -2215,7 +2239,9 @@ void ofxBeatClock::loadSettings(std::string path)
 	ofLogNotice(__FUNCTION__) << path + file_App << " : " << settings3.toString();
 	ofDeserialize(settings3, params_App);
 
+#ifdef USE_OFX_GUI_EXTENDED2
 	panel_BeatClock->setPosition(pos_Gui.get().x, pos_Gui.get().y);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -2520,4 +2546,54 @@ void ofxBeatClock::windowResized(int _w, int _h)
 	////	//1. video player
 	////	hapSkipper.windowResized(window_W, window_H);
 	////}
+}
+
+
+//--------------------------------------------------------------
+void ofxBeatClock::keyPressed(int key)
+{
+	switch (key)
+	{
+		// toggle play / stop
+	case ' ':
+		setTogglePlay();
+		break;
+
+		// trig tap-tempo 4 times 
+		// when using internal clock 
+		// only to set the bpm on the fly
+	case 't':
+		tap_Trig();
+		break;
+
+		// get some beatClock info. look api methods into ofxBeatClock.h
+	case OF_KEY_RETURN:
+		ofLogWarning("ofApp") << "BPM     : " << getBPM() << " beats per minute";
+		ofLogWarning("ofApp") << "BAR TIME: " << getTimeBar() << " ms";
+		break;
+
+		// debug
+	case 'd':
+		toggleDebug_Clock(); // clock debug
+		toggleDebug_Layout(); // layout debug
+		break;
+
+		// show gui controls
+	case 'g':
+		toggleVisible_GuiPanel();
+		break;
+
+		// show gui previews
+	case 'G':
+		setToggleVisible_GuiPreview();
+		break;
+
+	case '-':
+		BPM_Global -= 1.0;
+		break;
+
+	case '+':
+		BPM_Global += 1.0;
+		break;
+	}
 }
