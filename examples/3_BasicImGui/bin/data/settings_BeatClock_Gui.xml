@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <interactiveRect>
 	<path></path>
-	<x>263</x>
-	<y>124</y>
-	<width>207</width>
-	<height>360</height>
+	<x>220</x>
+	<y>20</y>
+	<width>223</width>
+	<height>331</height>
 	<nombre>_BeatClock_Gui</nombre>
 	<isEditing>0</isEditing>
 </interactiveRect>

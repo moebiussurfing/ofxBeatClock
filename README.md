@@ -71,10 +71,6 @@ Easy to Sync to **Ableton Live** or any sequencer app with **Midi Clock**.
 * Nice **Metronome Sound Ticks**.
 * Draggable box to edit to layout: change preview info and GUI panel positions.
 
-## Tested Systems
-- **Windows10** / **VS2017** / **OF ~0.11**
-- **macOS. High Sierra** / **Xcode9** & **Xcode10** / **OF ~0.11**
-
 ## Requeriments
 
 * ofxMidi  
@@ -96,6 +92,10 @@ https://github.com/castovoid/ofxDawMetro
 Take care of data folder files:
 ```/data/ofxBeatClock/```  
 Xml settings, gui font file, and JSON theme. (app may crash if not present)
+
+## Tested Systems
+- **Windows10** / **VS2017** / **OF ~0.11**
+- **macOS. High Sierra** / **Xcode9** & **Xcode10** / **OF ~0.11**
 
 ## Author
 Addon by **@moebiusSurfing**  
