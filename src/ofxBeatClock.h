@@ -4,7 +4,8 @@
 //	DEFINES
 //
 //
-#define USE_ofxAbletonLink
+//#define USE_OFX_GUI_EXTENDED2
+//#define USE_ofxAbletonLink
 //#define USE_AUDIO_BUFFER_TIMER_MODE // alternative clock engine based on audio buffer (WIP)
 //
 //
@@ -69,17 +70,20 @@ Problems happen when minimizing or moving the app window.. Any help is welcome!~
 //----
 
 #pragma once
+
 #include "ofMain.h"
 
 #include "ofxMidiClock.h"//used for external midi clock sync (1)
 #include "ofxMidi.h"
 #include "ofxMidiTimecode.h"
 #include "ofxDawMetro.h"//used for internal (using threaded timer) clock (2)
-#include "ofxGuiExtended2.h"
 #include "ofxSurfingHelpers.h"
 #include "CircleBeat.h"
 #include "BpmTapTempo.h"
 #include "ofxInteractiveRect.h" // engine to move the gui. TODO: add resize by mouse too.
+#ifdef USE_OFX_GUI_EXTENDED2
+#include "ofxGuiExtended2.h"
+#endif
 
 //----
 
@@ -160,6 +164,7 @@ public:
 	void draw(ofEventArgs & args);
 	void exit();
 	void windowResized(int w, int h);
+	void keyPressed(int key);
 
 	int window_W;
 	int window_H;
@@ -247,6 +252,7 @@ private:
 
 	//----
 
+	#ifdef USE_OFX_GUI_EXTENDED2
 	//gui panels theme
 	//NOTE: take care with the path font defined on the config json 
 	//because ofxGuiExtended crashes if fonts are not located on /data
@@ -264,6 +270,7 @@ private:
 		group_EXTERNAL_MIDI->loadTheme(s);
 	}
 	std::string path_Theme;
+#endif
 
 	int gui_Panel_Width, gui_Panel_posX, gui_Panel_posY;
 
@@ -282,16 +289,20 @@ public:
 	{
 		SHOW_PreviewExtra = !SHOW_PreviewExtra;
 	}
+#ifdef USE_ofxAbletonLink
 	//--------------------------------------------------------------
 	bool getVisible_GuiPanel()
 	{
 		return gui.getVisible();
 	}
+#endif
 	//--------------------------------------------------------------
 	void toggleVisible_GuiPanel()
 	{
+		#ifdef USE_ofxAbletonLink
 		bool b = getVisible_GuiPanel();
 		setVisible_GuiPanel(!b);
+#endif
 	}
 
 	void setPosition_GuiGlobal(int x, int y);//main global position setter for gui panel and extra elements
@@ -419,8 +430,9 @@ public:
 public:
 	void setup_GuiPanel();
 	void refresh_Gui();
-	ofxGui gui;
+	//ofxGui gui;
 
+#ifdef USE_OFX_GUI_EXTENDED2
 private:
 	ofxGuiPanel* panel_BeatClock;//nested folder
 	//ofxGuiGroup2* group_BeatClock;//nested folder
@@ -428,6 +440,7 @@ private:
 	ofxGuiGroup2* group_Advanced;
 	ofxGuiGroup2* group_INTERNAL;
 	ofxGuiGroup2* group_EXTERNAL_MIDI;
+#endif
 
 	ofParameterGroup params_INTERNAL;
 	ofParameterGroup params_EXTERNAL_MIDI;
