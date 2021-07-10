@@ -1,5 +1,6 @@
 ofxBeatClock
 ofxImGui
 ofxMidi
+ofxScaleDragRect
 ofxSurfingHelpers
 ofxSurfingImGui
