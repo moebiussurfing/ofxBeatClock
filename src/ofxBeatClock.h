@@ -4,6 +4,7 @@
 //	DEFINES
 //
 //
+#define USE_OFX_SURFING_IM_GUI
 //#define USE_OFX_GUI_EXTENDED2
 //#define USE_ofxAbletonLink
 //#define USE_AUDIO_BUFFER_TIMER_MODE // alternative clock engine based on audio buffer (WIP)
@@ -15,7 +16,8 @@
 
 /*
 	TODO:
-
+		+	make an ImGui preview clock widget
+		+	fix ImGui layout..
 		+	Use my beatCircle + tapTempo + circle progress from Ableton Link classes from ofxSurfingHelpers !
 		+ 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
 		+ 	Add fast filter to smooth / stabilize BPM number when using external midi clock mode.
@@ -31,7 +33,8 @@
 //-
 
 /*
-## TODO:
+
+TODO:
 
 - **BUG**: Repair problems when sometimes beat 1 tick it's displaced to beat 2...
 - **BUG**: Some log errors must be repaired on ofxAbletonLink that seems drop down fps/performance...
@@ -43,6 +46,7 @@
 (https://forum.openframeworks.cc/t/audio-programming-basics/34392/10).
 Problems happen when minimizing or moving the app window.. Any help is welcome!~~
 - Add kind of plugin to add audio input to get Beat on the fly from incomming audio signal. (Using ofxBTrack)
+
 */
 
 //-
@@ -81,8 +85,13 @@ Problems happen when minimizing or moving the app window.. Any help is welcome!~
 #include "CircleBeat.h"
 #include "BpmTapTempo.h"
 #include "ofxInteractiveRect.h" // engine to move the gui. TODO: add resize by mouse too.
+
 #ifdef USE_OFX_GUI_EXTENDED2
 #include "ofxGuiExtended2.h"
+#endif
+
+#ifdef USE_OFX_SURFING_IM_GUI
+#include "ofxSurfingImGui.h"
 #endif
 
 //----
@@ -151,9 +160,10 @@ Problems happen when minimizing or moving the app window.. Any help is welcome!~
 
 //-
 
-class ofxBeatClock : public ofBaseApp, public ofxMidiListener, public ofxDawMetro::MetroListener {
+class ofxBeatClock : public ofBaseApp, public ofxMidiListener, public ofxDawMetro::MetroListener
+{
 
-#pragma mark - OF
+	//  OF
 
 public:
 	ofxBeatClock();
@@ -164,8 +174,17 @@ public:
 	void draw(ofEventArgs & args);
 	void exit();
 	void windowResized(int w, int h);
-	void keyPressed(int key);
+	void keyPressed(ofKeyEventArgs &eventArgs);
 
+	//-
+
+#ifdef USE_OFX_SURFING_IM_GUI
+	ofxSurfing_ImGui_Manager guiManager;
+#endif
+
+	//-
+
+private:
 	int window_W;
 	int window_H;
 
@@ -173,7 +192,7 @@ public:
 
 private:
 	void startup();
-	void draw_PreviewExtra();
+	void draw_PreviewWidget();
 
 	CircleBeat circleBeat;
 	BpmTapTempo bpmTapTempo;
@@ -182,20 +201,22 @@ private:
 
 	//TODO:
 private:
+	ofParameter<bool> bKeys;
+
 	ofxInteractiveRect rPreview = { "_BeatClock_Gui" };
 	ofParameter<bool> MODE_Editor;
 	ofParameter<bool> SHOW_Editor;
 	std::string name_r1 = "_BeatClock";
 	std::string name_r2 = "Gui_";
-	int padx = 10;
-	int pady = 30;
+	const int padx = 10;
+	const int pady = 30;
 	//ofParameter<float> _rectRatio;
 	//float _RectClick_w;
 	//float _RectClick_Pad;
 
 	//-
 
-#pragma mark - MIDI_IN_CLOCK
+//  MIDI_IN_CLOCK
 
 private:
 	ofxMidiIn midiIn;
@@ -222,13 +243,13 @@ private:
 
 	//-
 
-#pragma mark - EXTERNAL_MIDI_CLOCK
+//  EXTERNAL_MIDI_CLOCK
 
 	void setup_MidiIn_Clock();
 
 	//-
 
-#pragma mark - LAYOUT
+//  LAYOUT
 
 	//NOTE: all the layout system is a little messy yet. sometimes using glm, or x y points ...etc
 
@@ -252,11 +273,11 @@ private:
 
 	//----
 
-	#ifdef USE_OFX_GUI_EXTENDED2
-	//gui panels theme
-	//NOTE: take care with the path font defined on the config json 
-	//because ofxGuiExtended crashes if fonts are not located on /data
-	//--------------------------------------------------------------
+#ifdef USE_OFX_GUI_EXTENDED2
+//gui panels theme
+//NOTE: take care with the path font defined on the config json 
+//because ofxGuiExtended crashes if fonts are not located on /data
+//--------------------------------------------------------------
 	void loadTheme(std::string s)
 	{
 		path_Theme = s;
@@ -274,8 +295,10 @@ private:
 
 	int gui_Panel_Width, gui_Panel_posX, gui_Panel_posY;
 
-public:
+	//-
+
 	//api setters
+public:
 
 	void setPosition_GuiPanel(int x, int y, int w);//gui panel
 	ofPoint getPosition_GuiPanel();
@@ -299,15 +322,16 @@ public:
 	//--------------------------------------------------------------
 	void toggleVisible_GuiPanel()
 	{
-		#ifdef USE_ofxAbletonLink
+#ifdef USE_ofxAbletonLink
 		bool b = getVisible_GuiPanel();
 		setVisible_GuiPanel(!b);
 #endif
 	}
 
 	void setPosition_GuiGlobal(int x, int y);//main global position setter for gui panel and extra elements
+	void setPosition_GuiPreviewWidget(int x, int y);//extra elements position setter with default layout of the other elements
 
-	void setPosition_GuiExtra(int x, int y);//extra elements position setter with default layout of the other elements
+private:
 	void setPosition_BeatBoxes(int x, int y, int w);//position x, y and w = width of all 4 squares
 	void setPosition_BeatBall(int x, int y, int w);//position x, y and w = width of ball
 	void setPosition_ClockInfo(int _x, int _y);//all clock source info
@@ -383,7 +407,7 @@ private:
 
 	//-
 
-#pragma mark - MONITOR_VISUAL_FEEDBACK
+//  MONITOR_VISUAL_FEEDBACK
 
 private:
 	//beat ball
@@ -415,7 +439,7 @@ public:
 ////WIP
 //private:
 //smooth clock for midi input clock sync
-//#pragma mark - REFRESH_FEQUENCY
+////  REFRESH_FEQUENCY
 ////used only when BPM_MIDI_CLOCK_REFRESH_RATE is defined
 //unsigned long BPM_LAST_Tick_Time_LAST;//test
 //unsigned long BPM_LAST_Tick_Time_ELLAPSED;//test
@@ -425,11 +449,20 @@ public:
 
 	//-
 
-#pragma mark - PARAMS_FOR_GUI_PANEL_AND_CLOCK_ENGINE
-
 public:
+
 	void setup_GuiPanel();
 	void refresh_Gui();
+
+	//#ifdef USE_OFX_GUI_EXTENDED2
+	//#endif
+
+#ifdef USE_OFX_SURFING_IM_GUI
+	void draw_ImGuiWidgets();
+#endif
+
+	//-
+
 	//ofxGui gui;
 
 #ifdef USE_OFX_GUI_EXTENDED2
@@ -442,6 +475,7 @@ private:
 	ofxGuiGroup2* group_EXTERNAL_MIDI;
 #endif
 
+private:
 	ofParameterGroup params_INTERNAL;
 	ofParameterGroup params_EXTERNAL_MIDI;
 	ofParameterGroup params_Advanced;
@@ -450,9 +484,10 @@ private:
 
 	//-
 
-#pragma mark - PARAMS
+//  PARAMS
 public:
 	ofParameter<bool> PLAYING_Global_State;//for all different source clock modes
+	ofParameter<bool> bGui;
 
 private:
 	ofParameterGroup params_CONTROL;
@@ -523,7 +558,7 @@ private:
 	//internal clock
 
 	//based on threaded timer using ofxDawMetro
-#pragma mark - INTERNAL_CLOCK
+//  INTERNAL_CLOCK
 
 	ofxDawMetro clockInternal;
 
@@ -559,7 +594,7 @@ public:
 	//-
 
 	//settings
-#pragma mark - XML SETTINGS
+//  XML SETTINGS
 
 private:
 	std::string path_Global;
@@ -584,8 +619,6 @@ private:
 
 	//-
 
-#pragma mark - DRAW_STUFF:
-
 	//font
 	std::string messageInfo;
 	ofTrueTypeFont fontSmall;
@@ -602,17 +635,18 @@ private:
 
 	ofParameter<bool> SHOW_PreviewExtra;//beat boxes, text info and beat ball (all except gui panels)
 	ofParameter<bool> SHOW_Advanced;//some helpers other secondary settings/controls 
-
+	glm::vec2 shapePreview;
+	void draw_PreviewWidgetItems();
 	//-
 
-#pragma mark - SOUND
+//  SOUND
 	//sound metronome
 	ofParameter<bool> ENABLE_sound;//enable sound ticks
 	ofParameter<float> volumeSound;//sound ticks volume
 
 	//-
 
-#pragma mark - CURRENT_BPM_CLOCK_VALUES
+//  CURRENT_BPM_CLOCK_VALUES
 public:
 	void reset_ClockValues();//set gui display text clock to 0:0:0
 
@@ -642,7 +676,7 @@ private:
 
 	//----
 
-#pragma mark - API
+	// API
 
 	//----
 
@@ -666,7 +700,7 @@ private:
 
 	//----
 
-#pragma mark - TAP_ENGINE
+// TAP_ENGINE
 
 public:
 	void tap_Trig();
@@ -681,7 +715,7 @@ private:
 
 	//----
 
-#pragma mark - CHANGE_MIDI_IN_PORT
+//  CHANGE_MIDI_IN_PORT
 
 	void setup_MidiIn_Port(int p);
 	int midiIn_Clock_Port_OPENED;
@@ -690,7 +724,7 @@ private:
 
 	//----
 
-#pragma mark - STEP LIMITING
+//  STEP LIMITING
 
 	//we don't need to use long song patterns
 	//and we will limit bars to 4 like a simple step sequencer.
