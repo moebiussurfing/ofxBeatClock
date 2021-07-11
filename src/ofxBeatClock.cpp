@@ -72,7 +72,7 @@ void ofxBeatClock::setup()
 
 	RESET_BPM_Global.set("BPM RESET", false);
 
-	params_CONTROL.setName("CONTROL");
+	params_CONTROL.setName("USER CONTROL");
 	params_CONTROL.add(ENABLE_CLOCKS.set("ENABLE", true));
 	//params_CONTROL.add(PLAYING_Global_State.set("PLAY", false));//TEST
 	params_CONTROL.add(clockInternal_Bpm.set("BPM", BPM_INIT, BPM_INIT_MIN, BPM_INIT_MAX));
@@ -241,13 +241,33 @@ void ofxBeatClock::setup()
 	//fontMedium.load(strFont, 11);
 	//fontBig.load(strFont, 15);
 
-	strFont = "assets/fonts/PrgmtB.ttf";
-	fontSmall.load(strFont, 10);
-	fontMedium.load(strFont, 13);
-	fontBig.load(strFont, 17);
+	int sz1, sz2, sz3;
 
-	//-
+	//strFont = "assets/fonts/PrgmtB.ttf";
+	//sz1 = 10;
+	//sz2 = 13;
+	//sz3 = 17;
 
+	//strFont = "assets/fonts/telegrama_render.otf";
+	//sz1 = 7;
+	//sz2 = 12;
+	//sz3 = 17;
+
+	strFont = "assets/fonts/overpass-mono-bold.otf";
+	sz1 = 7;
+	sz2 = 12;
+	sz3 = 17;
+
+	bool bOk = false;
+	bOk |= fontSmall.load(strFont, sz1);
+	bOk |= fontMedium.load(strFont, sz2);
+	bOk |= fontBig.load(strFont, sz3);
+	if (!bOk) // substitute font if not present on data/asssets/font with the OF native
+	{
+		fontSmall.load(OF_TTF_MONO, sz1);
+		fontMedium.load(OF_TTF_MONO, sz2);
+		fontBig.load(OF_TTF_MONO, sz3);
+	}
 	if (!fontSmall.isLoaded())
 	{
 		ofLogError(__FUNCTION__) << "ERROR LOADING FONT " << strFont;
@@ -272,26 +292,26 @@ void ofxBeatClock::setup()
 
 	// customize widgets
 
-	widgetsManager.AddWidgetConf(RESET_BPM_Global, SurfingTypes::IM_STEPPER);
+	widgetsManager.AddWidgetConf(RESET_BPM_Global, SurfingTypes::OFX_IM_STEPPER);
 
-	widgetsManager.AddWidgetConf(ENABLE_CLOCKS, SurfingTypes::IM_BUTTON_BIG, false, 1, 0);
-	widgetsManager.AddWidgetConf(ENABLE_INTERNAL_CLOCK, SurfingTypes::IM_BUTTON_BIG, false, 1, 0);
-	widgetsManager.AddWidgetConf(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingTypes::IM_BUTTON_BIG, false, 1, 0);
+	widgetsManager.AddWidgetConf(ENABLE_CLOCKS, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
+	widgetsManager.AddWidgetConf(ENABLE_INTERNAL_CLOCK, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
+	widgetsManager.AddWidgetConf(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
 #ifdef USE_ofxAbletonLink
-	widgetsManager.AddWidgetConf(ENABLE_LINK_SYNC, SurfingTypes::IM_BUTTON_BIG, false, 1, 0);
+	widgetsManager.AddWidgetConf(ENABLE_LINK_SYNC, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
 #endif
 
-	widgetsManager.AddWidgetConf(PLAYING_State, SurfingTypes::IM_TOGGLE_BIG, false, 1, 0);
-	widgetsManager.AddWidgetConf(BPM_Tap_Tempo_TRIG, SurfingTypes::IM_BUTTON_SMALL, false, 1, 0);
+	widgetsManager.AddWidgetConf(PLAYING_State, SurfingTypes::OFX_IM_TOGGLE_BIG, false, 1, 0);
+	widgetsManager.AddWidgetConf(BPM_Tap_Tempo_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, false, 1, 0);
 
-	widgetsManager.AddWidgetConf(SHOW_PreviewExtra, SurfingTypes::IM_TOGGLE_SMALL, false, 1, 0);
-	widgetsManager.AddWidgetConf(SHOW_Advanced, SurfingTypes::IM_TOGGLE_SMALL, false, 1, 0);
+	widgetsManager.AddWidgetConf(SHOW_PreviewExtra, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
+	widgetsManager.AddWidgetConf(SHOW_Advanced, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
 
-	widgetsManager.AddWidgetConf(BPM_half_TRIG, SurfingTypes::IM_BUTTON_SMALL, true, 2, 0);
-	widgetsManager.AddWidgetConf(BPM_double_TRIG, SurfingTypes::IM_BUTTON_SMALL, false, 2, 0);
+	widgetsManager.AddWidgetConf(BPM_half_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, true, 2, 0);
+	widgetsManager.AddWidgetConf(BPM_double_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, false, 2, 0);
 
-	widgetsManager.AddWidgetConf(SHOW_Editor, SurfingTypes::IM_TOGGLE_SMALL, true, 2, 0);
-	widgetsManager.AddWidgetConf(MODE_Editor, SurfingTypes::IM_TOGGLE_SMALL, false, 2, 0);
+	widgetsManager.AddWidgetConf(SHOW_Editor, SurfingTypes::OFX_IM_TOGGLE_SMALL, true, 2, 0);
+	widgetsManager.AddWidgetConf(MODE_Editor, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 2, 0);
 
 	//--
 
@@ -789,7 +809,7 @@ void ofxBeatClock::draw_ImGuiWidgets()
 				//ToggleRoundedButton("Show Window 2", &bOpen2);
 
 				//TODO:
-				widgetsManager.Add(ENABLE_CLOCKS, SurfingTypes::IM_TOGGLE_SMALL);
+				widgetsManager.Add(ENABLE_CLOCKS, SurfingTypes::OFX_IM_TOGGLE_SMALL);
 				if (!ENABLE_CLOCKS)
 				{
 					guiManager.endWindow();
@@ -799,12 +819,12 @@ void ofxBeatClock::draw_ImGuiWidgets()
 
 				//--
 
-				widgetsManager.Add(PLAYING_State, SurfingTypes::IM_TOGGLE_BIG);
+				widgetsManager.Add(PLAYING_State, SurfingTypes::OFX_IM_TOGGLE_BIG);
 
 				ImGui::Dummy(ImVec2(0, 2));
 
-				widgetsManager.Add(ENABLE_INTERNAL_CLOCK, SurfingTypes::IM_TOGGLE_BIG);
-				widgetsManager.Add(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingTypes::IM_TOGGLE_BIG);
+				widgetsManager.Add(ENABLE_INTERNAL_CLOCK, SurfingTypes::OFX_IM_TOGGLE_BIG);
+				widgetsManager.Add(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingTypes::OFX_IM_TOGGLE_BIG);
 
 				ImGui::Dummy(ImVec2(0, 2));
 
@@ -819,32 +839,37 @@ void ofxBeatClock::draw_ImGuiWidgets()
 					flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
 					//flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
 					ofxImGuiSurfing::AddGroup(params_CONTROL, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
-
 					ImGui::Dummy(ImVec2(0, 2));
 
-					flags = ImGuiTreeNodeFlags_None;
-					flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
-					if (ENABLE_INTERNAL_CLOCK) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
-					ofxImGuiSurfing::AddGroup(params_INTERNAL, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+					if (ENABLE_INTERNAL_CLOCK) {
+						flags = ImGuiTreeNodeFlags_None;
+						flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
+						if (ENABLE_INTERNAL_CLOCK) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
+						ofxImGuiSurfing::AddGroup(params_INTERNAL, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+						ImGui::Dummy(ImVec2(0, 2));
+					}
 
-					ImGui::Dummy(ImVec2(0, 2));
-
-					flags = ImGuiTreeNodeFlags_None;
-					flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
-					if (ENABLE_EXTERNAL_MIDI_CLOCK) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
-					ofxImGuiSurfing::AddGroup(params_EXTERNAL_MIDI, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
-					
-					ImGui::Dummy(ImVec2(0, 2));
+					if (ENABLE_EXTERNAL_MIDI_CLOCK) {
+						flags = ImGuiTreeNodeFlags_None;
+						flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
+						if (ENABLE_EXTERNAL_MIDI_CLOCK) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
+						ofxImGuiSurfing::AddGroup(params_EXTERNAL_MIDI, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+						ImGui::Dummy(ImVec2(0, 2));
+					}
 
 #ifdef USE_ofxAbletonLink
-					flags = ImGuiTreeNodeFlags_None;
-					flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
-					if (ENABLE_LINK_SYNC) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
-					ofxImGuiSurfing::AddGroup(params_LINK, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+					if (LINK_Enable) {
+						flags = ImGuiTreeNodeFlags_None;
+						flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
+						if (ENABLE_LINK_SYNC) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
+						ofxImGuiSurfing::AddGroup(params_LINK, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+						ImGui::Dummy(ImVec2(0, 2));
+					}
 #endif
-					ImGui::Dummy(ImVec2(0, 2));
-
-					ofxImGuiSurfing::AddGroup(params_Advanced, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+					if (SHOW_Advanced) {
+						flags = ImGuiTreeNodeFlags_None;
+						ofxImGuiSurfing::AddGroup(params_Advanced, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+					}
 				}
 			}
 			guiManager.endWindow();
@@ -1487,7 +1512,7 @@ void ofxBeatClock::start()//only used in internal and link modes
 	{
 		ofLogNotice(__FUNCTION__) << "skip start";
 	}
-	}
+}
 
 //--------------------------------------------------------------
 void ofxBeatClock::stop()//only used in internal mode
@@ -1552,7 +1577,7 @@ void ofxBeatClock::setTogglePlay()//only used in internal mode
 	{
 		ofLogNotice(__FUNCTION__) << "Skip setTogglePlay";
 	}
-	}
+}
 
 //--------------------------------------------------------------
 void ofxBeatClock::beatTick_MONITOR(int _beat)
@@ -1694,7 +1719,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 				stop();
 			}
 		}
-}
+	}
 
 	//-
 
@@ -1798,8 +1823,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 #ifdef USE_OFX_GUI_EXTENDED2
 			group_INTERNAL->minimize();
 #endif
-			}
 		}
+	}
 
 	//-
 
@@ -1865,7 +1890,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 #ifdef USE_OFX_GUI_EXTENDED2
 			group_EXTERNAL_MIDI->minimize();
 #endif
-			}
+		}
 	}
 
 	//-
@@ -2061,29 +2086,30 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			ofLogNotice(__FUNCTION__) << "BPM_Global: " << BPM_Global;
 		}
 	}
-	else if (name == "BPM DOUBLE")
+	else if (name == BPM_double_TRIG.getName())
 	{
-		ofLogNotice(__FUNCTION__) << "DOUBLE BPM";
 		if (BPM_double_TRIG)
 		{
+			ofLogNotice(__FUNCTION__) << "DOUBLE BPM";
 			BPM_double_TRIG = false;
 
 			clockInternal_Bpm = clockInternal_Bpm * 2.0f;
 		}
 	}
-	else if (name == "BPM HALF")
+	else if (name == BPM_half_TRIG.getName())
 	{
-		ofLogNotice(__FUNCTION__) << "HALF BPM";
 		if (BPM_half_TRIG)
 		{
+			ofLogNotice(__FUNCTION__) << "HALF BPM";
 			BPM_half_TRIG = false;
 
 			clockInternal_Bpm = clockInternal_Bpm / 2.0f;
 		}
 	}
-	else if (name == "SHOW ADVANCED")
+	else if (name == SHOW_Advanced.getName())
 	{
 		ofLogNotice(__FUNCTION__) << "SHOW ADVANCED: " << SHOW_Advanced;
+
 #ifdef USE_OFX_GUI_EXTENDED2
 		if (SHOW_Advanced)
 		{
@@ -2140,7 +2166,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//		reSync();
 	//	}
 	//}
-	}
+}
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_midiIn_BeatsInBar(int &beatsInBar)
