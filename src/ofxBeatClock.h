@@ -16,8 +16,10 @@
 
 /*
 	TODO:
+
+		+	fix ImGui layout...
 		+	make an ImGui preview clock widget
-		+	fix ImGui layout..
+
 		+	Use my beatCircle + tapTempo + circle progress from Ableton Link classes from ofxSurfingHelpers !
 		+ 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
 		+ 	Add fast filter to smooth / stabilize BPM number when using external midi clock mode.
