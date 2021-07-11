@@ -14,7 +14,7 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::Changed_BeatTick()// callback to receive BeatTicks
 {
-	if (beatClock.BeatTick_TRIG) ofLogNotice("ofApp") << "BeatTick ! #" << beatClock.Beat_current;
+	if (beatClock.BeatTick_TRIG) ofLogNotice(__FUNCTION__) << "BeatTick ! #" << beatClock.Beat_current;
 }
 
 //--------------------------------------------------------------
@@ -36,20 +36,22 @@ void ofApp::keyPressed(int key)
 
 		// get some beatClock info. look api methods into ofxBeatClock.h
 	case OF_KEY_RETURN:
-		ofLogWarning("ofApp") << "BPM     : " << beatClock.getBPM() << " beats per minute";
-		ofLogWarning("ofApp") << "BAR TIME: " << beatClock.getTimeBar() << " ms";
+		ofLogWarning(__FUNCTION__) << "BPM     : " << beatClock.getBPM() << " beats per minute";
+		ofLogWarning(__FUNCTION__) << "BAR TIME: " << beatClock.getTimeBar() << " ms";
 		break;
 
-		// debug
-	case 'd':
-		beatClock.toggleDebug_Clock();//clock debug
-		beatClock.toggleDebug_Layout();//layout debug
-		break;
+	//	// debug
+	//case 'd':
+	//	beatClock.toggleDebug_Clock();//clock debug
+	//	beatClock.toggleDebug_Layout();//layout debug
+	//	break;
 
 		// show gui controls
+		#ifdef USE_OFX_GUI_EXTENDED2
 	case 'g':
 		beatClock.toggleVisible_GuiPanel();
 		break;
+#endif
 
 		// show gui previews
 	case 'G':
