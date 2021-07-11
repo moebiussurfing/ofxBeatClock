@@ -291,27 +291,28 @@ void ofxBeatClock::setup()
 	//--
 
 	// customize widgets
+	if (0) {
+		widgetsManager.AddWidgetConf(RESET_BPM_Global, SurfingTypes::OFX_IM_STEPPER);
 
-	widgetsManager.AddWidgetConf(RESET_BPM_Global, SurfingTypes::OFX_IM_STEPPER);
-
-	widgetsManager.AddWidgetConf(ENABLE_CLOCKS, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
-	widgetsManager.AddWidgetConf(ENABLE_INTERNAL_CLOCK, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
-	widgetsManager.AddWidgetConf(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
+		widgetsManager.AddWidgetConf(ENABLE_CLOCKS, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
+		widgetsManager.AddWidgetConf(ENABLE_INTERNAL_CLOCK, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
+		widgetsManager.AddWidgetConf(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
 #ifdef USE_ofxAbletonLink
-	widgetsManager.AddWidgetConf(ENABLE_LINK_SYNC, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
+		widgetsManager.AddWidgetConf(ENABLE_LINK_SYNC, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
 #endif
 
-	widgetsManager.AddWidgetConf(PLAYING_State, SurfingTypes::OFX_IM_TOGGLE_BIG, false, 1, 0);
-	widgetsManager.AddWidgetConf(BPM_Tap_Tempo_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, false, 1, 0);
+		widgetsManager.AddWidgetConf(PLAYING_State, SurfingTypes::OFX_IM_TOGGLE_BIG, false, 1, 0);
+		widgetsManager.AddWidgetConf(BPM_Tap_Tempo_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, false, 1, 0);
 
-	widgetsManager.AddWidgetConf(SHOW_PreviewExtra, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
-	widgetsManager.AddWidgetConf(SHOW_Advanced, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
+		widgetsManager.AddWidgetConf(SHOW_PreviewExtra, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
+		widgetsManager.AddWidgetConf(SHOW_Advanced, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
 
-	widgetsManager.AddWidgetConf(BPM_half_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, true, 2, 0);
-	widgetsManager.AddWidgetConf(BPM_double_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, false, 2, 0);
+		widgetsManager.AddWidgetConf(BPM_half_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, true, 2, 0);
+		widgetsManager.AddWidgetConf(BPM_double_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, false, 2, 0);
 
-	widgetsManager.AddWidgetConf(SHOW_Editor, SurfingTypes::OFX_IM_TOGGLE_SMALL, true, 2, 0);
-	widgetsManager.AddWidgetConf(MODE_Editor, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 2, 0);
+		widgetsManager.AddWidgetConf(SHOW_Editor, SurfingTypes::OFX_IM_TOGGLE_SMALL, true, 2, 0);
+		widgetsManager.AddWidgetConf(MODE_Editor, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 2, 0);
+	}
 
 	//--
 
@@ -653,6 +654,7 @@ void ofxBeatClock::refresh_Gui()
 	//-
 
 #ifdef USE_ofxAbletonLink
+#ifdef USE_OFX_GUI_EXTENDED2
 	if (ENABLE_LINK_SYNC)
 	{
 		group_LINK->maximize();
@@ -661,6 +663,7 @@ void ofxBeatClock::refresh_Gui()
 	{
 		group_LINK->minimize();
 	}
+#endif
 #endif
 }
 
@@ -826,6 +829,11 @@ void ofxBeatClock::draw_ImGuiWidgets()
 				widgetsManager.Add(ENABLE_INTERNAL_CLOCK, SurfingTypes::OFX_IM_TOGGLE_BIG);
 				widgetsManager.Add(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingTypes::OFX_IM_TOGGLE_BIG);
 
+#ifdef USE_ofxAbletonLink
+				widgetsManager.Add(ENABLE_LINK_SYNC, SurfingTypes::OFX_IM_TOGGLE_BIG);
+				widgetsManager.Add(LINK_Enable, SurfingTypes::OFX_IM_TOGGLE_BIG);
+#endif
+
 				ImGui::Dummy(ImVec2(0, 2));
 
 				{
@@ -838,6 +846,7 @@ void ofxBeatClock::draw_ImGuiWidgets()
 					flags = ImGuiTreeNodeFlags_None;
 					flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
 					//flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
+
 					ofxImGuiSurfing::AddGroup(params_CONTROL, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
 					ImGui::Dummy(ImVec2(0, 2));
 
@@ -1938,8 +1947,10 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 			//-
 
+#ifdef USE_OFX_GUI_EXTENDED2
 			//workflow
 			group_LINK->maximize();
+#endif
 		}
 		else
 		{
@@ -1950,8 +1961,10 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 			//-
 
+#ifdef USE_OFX_GUI_EXTENDED2
 			//workflow
 			group_LINK->minimize();
+#endif
 		}
 	}
 #endif
@@ -2760,8 +2773,8 @@ void ofxBeatClock::keyPressed(ofKeyEventArgs &eventArgs)
 
 		// get some beatClock info. look api methods into ofxBeatClock.h
 	case OF_KEY_RETURN:
-		ofLogWarning("ofApp") << "BPM     : " << getBPM() << " beats per minute";
-		ofLogWarning("ofApp") << "BAR TIME: " << getTimeBar() << " ms";
+		ofLogWarning(__FUNCTION__) << "BPM     : " << getBPM() << " beats per minute";
+		ofLogWarning(__FUNCTION__) << "BAR TIME: " << getTimeBar() << " ms";
 		break;
 
 		// debug
@@ -2771,9 +2784,11 @@ void ofxBeatClock::keyPressed(ofKeyEventArgs &eventArgs)
 		break;
 
 		// show gui controls
+#ifdef USE_OFX_GUI_EXTENDED2
 	case 'g':
 		toggleVisible_GuiPanel();
 		break;
+#endif
 
 		// edit gui preview
 	case 'e':
