@@ -1,23 +1,23 @@
 
 //---------------------------------
 //
-//	DEFINES
-//
-//
+//	OPTIONAL DEFINES
+
 #define USE_OFX_SURFING_IM_GUI
-//#define USE_OFX_GUI_EXTENDED2
-//#define USE_ofxAbletonLink
-//#define USE_AUDIO_BUFFER_TIMER_MODE // alternative clock engine based on audio buffer (WIP)
-//
-//
+#define USE_ofxAbletonLink
+//#define USE_AUDIO_BUFFER_TIMER_MODE // -> Better alternative clock engine based on audio buffer (WIP)
+//#define USE_OFX_GUI_EXTENDED2 // -> Deprecated! Now using ImGui
+
+
 //---------------------------------
+
 
 //-
 
 /*
 	TODO:
 
-		+	fix ImGui layout...
+		+	fix ImGui layout glitches...
 		+	make an ImGui preview clock widget
 
 		+	Use my beatCircle + tapTempo + circle progress from Ableton Link classes from ofxSurfingHelpers !
@@ -314,21 +314,27 @@ public:
 	{
 		SHOW_PreviewExtra = !SHOW_PreviewExtra;
 	}
+
+#ifdef USE_OFX_GUI_EXTENDED2
 #ifdef USE_ofxAbletonLink
 	//--------------------------------------------------------------
 	bool getVisible_GuiPanel()
 	{
+
 		return gui.getVisible();
 	}
 #endif
+#endif
+#ifdef USE_ofxAbletonLink
+#ifdef USE_OFX_GUI_EXTENDED2
 	//--------------------------------------------------------------
 	void toggleVisible_GuiPanel()
 	{
-#ifdef USE_ofxAbletonLink
 		bool b = getVisible_GuiPanel();
 		setVisible_GuiPanel(!b);
+}
 #endif
-	}
+#endif
 
 	void setPosition_GuiGlobal(int x, int y);//main global position setter for gui panel and extra elements
 	void setPosition_GuiPreviewWidget(int x, int y);//extra elements position setter with default layout of the other elements
@@ -776,7 +782,10 @@ private:
 
 	ofParameter<bool> ENABLE_LINK_SYNC;
 
+#ifdef USE_OFX_GUI_EXTENDED2
 	ofxGuiGroup2* group_LINK;
+#endif
+
 	ofParameterGroup params_LINK;
 
 	ofParameter<bool> LINK_Enable;//enable link
