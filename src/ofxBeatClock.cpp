@@ -355,7 +355,8 @@ void ofxBeatClock::setup()
 	BeatTick_TRIG = false;
 
 	//swap to a class..
-	bpmTapTempo.setPathSounds(path_Global + "sounds/");
+	bpmTapTempo.setPathSounds("assets/sounds/");
+	//bpmTapTempo.setPathSounds(path_Global + "sounds/");
 	bpmTapTempo.setup();
 
 	//-
@@ -801,6 +802,8 @@ void ofxBeatClock::draw_ImGuiWidgets()
 		{
 			ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 			if (guiManager.bAutoResize) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
+
+			ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
 
 			guiManager.beginWindow("BEAT CLOCK", (bool*)&bGui.get(), window_flags);
 			{
