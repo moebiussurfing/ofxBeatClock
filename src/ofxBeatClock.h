@@ -310,7 +310,7 @@ public:
 	//--------------------------------------------------------------
 	void setToggleVisible_GuiPreview()
 	{
-		bGui_PreviewExtra = !bGui_PreviewExtra;
+		bGui_PreviewWidget = !bGui_PreviewWidget;
 	}
 
 #ifdef USE_OFX_GUI_EXTENDED2
@@ -333,6 +333,12 @@ public:
 }
 #endif
 #endif
+
+	//--------------------------------------------------------------
+	void toggleVisibleGui()
+	{
+		bGui = !bGui;
+	}
 
 	void setPosition_GuiGlobal(int x, int y);//main global position setter for gui panel and extra elements
 	void setPosition_GuiPreviewWidget(int x, int y);//extra elements position setter with default layout of the other elements
@@ -357,6 +363,12 @@ private:
 
 	// big clock
 	void draw_BigClockTime(int x, int y);
+
+	void draw_ImGuiCircleBeatWidget();
+
+	bool bb[4];
+	ofColor cb[4];
+	std::string strTimeBeatPos;
 
 	//--
 
@@ -459,6 +471,7 @@ public:
 
 	void setup_GuiPanel();
 	void refresh_Gui();
+	void refresh_GuiWidgets();
 
 	//#ifdef USE_OFX_GUI_EXTENDED2
 	//#endif
@@ -466,7 +479,7 @@ public:
 #ifdef USE_OFX_SURFING_IM_GUI
 	void draw_ImGuiWidgets();
 	void draw_ImGuiControl();
-	void draw_ImGuiTransport();
+	void draw_ImGuiclockWidget();
 #endif
 
 	//-
@@ -626,7 +639,14 @@ private:
 	//-
 
 	// fonts
-	std::string messageInfo;
+	std::string strBpmInfo;
+	std::string strTapTempo;
+	std::string strExtMidiClock;
+	std::string strClock;
+	std::string strLink;
+	std::string strMessageInfo;
+	std::string strMoreInfo;
+	std::string strMessageInfoFull;
 	ofTrueTypeFont fontSmall;
 	ofTrueTypeFont fontMedium;
 	ofTrueTypeFont fontBig;
@@ -640,7 +660,7 @@ private:
 	//-
 
 	ofParameter<bool> bGui_Transport; 
-	ofParameter<bool> bGui_PreviewExtra; // beat boxes, text info and beat ball (all except gui panels)
+	ofParameter<bool> bGui_PreviewWidget; // beat boxes, text info and beat ball (all except gui panels)
 	ofParameter<bool> bGui_Advanced; // some helpers other secondary settings/controls 
 	glm::vec2 shapePreview;
 	void draw_PreviewWidgetItems();
@@ -819,11 +839,11 @@ private:
 			//display text
 			clockActive_Type = "ABLETON LINK";
 
-			clockActive_Info = "BEAT : " + ofToString(link.getBeat(), 1);
+			clockActive_Info = "BEAT   " + ofToString(link.getBeat(), 1);
 			clockActive_Info += "\n";
-			clockActive_Info += "PHASE: " + ofToString(link.getPhase(), 1);
+			clockActive_Info += "PHASE  " + ofToString(link.getPhase(), 1);
 			clockActive_Info += "\n";
-			clockActive_Info += "PEERS: " + ofToString(link.getNumPeers());
+			clockActive_Info += "PEERS  " + ofToString(link.getNumPeers());
 
 			//-
 
