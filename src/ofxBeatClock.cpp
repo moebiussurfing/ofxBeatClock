@@ -83,9 +83,9 @@ void ofxBeatClock::setup()
 #ifdef USE_ofxAbletonLink
 	params_CONTROL.add(ENABLE_LINK_SYNC.set("3 ABLETON LINK", false));
 #endif
-	params_CONTROL.add(bGui_PreviewExtra.set("SHOW PREVIEW", true));
-	params_CONTROL.add(bGui_Advanced.set("SHOW ADVANCED", false));
-	params_CONTROL.add(bGui_Transport.set("SHOW TRANSPORT", false));
+	params_CONTROL.add(bGui_Advanced.set("Advanced", false));
+	params_CONTROL.add(bGui_PreviewWidget.set("Clock Native", true));
+	params_CONTROL.add(bGui_Transport.set("Clock Monitor", false));
 
 	bGui.set("BEAT CLOCK", true);
 
@@ -283,11 +283,13 @@ void ofxBeatClock::setup()
 
 	guiManager.setImGuiAutodraw(true);
 	guiManager.setup();
+	guiManager.bAutoResize = false;
 
 	//--
 
 	// customize widgets
-	if (0) {
+	if (0) 
+	{
 		widgetsManager.AddWidgetConf(RESET_BPM_Global, SurfingTypes::OFX_IM_STEPPER);
 
 		widgetsManager.AddWidgetConf(ENABLE_CLOCKS, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
@@ -300,7 +302,7 @@ void ofxBeatClock::setup()
 		widgetsManager.AddWidgetConf(PLAYING_State, SurfingTypes::OFX_IM_TOGGLE_BIG, false, 1, 0);
 		widgetsManager.AddWidgetConf(BPM_Tap_Tempo_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, false, 1, 0);
 
-		widgetsManager.AddWidgetConf(bGui_PreviewExtra, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
+		widgetsManager.AddWidgetConf(bGui_PreviewWidget, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
 		widgetsManager.AddWidgetConf(bGui_Advanced, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
 
 		widgetsManager.AddWidgetConf(BPM_half_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, true, 2, 0);
@@ -309,6 +311,16 @@ void ofxBeatClock::setup()
 		widgetsManager.AddWidgetConf(SHOW_Editor, SurfingTypes::OFX_IM_TOGGLE_SMALL, true, 2, 0);
 		widgetsManager.AddWidgetConf(MODE_Editor, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 2, 0);
 	}
+
+#ifdef USE_ofxAbletonLink
+	if (1)
+	{
+		widgetsManager.AddWidgetConf(LINK_Peers_string, SurfingTypes::OFX_IM_TEXT_DISPLAY);
+		widgetsManager.AddWidgetConf(LINK_Beat_string, SurfingTypes::OFX_IM_TEXT_DISPLAY);
+		widgetsManager.AddWidgetConf(LINK_Phase, SurfingTypes::OFX_IM_INACTIVE);
+		widgetsManager.AddWidgetConf(LINK_Bpm, SurfingTypes::OFX_IM_INACTIVE);
+	}
+#endif
 
 	//--
 
@@ -660,6 +672,160 @@ void ofxBeatClock::refresh_Gui()
 	}
 #endif
 #endif
+
+	//--
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::refresh_GuiWidgets()
+{
+	if (!bGui_PreviewWidget)
+		circleBeat.update();
+
+	//-
+
+	// text labels
+
+	//strMessageInfoFull = "";
+
+	//-
+
+	strTapTempo = "";
+	if (bpmTapTempo.isRunning())
+	{
+		strTapTempo = "     TAP " + ofToString(ofMap(bpmTapTempo.getCountTap(), 1, 4, 3, 0));
+		//strMessageInfoFull += strTapTempo + "\n";
+	}
+	else
+	{
+		strTapTempo = "";
+		//strMessageInfoFull += strTapTempo + "\n";
+	}
+
+	//-
+
+	// A. external midi clock
+	// midi in port. id number and name
+	if (ENABLE_EXTERNAL_MIDI_CLOCK)
+	{
+		strExtMidiClock = ofToString(clockActive_Info);
+		//strMessageInfoFull += strExtMidiClock + "\n";
+	}
+
+	//-
+
+#ifdef USE_ofxAbletonLink
+	// C. Ableton Link
+	else if (ENABLE_LINK_SYNC)
+	{
+		strLink = ofToString(clockActive_Info);
+		//strMessageInfoFull += strLink + "\n";
+	}
+#endif	
+	
+	//--
+
+	// 1.4 more debug info
+	if (DEBUG_moreInfo)
+	{
+		strMoreInfo = "";
+		strMoreInfo += ("BPM: " + ofToString(BPM_Global, 2));
+		strMoreInfo += "\n";
+		strMoreInfo += ("BAR: " + Bar_string);
+		strMoreInfo += "\n";
+		strMoreInfo += ("BEAT: " + Beat_string);
+		strMoreInfo += "\n";
+		strMoreInfo += ("Tick 16th: " + Tick_16th_string);
+		strMoreInfo += "\n";
+		//strMessageInfoFull = strMoreInfo + "\n";
+	}
+
+	//-
+
+	// show clock source (internal, external or link)
+	strClock = "CLOCK  " + clockActive_Type;
+	//strMessageInfoFull += strClock + "\n";
+
+	//-
+
+	// time pos
+	strTimeBeatPos = ofToString(Bar_string, 3, ' ') + " : " + ofToString(Beat_string);
+
+	//only internal clock mode gets 16th ticks (beat / 16 duration)
+	//midi sync and link modes do not gets the 16th ticks, so we hide the (last) number to avoid confusion..
+
+#ifndef USE_ofxAbletonLink
+	if (!ENABLE_EXTERNAL_MIDI_CLOCK)
+#else
+	if (!ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_LINK_SYNC)
+#endif
+	{
+		strTimeBeatPos += " : " + ofToString(Tick_16th_string);
+	}
+
+	//-
+
+	strBpmInfo = "BPM: " + ofToString(BPM_Global.get(), 2);
+
+	//------
+
+	// colors
+	int colorBoxes = 192; // grey
+	int alphaBoxes = 200; // alpha of several above draw fills
+
+	//--
+
+	// 2. BEATS [4] SQUARES
+
+	for (int i = 0; i < 4; i++)
+	{
+		// define squares colors:
+#ifdef USE_ofxAbletonLink
+		if (ENABLE_CLOCKS && (ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK || ENABLE_LINK_SYNC))
+#else
+		if (ENABLE_CLOCKS && (ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK))
+#endif
+		{
+			// ligther color (colorBoxes) for beat squares that "has been passed [left]"
+			if (i <= (Beat_current - 1))
+			{
+#ifdef USE_ofxAbletonLink
+				//TEST:
+				if (ENABLE_LINK_SYNC && LINK_Enable)
+				{
+					cb[i] = (LINK_Play) ? ofColor(colorBoxes, alphaBoxes) : ofColor(32, alphaBoxes);
+				}
+				else if (ENABLE_INTERNAL_CLOCK)
+				{
+					cb[i] = (PLAYING_State) ? ofColor(colorBoxes, alphaBoxes) : ofColor(32, alphaBoxes);
+				}
+
+#else
+				if (ENABLE_INTERNAL_CLOCK)
+				{
+					cb[i] = (PLAYING_State) ? ofColor(colorBoxes, alphaBoxes) : ofColor(32, alphaBoxes);
+				}
+#endif
+				else if (ENABLE_EXTERNAL_MIDI_CLOCK)
+				{
+					cb[i] = (bMidiInClockRunning) ? ofColor(colorBoxes, alphaBoxes) : ofColor(32, alphaBoxes);
+				}
+			}
+
+			// dark color if beat square "is comming [right]"..
+			else
+			{
+				cb[i] = ofColor(32, alphaBoxes);
+			}
+		}
+
+		//-
+
+		else // disabled all the 3 source clock modes
+		{
+			cb[i] = ofColor(32, alphaBoxes);
+		}
+	}
 }
 
 //--------------------------------------------------------------
@@ -728,6 +894,8 @@ void ofxBeatClock::setup_MidiIn_Port(int p)
 //--------------------------------------------------------------
 void ofxBeatClock::update(ofEventArgs & args)
 {
+	refresh_GuiWidgets();
+
 	//--
 
 	// tap engine
@@ -765,7 +933,7 @@ void ofxBeatClock::draw_PreviewWidget()
 	//if (MODE_Editor.get())
 	{
 		setPosition_GuiPreviewWidget(rPreview.x + padx, rPreview.y + pady);
-		//sets all below variables...
+		// sets all below variables...
 	}
 
 	//-
@@ -803,39 +971,46 @@ void ofxBeatClock::draw_ImGuiControl()
 		float _h = ofxImGuiSurfing::getWidgetsHeightRelative(); // one unit height relative to ImGui theme
 		widgetsManager.refreshPanelShape();
 
+		//ofxImGuiSurfing::AddToggleRoundedButton(bGui);
 		ofxImGuiSurfing::AddToggleRoundedButton(bGui_Transport);
-		ofxImGuiSurfing::AddToggleRoundedButton(bGui_PreviewExtra);
-		ofxImGuiSurfing::AddToggleRoundedButton(bGui);
+		ofxImGuiSurfing::AddToggleRoundedButton(bGui_PreviewWidget);
+		ofxImGuiSurfing::AddToggleRoundedButton(bGui_Advanced);
 		ofxImGuiSurfing::AddToggleRoundedButton(bKeys);
 
 		widgetsManager.Add(ENABLE_CLOCKS, SurfingTypes::OFX_IM_TOGGLE_BIG);
-		if (!ENABLE_CLOCKS)
-		{
-			guiManager.endWindow();
-			guiManager.end();
-			return;
-		}
+		//TODO:
+		//if (!ENABLE_CLOCKS)
+		//{
+		//	guiManager.endWindow();
+		//	guiManager.end();
+		//	return;
+		//}
 
 		//--
 
 		//widgetsManager.Add(PLAYING_State, SurfingTypes::OFX_IM_TOGGLE_BIG);
-		AddBigToggleNamed(PLAYING_State, _w1, _h, "PLAY", "PLAYING", true, link.getPhase());
+		AddBigToggleNamed(PLAYING_State, _w1, 2 * _h, "PLAYING", "PLAY", true, link.getPhase());
 
 		ImGui::Dummy(ImVec2(0, 2));
 
 		//--
 
-		static bool bOpen = true;
-		ImGuiTreeNodeFlags _flagt = (bOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None);
-		_flagt |= ImGuiTreeNodeFlags_Framed;
-		if (ImGui::TreeNodeEx("SOURCES", _flagt))
+		// sources
 		{
-			widgetsManager.Add(ENABLE_INTERNAL_CLOCK, SurfingTypes::OFX_IM_TOGGLE_BIG);
-			widgetsManager.Add(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingTypes::OFX_IM_TOGGLE_BIG);
+			static bool bOpen = false;
+			ImGuiTreeNodeFlags _flagt = (bOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None);
+			_flagt |= ImGuiTreeNodeFlags_Framed;
+			if (ImGui::TreeNodeEx("SOURCES", _flagt))
+			{
+				widgetsManager.refreshPanelShape();
+
+				widgetsManager.Add(ENABLE_INTERNAL_CLOCK, SurfingTypes::OFX_IM_TOGGLE_BIG);
+				widgetsManager.Add(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingTypes::OFX_IM_TOGGLE_BIG);
 #ifdef USE_ofxAbletonLink
-			widgetsManager.Add(ENABLE_LINK_SYNC, SurfingTypes::OFX_IM_TOGGLE_BIG);
+				widgetsManager.Add(ENABLE_LINK_SYNC, SurfingTypes::OFX_IM_TOGGLE_BIG);
 #endif
-			ImGui::TreePop();
+				ImGui::TreePop();
+			}
 		}
 
 		ImGui::Dummy(ImVec2(0, 2));
@@ -843,68 +1018,98 @@ void ofxBeatClock::draw_ImGuiControl()
 		//-
 
 #ifdef USE_ofxAbletonLink
-		widgetsManager.Add(LINK_Enable, SurfingTypes::OFX_IM_TOGGLE_BIG);
-#endif
-
+		if (ENABLE_LINK_SYNC)
 		{
+			widgetsManager.Add(LINK_Enable, SurfingTypes::OFX_IM_TOGGLE_BIG);
+		}
+#endif
+		// link
+		{
+			widgetsManager.refreshPanelShape();
+
 			// group of parameters with customized tree/folder type
 			// will be applied to all nested groups inside this parent
 			// customization is defined above on setup(): widgetsManager.AddWidgetConf(..
 
-			ImGuiTreeNodeFlags flags;
-
-			flags = ImGuiTreeNodeFlags_None;
-			flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
-			//flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
-
-			ofxImGuiSurfing::AddGroup(params_CONTROL, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
-			ImGui::Dummy(ImVec2(0, 2));
-
-			if (ENABLE_INTERNAL_CLOCK) {
+			{
+				ImGuiTreeNodeFlags flags;
 				flags = ImGuiTreeNodeFlags_None;
 				flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
+				//flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
+
+				//ofxImGuiSurfing::AddGroup(params_CONTROL, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+
+				ImGui::Dummy(ImVec2(0, 2));
+				widgetsManager.refreshPanelShape();
+			}
+
+			if (ENABLE_INTERNAL_CLOCK)
+			{
+				ImGuiTreeNodeFlags flags;
+				flags = ImGuiTreeNodeFlags_None;
+				flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
+
 				if (ENABLE_INTERNAL_CLOCK) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
 				{
 					//ofxImGuiSurfing::AddGroup(params_INTERNAL, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
 
-					ofxImGuiSurfing::AddBigButton(BPM_Tap_Tempo_TRIG);
+					//ofxImGuiSurfing::AddBigButton(BPM_Tap_Tempo_TRIG);
+					widgetsManager.Add(BPM_Tap_Tempo_TRIG, SurfingTypes::OFX_IM_BUTTON_BIG);
 				}
+
 				ImGui::Dummy(ImVec2(0, 2));
+				widgetsManager.refreshPanelShape();
 			}
 
-			if (ENABLE_EXTERNAL_MIDI_CLOCK) {
+			if (ENABLE_EXTERNAL_MIDI_CLOCK)
+			{
+				ImGuiTreeNodeFlags flags;
 				flags = ImGuiTreeNodeFlags_None;
 				flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
+
 				if (ENABLE_EXTERNAL_MIDI_CLOCK) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
 				{
 					//ofxImGuiSurfing::AddGroup(params_EXTERNAL_MIDI, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
-				
+
 					ofxImGuiSurfing::AddParameter(PLAYING_External_State);
-					ofxImGuiSurfing::AddParameter(midiIn_Port_SELECT);
-					ofxImGuiSurfing::AddParameter(midiIn_PortName);
+
+					////ofxImGuiSurfing::AddParameter(midiIn_Port_SELECT);
+					//widgetsManager.Add(midiIn_Port_SELECT, SurfingTypes::OFX_IM_STEPPER);
+					////ofxImGuiSurfing::AddParameter(midiIn_PortName);
+					//widgetsManager.Add(midiIn_PortName, SurfingTypes::OFX_IM_DEFAULT);
+
+					widgetsManager.Add(midiIn_Port_SELECT, SurfingTypes::OFX_IM_STEPPER);
+					widgetsManager.Add(midiIn_PortName, SurfingTypes::OFX_IM_TEXT_DISPLAY);
+
 				}
+
 				ImGui::Dummy(ImVec2(0, 2));
+				widgetsManager.refreshPanelShape();
 			}
 
 #ifdef USE_ofxAbletonLink
-			if (LINK_Enable) {
+			if (ENABLE_LINK_SYNC && LINK_Enable)
+			{
+				ImGuiTreeNodeFlags flags;
 				flags = ImGuiTreeNodeFlags_None;
 				flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
+
 				if (ENABLE_LINK_SYNC) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
 				{
-					//ofxImGuiSurfing::AddGroup(params_LINK, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
-				
-					ofxImGuiSurfing::AddParameter(midiIn_Port_SELECT);
-					ofxImGuiSurfing::AddParameter(midiIn_PortName);
-					//widgetsManager.Add(midiIn_PortName, SurfingTypes::OFX_IM_DEFAULT);
+					ofxImGuiSurfing::AddGroup(params_LINK, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
 				}
+
 				ImGui::Dummy(ImVec2(0, 2));
+				widgetsManager.refreshPanelShape();
 			}
 #endif
 			//-
 
-			if (bGui_Advanced) {
+			if (bGui_Advanced)
+			{
+				ImGuiTreeNodeFlags flags;
 				flags = ImGuiTreeNodeFlags_None;
+
 				ofxImGuiSurfing::AddGroup(params_Advanced, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
 			}
 		}
@@ -913,28 +1118,188 @@ void ofxBeatClock::draw_ImGuiControl()
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::draw_ImGuiTransport()
+void ofxBeatClock::draw_ImGuiCircleBeatWidget()
+{
+	// circle widget
+	{
+		float pad = 10;
+		float __w100 = ImGui::GetContentRegionAvail().x - 2 * pad;
+
+		float radius = 30;
+		//float radius = __w100 / 2; // *circleBeat.getRadius();
+
+		//ImGui::Text("BEAT");
+		const char* label = " ";
+		//const char* label = "BEAT";
+
+		float radius_inner = radius * circleBeat.getValue();
+		//float radius_inner = radius * ofxSurfingHelpers::getFadeBlink();
+		float radius_outer = radius;
+		//float spcx = radius * 0.1;
+
+		//const int nsegm = 4;
+		const int nsegm = 24; // big resgments outperforms..
+
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuiStyle& style = ImGui::GetStyle();
+
+		ImVec2 pos = ImGui::GetCursorScreenPos(); // get top left of current widget
+
+		//float line_height = ImGui::GetTextLineHeight();
+		//float space_height = radius * 0.1; // to add between top, text, knob, value and bottom
+		//float space_width = radius * 0.1; // to add on left and right to diameter of knob
+
+		float xx = pos.x + pad;
+		float yy = pos.y + pad;
+
+		//ImVec4 widgetRec = ImVec4(
+		//	pos.x,
+		//	pos.y,
+		//	radius * 2.0f + space_width * 2.0f,
+		//	space_height * 4.0f + radius * 2.0f + line_height * 2.0f);
+
+		ImVec4 widgetRec = ImVec4(
+			xx,
+			yy,
+			radius * 2.0f,
+			radius * 2.0f + 4 * pad);
+
+		//ImVec2 labelLength = ImGui::CalcTextSize(label);
+
+		//ImVec2 center = ImVec2(
+		//	pos.x + space_width + radius,
+		//	pos.y + space_height * 2 + line_height + radius);
+
+		//ImVec2 center = ImVec2(
+		//	xx + radius,
+		//	yy + radius);
+
+		ImVec2 center = ImVec2(
+			xx + __w100 / 2,
+			yy + radius + pad);
+		//yy + __w100 / 2);
+
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+		ImGui::InvisibleButton(label, ImVec2(widgetRec.z, widgetRec.w));
+
+		//bool value_changed = false;
+		//bool is_active = ImGui::IsItemActive();
+		//bool is_hovered = ImGui::IsItemActive();
+		//if (is_active && io.MouseDelta.x != 0.0f)
+		//{
+		//	value_changed = true;
+		//}
+
+		//-
+
+		//// draw label
+
+		//float texPos = pos.x + ((widgetRec.z - labelLength.x) * 0.5f);
+		//draw_list->AddText(ImVec2(texPos, pos.y + space_height), ImGui::GetColorU32(ImGuiCol_Text), label);
+
+		//-
+
+		ofColor cbg;
+
+		// background black ball
+		if (!bpmTapTempo.isRunning())
+		{
+			// ball background when not tapping
+			cbg = ofColor(16, 200);
+		}
+		else
+		{
+			// white alpha fade when measuring tapping
+			float t = (ofGetElapsedTimeMillis() % 1000);
+			float fade = sin(ofMap(t, 0, 1000, 0, 2 * PI));
+			ofLogVerbose(__FUNCTION__) << "fade: " << fade << endl;
+			int alpha = (int)ofMap(fade, -1.0f, 1.0f, 0, 50) + 205;
+			cbg = ofColor(96, alpha);
+		}
+
+		//-
+
+		// outer circle
+
+		draw_list->AddCircleFilled(center, radius_outer, ImGui::GetColorU32(ImVec4(cbg)), nsegm);
+		//draw_list->AddCircleFilled(center, radius_outer, ImGui::GetColorU32(is_active ? ImGuiCol_FrameBgActive : ImGuiCol_FrameBg), nsegm);
+		//draw_list->AddCircleFilled(center, radius_outer * 0.8, ImGui::GetColorU32(is_active ? ImGuiCol_FrameBgActive : ImGuiCol_FrameBg), nsegm);
+
+		//-
+
+		// inner circle
+
+		// highlight 1st beat
+		ofColor c;
+		if (Beat_current == 1) c = ofColor::red;
+		else c = ofColor::white;
+
+		draw_list->AddCircleFilled(center, radius_inner, ImGui::GetColorU32(ImVec4(c)), nsegm);
+
+		//draw_list->AddCircleFilled(center, radius_inner, ImGui::GetColorU32(is_active ? ImGuiCol_ButtonActive : is_hovered ? ImGuiCol_ButtonHovered : ImGuiCol_SliderGrab), nsegm);
+		//draw_list->AddCircleFilled(center, radius_inner * 0.8, ImGui::GetColorU32(is_active ? ImGuiCol_ButtonActive : is_hovered ? ImGuiCol_ButtonHovered : ImGuiCol_SliderGrab), nsegm);
+
+		//// draw value
+		//char temp_buf[64];
+		//sprintf(temp_buf, "%.2f", *p_value);
+		//labelLength = ImGui::CalcTextSize(temp_buf);
+		//texPos = pos.x + ((widgetRec.z - labelLength.x) * 0.5f);
+		//draw_list->AddText(ImVec2(texPos, pos.y + space_height * 3 + line_height + radius * 2), ImGui::GetColorU32(ImGuiCol_Text), temp_buf);
+	}
+}
+
+//--------------------------------------------------------------
+void ofxBeatClock::draw_ImGuiclockWidget()
 {
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
-	if (guiManager.bAutoResize) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
+	if (1) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
+	//if (guiManager.bAutoResize) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
 
 	ImGui::SetNextWindowPos(ImVec2(250, 10), ImGuiCond_FirstUseEver);
 
-	guiManager.beginWindow(bGui_PreviewExtra.getName().c_str(), (bool*)&bGui_PreviewExtra.get(), window_flags);
+	guiManager.beginWindow(bGui_Transport.getName().c_str(), (bool*)&bGui_Transport.get(), window_flags);
 	{
-		float _w1 = ofxImGuiSurfing::getWidgetsWidth(1); // 1 widget full width
-		float _w4 = ofxImGuiSurfing::getWidgetsWidth(4);
-		float _h = ofxImGuiSurfing::getWidgetsHeightRelative(); // one unit height relative to ImGui theme
+		float __w100 = ImGui::GetContentRegionAvail().x;
+		float _w4 = __w100 / 4;
+		float _h = _w4;
 
-		ImGui::Button("1", ImVec2(_w4, _h / 2));
-		ImGui::SameLine(0, 0);
-		ImGui::Button("2", ImVec2(_w4, _h / 2));
-		ImGui::SameLine(0, 0);
-		ImGui::Button("3", ImVec2(_w4, _h / 2));
-		ImGui::SameLine(0, 0);
-		ImGui::Button("4", ImVec2(_w4, _h / 2));
+		ImGui::TextWrapped(strBpmInfo.c_str());
+		ImGui::TextWrapped(strTimeBeatPos.c_str());
+		ImGui::Dummy(ImVec2(0, 2));
 
-		ImGui::Text("adad");
+		ImGui::TextWrapped(strClock.c_str());
+		ImGui::TextWrapped(clockActive_Info.c_str());
+		//ImGui::TextWrapped(strExtMidiClock.c_str());
+		//ImGui::TextWrapped(strLink.c_str());
+		ImGui::TextWrapped(strMoreInfo.c_str());
+		//ImGui::TextWrapped(strMessageInfoFull.c_str());
+
+		ImGui::Dummy(ImVec2(0, 2));
+
+		ImGui::PushStyleColor(ImGuiCol_Button, cb[0]);
+		ImGui::Button("1", ImVec2(_w4, _h));
+		ImGui::PopStyleColor();
+		ImGui::SameLine(0, 0);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, cb[1]);
+		ImGui::Button("2", ImVec2(_w4, _h));
+		ImGui::PopStyleColor();
+		ImGui::SameLine(0, 0);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, cb[2]);
+		ImGui::Button("3", ImVec2(_w4, _h));
+		ImGui::PopStyleColor();
+		ImGui::SameLine(0, 0);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, cb[3]);
+		ImGui::Button("4", ImVec2(_w4, _h));
+		ImGui::PopStyleColor();
+
+		ImGui::Dummy(ImVec2(0, 2));
+
+		// circle beat
+		draw_ImGuiCircleBeatWidget();
 	}
 	guiManager.endWindow();
 }
@@ -945,7 +1310,7 @@ void ofxBeatClock::draw_ImGuiWidgets()
 	guiManager.begin();
 	{
 		if (bGui) draw_ImGuiControl();
-		if (bGui_Transport) draw_ImGuiTransport();
+		if (bGui_Transport) draw_ImGuiclockWidget();
 	}
 	guiManager.end();
 }
@@ -956,7 +1321,7 @@ void ofxBeatClock::draw(ofEventArgs & args)
 {
 	//TODO: maybe could improve performance with fbo drawings for all BeatBoxes/text/ball?
 
-	if (bGui_PreviewExtra)
+	if (bGui_PreviewWidget)
 	{
 		draw_PreviewWidget();
 
@@ -991,58 +1356,21 @@ void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and b
 	int interline = 15; //text line heigh
 	int i = 0;//vertical spacer to accumulate text lines
 
-	//colors
-	int colorBoxes = 192;//grey
-	int alphaBoxes = 200;//alpha of several above draw fills
+	int alphaBoxes = 200; // alpha of several above draw fills
 
 	//----
 
-	//2. BEATS [4] SQUARES
+	// 2. BEATS [4] SQUARES
 
 	for (int i = 0; i < 4; i++)
 	{
 		ofPushStyle();
 
-		//define squares colors:
-#ifdef USE_ofxAbletonLink
-		if (ENABLE_CLOCKS && (ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK || ENABLE_LINK_SYNC))
-#else
-		if (ENABLE_CLOCKS && (ENABLE_EXTERNAL_MIDI_CLOCK || ENABLE_INTERNAL_CLOCK))
-#endif
-		{
-			//ligther color (colorBoxes) for beat squares that "has been passed [left]"
-			if (i <= (Beat_current - 1))
-			{
-#ifdef USE_ofxAbletonLink
-				//TEST:
-				if (ENABLE_LINK_SYNC && LINK_Enable)
-					/*(link.isPlaying()) ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);*/
-					(LINK_Play) ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);
-
-				else if (ENABLE_INTERNAL_CLOCK)
-					PLAYING_State ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);
-#else
-				if (ENABLE_INTERNAL_CLOCK)
-					PLAYING_State ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);
-#endif
-				else if (ENABLE_EXTERNAL_MIDI_CLOCK)
-					bMidiInClockRunning ? ofSetColor(colorBoxes, alphaBoxes) : ofSetColor(32, alphaBoxes);
-		}
-
-			//dark color if beat square "is comming [right]"..
-			else ofSetColor(32, alphaBoxes);
-	}
-
-		//-
-
-		else//disabled all the 3 source clock modes
-		{
-			ofSetColor(32, alphaBoxes);//black
-		}
+		ofSetColor(cb[i]);
 
 		//--
 
-		//draw each i square
+		// draw each i square
 
 		//filled rectangle
 		////optional:
@@ -1054,7 +1382,7 @@ void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and b
 		ofFill();
 		ofDrawRectRounded(px + i * squaresW, py, squaresW, squaresW, 3.0f);
 
-		//rectangle with border only
+		// rectangle with border only
 		ofNoFill();
 		ofSetColor(8, alphaBoxes);
 		ofSetLineWidth(2.0f);
@@ -1068,7 +1396,7 @@ void ofxBeatClock::draw_BeatBoxes(int px, int py, int w)///draws text info and b
 		{
 			shapePreview.x = (4 * squaresW) + 2 * padx;
 		}
-}
+	}
 
 	ofPopStyle();
 }
@@ -1080,7 +1408,7 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 
 	if (DEBUG_Layout) ofxSurfingHelpers::draw_Anchor(px, py);
 
-	//this method draws: tap debug, clock source, clock info, bar-beat-tick16th clock 
+	// this method draws: tap debug, clock source, clock info, bar-beat-tick16th clock 
 	int xPad = 5;
 	int interline = 15; //text line heigh
 	int i = 0;//vertical spacer to accumulate text lines
@@ -1098,24 +1426,15 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 	{
 		ofTranslate(px, py);
 
-		//-
-
-		//1.2. tap mode
+		// 1.2. tap mode
 
 		int speed = 10;//blink speed when measuring taps
 		bool b = (ofGetFrameNum() % (2 * speed) < speed);
 		ofSetColor(255, b ? 128 : 255);
-		if (bpmTapTempo.isRunning())
-		{
-			messageInfo = "     TAP " + ofToString(ofMap(bpmTapTempo.getCountTap(), 1, 4, 3, 0));
-		}
-		else
-		{
-			messageInfo = "";
-		}
-		fontBig.drawString(messageInfo, xPad, h + interline * i++);
 
-		i++;//one extra line vertical spacer
+		fontBig.drawString(strTapTempo, xPad, h + interline * i++);
+
+		i++; // one extra line vertical spacer
 		i++;
 
 		//int speed = 10;//blink speed when measuring taps
@@ -1123,13 +1442,13 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 		//ofSetColor(255, b ? 128 : 255);
 		//if (bTap_Running)
 		//{
-		//	messageInfo = "     TAP " + ofToString(ofMap(tap_Count, 1, 4, 3, 0));
+		//	strMessageInfo = "     TAP " + ofToString(ofMap(tap_Count, 1, 4, 3, 0));
 		//}
 		//else
 		//{
-		//	messageInfo = "";
+		//	strMessageInfo = "";
 		//}
-		//fontBig.drawString(messageInfo, xPad, h + interline * i++);
+		//fontBig.drawString(strMessageInfo, xPad, h + interline * i++);
 
 		//i++;//one extra line vertical spacer
 		//i++;
@@ -1138,25 +1457,22 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 
 		ofSetColor(colorText);
 
-		//1.3. clock
+		// 1.3. clock
 
-		//show clock source (internal, external or link)
-		messageInfo = "CLOCK: " + clockActive_Type;
-		fontSmall.drawString(messageInfo, xPad, interline * i++);
+		fontSmall.drawString(strClock, xPad, interline * i++);
 
 		//-
 
-		//A. external midi clock
-		//midi in port. id number and name
+		// A. external midi clock
+		// midi in port. id number and name
 		if (ENABLE_EXTERNAL_MIDI_CLOCK)
 		{
-			messageInfo = ofToString(clockActive_Info);
-			fontSmall.drawString(messageInfo, xPad, interline * i++);
+			fontSmall.drawString(strExtMidiClock, xPad, interline * i++);
 		}
 
 		//-
 
-		//B. internal clock
+		// B. internal clock
 		else if (ENABLE_INTERNAL_CLOCK)
 		{
 			i++;//empty line
@@ -1165,23 +1481,22 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 		//-
 
 #ifdef USE_ofxAbletonLink
-		//C. Ableton Link
+		// C. Ableton Link
 		else if (ENABLE_LINK_SYNC)
 		{
-			messageInfo = ofToString(clockActive_Info);
-			fontSmall.drawString(messageInfo, xPad, interline * i++);
+			fontSmall.drawString(strLink, xPad, interline * i++);
 		}
 #endif
 		//-
 
-		else//space in case no clock source is selected to mantain layout "static" below
+		else // space in case no clock source is selected to mantain layout "static" below
 		{
 			i++;
 		}
 
 		//-
 
-		//1.5 main big clock: [bar:beat:tick16th]
+		// 1.5 main big clock: [bar:beat:tick16th]
 		//TODO: could split this and allow to draw independently
 		ofSetColor(colorText);
 
@@ -1201,20 +1516,7 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 	{
 		int xpos = 240;
 		int ypos = 750;
-
-		i = 0;
-
-		messageInfo = ("BPM: " + ofToString(BPM_Global, 2));
-		fontMedium.drawString(messageInfo, xpos, ypos + interline * i++);
-
-		messageInfo = ("BAR: " + Bar_string);
-		fontMedium.drawString(messageInfo, xpos, ypos + interline * i++);
-
-		messageInfo = ("BEAT: " + Beat_string);
-		fontMedium.drawString(messageInfo, xpos, ypos + interline * i++);
-
-		messageInfo = ("Tick 16th: " + Tick_16th_string);
-		fontMedium.drawString(messageInfo, xpos, ypos + interline * i);
+		fontMedium.drawString(strMoreInfo, xpos, ypos);
 	}
 
 	ofPopStyle();
@@ -1232,8 +1534,7 @@ void ofxBeatClock::draw_BpmInfo(int px, int py)
 
 	ofSetColor(colorText);
 
-	messageInfo = "BPM: " + ofToString(BPM_Global.get(), 2);
-	fontBig.drawString(messageInfo, px + xPad, py + h);
+	fontBig.drawString(strBpmInfo, px + xPad, py + h);
 
 	ofPopStyle();
 }
@@ -1247,18 +1548,17 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 
 	//-
 
-	//tick ball
-
+	// tick ball
 	metronome_ball_radius = _radius;
 	py += metronome_ball_radius;
 	metronome_ball_pos.x = px + metronome_ball_radius;
 	metronome_ball_pos.y = py;
 
-	//beat circle
+	// beat circle
 	circleBeat.setPosition(glm::vec2(metronome_ball_pos.x, metronome_ball_pos.y));
 	circleBeat.setRadius(metronome_ball_radius);
 
-	//highlight 1st beat
+	// highlight 1st beat
 	ofColor c;
 	if (Beat_current == 1) c = (ofColor::red);
 	else c = (ofColor::white);
@@ -1266,15 +1566,15 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 
 	//-
 
-	//background black ball
+	// background black ball
 	if (!bpmTapTempo.isRunning())
 	{
-		//ball background when not tapping
+		// ball background when not tapping
 		circleBeat.setColorBackground(ofColor(16, 200));
 	}
 	else
 	{
-		//white alpha fade when measuring tapping
+		// white alpha fade when measuring tapping
 		float t = (ofGetElapsedTimeMillis() % 1000);
 		float fade = sin(ofMap(t, 0, 1000, 0, 2 * PI));
 		ofLogVerbose(__FUNCTION__) << "fade: " << fade << endl;
@@ -1284,9 +1584,11 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 
 	//-
 
-	//beat circle
+	// beat circle
+	circleBeat.update();
 	circleBeat.draw();
 
+	//-
 
 	//#else//TODO:
 //	//not doing the candy-fading-out, but it seems that do not improve fps much neither...
@@ -1349,21 +1651,8 @@ void ofxBeatClock::draw_BigClockTime(int x, int y)
 	ofSetColor(colorText);
 
 	int xpad = 12;
-	std::string timePos = ofToString(Bar_string, 3, ' ') + " : " + ofToString(Beat_string);
 
-	//only internal clock mode gets 16th ticks (beat / 16 duration)
-	//midi sync and link modes do not gets the 16th ticks, so we hide the (last) number to avoid confusion..
-
-#ifndef USE_ofxAbletonLink
-	if (!ENABLE_EXTERNAL_MIDI_CLOCK)
-#else
-	if (!ENABLE_EXTERNAL_MIDI_CLOCK && !ENABLE_LINK_SYNC)
-#endif
-	{
-		timePos += " : " + ofToString(Tick_16th_string);
-	}
-
-	fontBig.drawString(timePos, x + xpad, y);
+	fontBig.drawString(strTimeBeatPos, x + xpad, y);
 
 	ofPopStyle();
 }
@@ -1473,7 +1762,7 @@ void ofxBeatClock::setPosition_BpmInfo(int x, int y)
 //--------------------------------------------------------------
 void ofxBeatClock::setVisible_GuiPreview(bool b)
 {
-	bGui_PreviewExtra = b;
+	bGui_PreviewWidget = b;
 }
 
 //--------------------------------------------------------------
@@ -1650,7 +1939,7 @@ void ofxBeatClock::setTogglePlay()//only used in internal mode
 //--------------------------------------------------------------
 void ofxBeatClock::beatTick_MONITOR(int _beat)
 {
-	//trigs ball drawing and sound ticker
+	// trigs ball drawing and sound ticker
 	ofLogVerbose(__FUNCTION__) << "> BeatTick : " << Beat_string;
 
 #ifdef USE_ofxAbletonLink
@@ -2129,7 +2418,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		//	clockInternal.addBarListener(this);
 		//	clockInternal.addSixteenthListener(this);
 		//}
-		}
+	}
 #endif
 
 	//-
@@ -2176,7 +2465,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	}
 	else if (name == bGui_Advanced.getName())
 	{
-		ofLogNotice(__FUNCTION__) << "SHOW ADVANCED: " << bGui_Advanced;
+		ofLogNotice(__FUNCTION__) << bGui_Advanced;
 
 #ifdef USE_OFX_GUI_EXTENDED2
 		if (bGui_Advanced)
@@ -2188,7 +2477,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			group_Advanced->minimize();
 		}
 #endif
-		}
+	}
 
 	//-
 
@@ -2234,7 +2523,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//		reSync();
 	//	}
 	//}
-	}
+}
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_midiIn_BeatsInBar(int &beatsInBar)
@@ -2513,8 +2802,8 @@ void ofxBeatClock::onBarEvent(int &bar)
 
 			Bar_string = ofToString(Bar_current);
 		}
-		}
 	}
+}
 
 //--------------------------------------------------------------
 void ofxBeatClock::onBeatEvent(int &beat)
@@ -2544,8 +2833,8 @@ void ofxBeatClock::onBeatEvent(int &beat)
 
 			//-
 		}
-		}
 	}
+}
 
 //--------------------------------------------------------------
 void ofxBeatClock::onSixteenthEvent(int &sixteenth)
@@ -2755,9 +3044,9 @@ void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
 						beatTick_MONITOR(Beat_current);
 
 						//ofLogNotice(__FUNCTION__) << "[audioBuffer] BEAT: " << Beat_string;
-}
-}
-	}
+					}
+				}
+			}
 		}
 	}
 }
@@ -2835,15 +3124,18 @@ void ofxBeatClock::keyPressed(ofKeyEventArgs &eventArgs)
 		toggleVisible_GuiPanel();
 		break;
 #endif
-
-		// edit gui preview
-	case 'e':
-		MODE_Editor = !MODE_Editor;
+	case 'g':
+		toggleVisibleGui();
 		break;
 
 		// show gui previews
 	case 'G':
 		setToggleVisible_GuiPreview();
+		break;
+
+		// edit gui preview
+	case 'e':
+		MODE_Editor = !MODE_Editor;
 		break;
 
 	case '-':
