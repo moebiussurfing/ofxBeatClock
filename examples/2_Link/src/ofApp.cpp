@@ -18,8 +18,3 @@ void ofApp::Changed_BeatTick() // callback to receive BeatTicks
 {
 	if (beatClock.BeatTick_TRIG) ofLogNotice(__FUNCTION__) << "BeatTick ! #" << beatClock.Beat_current;
 }
-
-//--------------------------------------------------------------
-void ofApp::keyPressed(int key)
-{
-}
