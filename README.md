@@ -68,11 +68,11 @@ Easy to Sync to **Ableton Live** or any sequencer app with **Midi Clock**.
 
 * [ofxMidi](https://github.com/danomatika/ofxMidi)  
 * [ofxAbletonLink](https://github.com/2bbb/ofxAbletonLink) [optional]  
-* [ofxImGuiSurfing](https://github.com/moebiussurfing/ofxImGuiSurfing)
+* [ofxImGuiSurfing](https://github.com/moebiussurfing/ofxSurfingImGui)
 * [ofxImGui](https://github.com/Daandelange/ofxImGui/) fork from @**Daandelange**.  
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)  
 
-Allready included into ```OF_add-on/libs```. No need to add manually!:  
+Allready included into ```OF_add-on/libs```. No need to add manually:  
 * [ofxDawMetro](https://github.com/castovoid/ofxDawMetro)  
 
 ## Tested Systems
