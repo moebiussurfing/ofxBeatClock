@@ -281,15 +281,28 @@ void ofxBeatClock::setup()
 
 #ifdef USE_OFX_SURFING_IM_GUI
 
+	//guiManager.setAutoResize(true);
 	guiManager.setAutoSaveSettings(true);
 	guiManager.setImGuiAutodraw(true);
 	guiManager.setup();
-	//guiManager.bAutoResize = false;
+	
+	//-
+
+	// fonts
+	std::string _fontName;
+	float _fontSizeParam;
+	_fontName = "telegrama_render.otf"; // WARNING: will crash if font not present!
+	_fontSizeParam = 11;
+	std::string _path = "assets/fonts/"; // assets folder
+
+	guiManager.pushFont(_path + _fontName, 30); // is index 1. 0 is for default font
+	guiManager.pushFont(_path + _fontName, 20);
+	guiManager.pushFont(_path + _fontName, 22); // 3
 
 	//--
 
 	// customize widgets
-	if (true)
+	//if (0)
 	{
 		//guiManager.AddStyle(bMode3, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG, true, 2);
 		guiManager.AddStyle(clockInternal_Bpm, SurfingImGuiTypes::OFX_IM_STEPPER);
@@ -321,8 +334,9 @@ void ofxBeatClock::setup()
 	//-
 
 #ifdef USE_ofxAbletonLink
-	if (true)
+	//if (0)
 	{
+		guiManager.AddStyle(LINK_Play, SurfingImGuiTypes::OFX_IM_TOGGLE_SMALL);
 		guiManager.AddStyle(LINK_Enable, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
 		guiManager.AddStyle(LINK_Peers_string, SurfingImGuiTypes::OFX_IM_TEXT_DISPLAY);
 		guiManager.AddStyle(LINK_Beat_string, SurfingImGuiTypes::OFX_IM_TEXT_DISPLAY);
@@ -609,7 +623,9 @@ void ofxBeatClock::refresh_Gui()
 		MODE_ABLETON_LINK_SYNC = false;
 #endif
 		//display text
-		clockActive_Type = "1 INTERNAL CLOCK";
+		clockActive_Type = MODE_INTERNAL_CLOCK.getName();
+		clockActive_Type += "\n";
+		//clockActive_Type = "1 INTERNAL CLOCK";
 		clockActive_Info = "";
 	}
 
@@ -627,8 +643,10 @@ void ofxBeatClock::refresh_Gui()
 		if (clockInternal_Active) clockInternal_Active = false;
 
 		//display text
-		clockActive_Type = "2 EXTERNAL MIDI CLOCK";
-		clockActive_Info = "MIDI PORT: ";
+		clockActive_Type = MODE_EXTERNAL_MIDI_CLOCK.getName() + "\n";
+		//clockActive_Type = "2 EXTERNAL MIDI CLOCK";
+		clockActive_Type += "\n";
+		clockActive_Info = "PORT: ";
 		clockActive_Info += "'" + midiIn.getName() + "'";
 		//clockActive_Info += ofToString(midiIn.getPort());
 	}
@@ -645,7 +663,9 @@ void ofxBeatClock::refresh_Gui()
 		if (clockInternal_Active) clockInternal_Active = false;
 
 		//display text
-		clockActive_Type = "3 ABLETON LINK";
+		clockActive_Type = MODE_ABLETON_LINK_SYNC.getName() + "\n";
+		//clockActive_Type = "3 ABLETON LINK";
+		clockActive_Type += "\n";
 		clockActive_Info = "";
 	}
 #endif
@@ -744,22 +764,24 @@ void ofxBeatClock::refresh_GuiWidgets()
 	// 1.4 more debug info
 	if (DEBUG_moreInfo)
 	{
-		strMoreInfo = "";
-		strMoreInfo += ("BPM: " + ofToString(BPM_Global, 2));
-		strMoreInfo += "\n";
-		strMoreInfo += ("BAR: " + Bar_string);
-		strMoreInfo += "\n";
-		strMoreInfo += ("BEAT: " + Beat_string);
-		strMoreInfo += "\n";
-		strMoreInfo += ("Tick 16th: " + Tick_16th_string);
-		strMoreInfo += "\n";
-		//strMessageInfoFull = strMoreInfo + "\n";
+		strDebugInfo = "";
+		strDebugInfo += ("BPM: " + ofToString(BPM_Global, 2));
+		strDebugInfo += "\n";
+		strDebugInfo += ("BAR: " + Bar_string);
+		strDebugInfo += "\n";
+		strDebugInfo += ("BEAT: " + Beat_string);
+		strDebugInfo += "\n";
+		strDebugInfo += ("Tick 16th: " + Tick_16th_string);
+		strDebugInfo += "\n";
+		//strMessageInfoFull = strDebugInfo + "\n";
 	}
+	else { strDebugInfo = ""; }
 
 	//-
 
 	// show clock source (internal, external or link)
-	strClock = "CLOCK  " + clockActive_Type;
+	//strClock = clockActive_Type;
+	//strClock = "CLOCK  " + clockActive_Type;
 	//strMessageInfoFull += strClock + "\n";
 
 	//-
@@ -901,10 +923,12 @@ void ofxBeatClock::setup_MidiIn_Port(int p)
 	ofLogNotice(__FUNCTION__) << "PORT NAME: " << midiIn.getInPortName(p);
 
 	//display text
-	clockActive_Type = "2 EXTERNAL MIDI CLOCK";
-	clockActive_Info = "MIDI PORT: ";
+	clockActive_Type = MODE_EXTERNAL_MIDI_CLOCK.getName() + "\n";
+	clockActive_Info = "PORT: ";
 	clockActive_Info += "'" + midiIn.getName() + "'";
 	//clockActive_Info += ofToString(midiIn.getPort());
+	
+	strClock = clockActive_Type;
 
 	ofLogNotice(__FUNCTION__) << "Connected to MIDI IN CLOCK Port: " << midiIn.getPort();
 }
@@ -987,7 +1011,7 @@ void ofxBeatClock::draw_ImGuiControl()
 		float _w3 = ofxImGuiSurfing::getWidgetsWidth(3); // 3 widgets third width
 		float _w4 = ofxImGuiSurfing::getWidgetsWidth(4); // 4 widgets quarter width
 		float _h = ofxImGuiSurfing::getWidgetsHeightRelative(); // one unit height relative to ImGui theme
-		//guiManager.refresh();
+		guiManager.refresh();
 
 		//ofxImGuiSurfing::AddToggleRoundedButton(bGui);
 		ofxImGuiSurfing::AddToggleRoundedButton(bGui_Transport);
@@ -995,15 +1019,16 @@ void ofxBeatClock::draw_ImGuiControl()
 		ofxImGuiSurfing::AddToggleRoundedButton(bGui_BpmClock);
 
 		guiManager.Add(ENABLE_CLOCKS, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
-		//TODO:
-		//if (!ENABLE_CLOCKS)
-		//{
-		//	guiManager.endWindow();
-		//	guiManager.end();
-		//	return;
-		//}
 
-		//--
+		//TODO:
+		//hide all
+		if (!ENABLE_CLOCKS)
+		{
+			guiManager.endWindow();
+			return;
+		}
+
+		//----
 
 		// play 
 		//guiManager.Add(PLAYING_State, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
@@ -1039,7 +1064,7 @@ void ofxBeatClock::draw_ImGuiControl()
 		//--
 
 		// modes
-
+		ImGui::Indent();
 		{
 			if (MODE_INTERNAL_CLOCK)
 			{
@@ -1115,9 +1140,11 @@ void ofxBeatClock::draw_ImGuiControl()
 			}
 #endif
 		}
+		ImGui::Unindent();
 
 		//--
 
+		ImGui::Dummy(ImVec2(0, 5));
 		ofxImGuiSurfing::AddToggleRoundedButton(bKeys);
 		ofxImGuiSurfing::AddToggleRoundedButton(guiManager.bAutoResize);
 	}
@@ -1125,25 +1152,27 @@ void ofxBeatClock::draw_ImGuiControl()
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::draw_ImGuiBpmClock() 
+void ofxBeatClock::draw_ImGuiBpmClock()
 {
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 	if (guiManager.bAutoResize) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
 
-	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiCond_FirstUseEver);
 
 	guiManager.beginWindow(bGui_BpmClock.getName().c_str(), (bool*)&bGui_BpmClock.get(), window_flags);
 	{
-		{
-			guiManager.AddGroup(params_BPM_Clock);
+		// TODO: '-' fails
+		//ImGui::PushID("##Stepper");
+		//guiManager.Add(BPM_Global, SurfingImGuiTypes::OFX_IM_STEPPER);
+		//ImGui::PopID();
 
-			//ImGuiTreeNodeFlags flags;
-			//flags = ImGuiTreeNodeFlags_None;
-			//guiManager.AddGroup(params_BPM_Clock, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
+		guiManager.AddGroup(params_BPM_Clock, ImGuiTreeNodeFlags_DefaultOpen, OFX_IM_GROUP_HIDDEN_HEADER);
 
-			ImGui::Dummy(ImVec2(0, 2));
-		}
+		//ImGuiTreeNodeFlags flags;
+		//flags = ImGuiTreeNodeFlags_None;
+		//guiManager.AddGroup(params_BPM_Clock, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
 
+		//ImGui::Dummy(ImVec2(0, 2));
 	}
 	guiManager.endWindow();
 }
@@ -1155,8 +1184,10 @@ void ofxBeatClock::draw_ImGuiCircleBeatWidget()
 	{
 		ofColor colorBeat = ofColor(ofColor::red, 200);
 		ofColor colorTick = ofColor(128, 200);
+		ofColor colorBallTap = ofColor(16, 200);
+		ofColor colorBallTap2 = ofColor(96);
 
-		//-
+		//---
 
 		float pad = 10;
 		float __w100 = ImGui::GetContentRegionAvail().x - 2 * pad;
@@ -1186,7 +1217,7 @@ void ofxBeatClock::draw_ImGuiCircleBeatWidget()
 		//float space_width = radius * 0.1; // to add on left and right to diameter of knob
 
 		float xx = pos.x + pad;
-		float yy = pos.y + pad;
+		float yy = pos.y + pad/2;
 
 		//ImVec4 widgetRec = ImVec4(
 		//	pos.x,
@@ -1194,11 +1225,13 @@ void ofxBeatClock::draw_ImGuiCircleBeatWidget()
 		//	radius * 2.0f + space_width * 2.0f,
 		//	space_height * 4.0f + radius * 2.0f + line_height * 2.0f);
 
+		const int spcUnits = 3;
+
 		ImVec4 widgetRec = ImVec4(
 			xx,
 			yy,
 			radius * 2.0f,
-			radius * 2.0f + 4 * pad);
+			radius * 2.0f + spcUnits * pad);
 
 		//ImVec2 labelLength = ImGui::CalcTextSize(label);
 
@@ -1213,6 +1246,7 @@ void ofxBeatClock::draw_ImGuiCircleBeatWidget()
 		ImVec2 center = ImVec2(
 			xx + __w100 / 2,
 			yy + radius + pad);
+
 		//yy + __w100 / 2);
 
 		ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -1242,7 +1276,7 @@ void ofxBeatClock::draw_ImGuiCircleBeatWidget()
 		if (!bpmTapTempo.isRunning())
 		{
 			// ball background when not tapping
-			cbg = ofColor(16, 200);
+			cbg = colorBallTap;
 		}
 		else
 		{
@@ -1251,7 +1285,7 @@ void ofxBeatClock::draw_ImGuiCircleBeatWidget()
 			float fade = sin(ofMap(t, 0, 1000, 0, 2 * PI));
 			ofLogVerbose(__FUNCTION__) << "fade: " << fade << endl;
 			int alpha = (int)ofMap(fade, -1.0f, 1.0f, 0, 50) + 205;
-			cbg = ofColor(96, alpha);
+			cbg = ofColor(colorBallTap2.r, colorBallTap2.g, colorBallTap2.b, alpha);
 		}
 
 		//-
@@ -1300,19 +1334,43 @@ void ofxBeatClock::draw_ImGuiClockMonitor()
 		float _w4 = __w100 / 4;
 		float _h = _w4;
 
+		// 1. bpm + counters
+		guiManager.pushStyleFont(1);
 		ImGui::TextWrapped(strBpmInfo.c_str());
 		ImGui::TextWrapped(strTimeBeatPos.c_str());
-		ImGui::Dummy(ImVec2(0, 2));
+		guiManager.popStyleFont();
 
+		ImGui::Dummy(ImVec2(0, 5));
+
+		// 2. input info
+		guiManager.pushStyleFont(3);
 		ImGui::TextWrapped(strClock.c_str());
 		ImGui::TextWrapped(clockActive_Info.c_str());
+		guiManager.popStyleFont();
+
 		//ImGui::TextWrapped(strExtMidiClock.c_str());
 		//ImGui::TextWrapped(strLink.c_str());
-		ImGui::TextWrapped(strMoreInfo.c_str());
+
+		ImGui::Dummy(ImVec2(0, 5));
+	
+		if (strDebugInfo != "") {
+			guiManager.pushStyleFont(2);
+			ImGui::TextWrapped(strDebugInfo.c_str());
+			guiManager.popStyleFont();
+		}
+
+		guiManager.pushStyleFont(3);
+		ImGui::TextWrapped(strTapTempo.c_str());
+		guiManager.popStyleFont();
+		
 		//ImGui::TextWrapped(strMessageInfoFull.c_str());
 
-		ImGui::Dummy(ImVec2(0, 2));
+		ImGui::Dummy(ImVec2(0, 5));
+		
+		//--
 
+		//guiManager.pushStyleFont(0);
+		
 		ImGui::PushStyleColor(ImGuiCol_Button, cb[0]);
 		ImGui::Button("1", ImVec2(_w4, _h));
 		ImGui::PopStyleColor();
@@ -1336,6 +1394,13 @@ void ofxBeatClock::draw_ImGuiClockMonitor()
 
 		// circle beat
 		draw_ImGuiCircleBeatWidget();
+
+		//guiManager.popStyleFont();
+
+		//--
+
+		guiManager.setDefaultFont();
+		//guiManager.setDefaultFontIndex(0);
 	}
 	guiManager.endWindow();
 }
@@ -1553,7 +1618,7 @@ void ofxBeatClock::draw_ClockInfo(int px, int py)
 	{
 		int xpos = 240;
 		int ypos = 750;
-		fontMedium.drawString(strMoreInfo, xpos, ypos);
+		fontMedium.drawString(strDebugInfo, xpos, ypos);
 	}
 
 	ofPopStyle();
@@ -2184,7 +2249,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 	//source clock type
 
-	else if (name == "1 INTERNAL CLOCK")
+	else if (name == MODE_INTERNAL_CLOCK.getName() )
 	{
 		ofLogNotice(__FUNCTION__) << "CLOCK INTERNAL: " << MODE_INTERNAL_CLOCK;
 
@@ -2197,8 +2262,9 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			//-
 
 			//display text
-			clockActive_Type = "1 INTERNAL CLOCK";
+			clockActive_Type = MODE_INTERNAL_CLOCK.getName() + "\n";
 			clockActive_Info = "";
+			strClock = clockActive_Type;
 
 			//-
 #ifdef USE_OFX_GUI_EXTENDED2
@@ -2221,8 +2287,10 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			if (!MODE_INTERNAL_CLOCK)
 			{
 				//display text
-				clockActive_Type = "NONE";
+				//clockActive_Type = "NONE";
+				clockActive_Type = "";
 				clockActive_Info = "";
+				strClock = clockActive_Type;
 			}
 
 			//-
@@ -2234,7 +2302,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 	//-
 
-	else if (name == "2 EXTERNAL MIDI CLOCK")
+	else if (name == MODE_EXTERNAL_MIDI_CLOCK.getName() )
 	{
 		ofLogNotice(__FUNCTION__) << "CLOCK EXTERNAL MIDI-IN: " << MODE_EXTERNAL_MIDI_CLOCK;
 
@@ -2267,10 +2335,12 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			//-
 
 			//display text
-			clockActive_Type = "2 EXTERNAL MIDI CLOCK";
-			clockActive_Info = "MIDI PORT: ";
+			clockActive_Type = MODE_EXTERNAL_MIDI_CLOCK.getName() + "\n";
+			clockActive_Info = "PORT:\n";
 			clockActive_Info += "'" + midiIn.getName() + "'";
 			//clockActive_Info += ofToString(midiIn.getPort());
+
+			strClock = clockActive_Type;
 
 			midiIn_PortName = midiIn.getName();
 
@@ -2288,9 +2358,12 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 			if (!MODE_EXTERNAL_MIDI_CLOCK)
 			{
-				clockActive_Type = "NONE";
+				clockActive_Type = "";
+				//clockActive_Type = "NONE";
 				clockActive_Info = "";
-			}
+		
+				strClock = clockActive_Type;
+		}
 
 			//-
 #ifdef USE_OFX_GUI_EXTENDED2
@@ -2339,8 +2412,11 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			//-
 
 			//display text
-			clockActive_Type = "3 ABLETON LINK";
+			clockActive_Type = MODE_ABLETON_LINK_SYNC.getName() + "\n";
+			//clockActive_Type = "3 ABLETON LINK";
 			clockActive_Info = "";
+
+			strClock = clockActive_Type;
 
 			//-
 
@@ -2474,7 +2550,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		//	clockInternal.addBarListener(this);
 		//	clockInternal.addSixteenthListener(this);
 		//}
-	}
+		}
 #endif
 
 	//-
@@ -2533,12 +2609,12 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			group_Advanced->minimize();
 		}
 #endif
-	}
+		}
 
 	//-
 
 	//metronome ticks volume
-	else if (name == "TICK VOLUME")
+	else if (name == volumeSound.getName())
 	{
 		ofLogNotice(__FUNCTION__) << "VOLUME: " << ofToString(volumeSound, 1);
 
@@ -2553,7 +2629,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//-
 
 	//tap
-	else if (name == "TAP")
+	else if (name == BPM_Tap_Tempo_TRIG.getName())
 	{
 		ofLogNotice(__FUNCTION__) << "TAP BUTTON";
 
@@ -2579,7 +2655,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//		reSync();
 	//	}
 	//}
-}
+	}
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_midiIn_BeatsInBar(int &beatsInBar)
@@ -2858,8 +2934,8 @@ void ofxBeatClock::onBarEvent(int &bar)
 
 			Bar_string = ofToString(Bar_current);
 		}
+		}
 	}
-}
 
 //--------------------------------------------------------------
 void ofxBeatClock::onBeatEvent(int &beat)
@@ -2889,8 +2965,8 @@ void ofxBeatClock::onBeatEvent(int &beat)
 
 			//-
 		}
+		}
 	}
-}
 
 //--------------------------------------------------------------
 void ofxBeatClock::onSixteenthEvent(int &sixteenth)
@@ -3100,11 +3176,11 @@ void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
 						beatTick_MONITOR(Beat_current);
 
 						//ofLogNotice(__FUNCTION__) << "[audioBuffer] BEAT: " << Beat_string;
-					}
-				}
-			}
-		}
+}
+}
 	}
+	}
+}
 }
 #endif
 
