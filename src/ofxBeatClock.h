@@ -642,7 +642,7 @@ private:
 	std::string strClock;
 	std::string strLink;
 	std::string strMessageInfo;
-	std::string strMoreInfo;
+	std::string strDebugInfo;
 	std::string strMessageInfoFull;
 	ofTrueTypeFont fontSmall;
 	ofTrueTypeFont fontMedium;
