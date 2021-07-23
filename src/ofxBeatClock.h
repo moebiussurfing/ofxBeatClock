@@ -17,16 +17,13 @@
 
 	TODO:
 
-		+	fix ImGui layout glitches...
-		+	make an ImGui preview clock widget
-
-		+	Use my beatCircle + tapTempo + circle progress from Ableton Link classes from ofxSurfingHelpers !
+		+	remove guiExtended
+		+	remove native preview clock widget
 		+ 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
 		+ 	Add fast filter to smooth / stabilize BPM number when using external midi clock mode.
 		+ 	Add audio output selector to metronome sounds.
 				maybe share audioBuffer with better timer mode
 				on USE_AUDIO_BUFFER_TIMER_MODE. still disabled by default yet
-
 	NOTE:
 			more info about soundStream timer
 			https://forum.openframeworks.cc/t/pass-this-pointer-from-parent-to-child-object-scheduler-oftimer-system/22088/6?u=moebiussurfing
@@ -44,7 +41,6 @@ TODO:
 - Add the correct workflow for LINK. Must add some mode toggle.
 - On-the-fly re-sync to bar beat start.
 - A better link between play button/params in all internal/external clock source modes, with one unique play button for all clock sources.
-- Add filter to smooth/stabilize BPM number when using external midi clock mode.
 - Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers
 (https://forum.openframeworks.cc/t/audio-programming-basics/34392/10).
 Problems happen when minimizing or moving the app window.. Any help is welcome!
@@ -80,10 +76,10 @@ Problems happen when minimizing or moving the app window.. Any help is welcome!
 
 #include "ofMain.h"
 
-#include "ofxMidiClock.h"//used for external midi clock sync (1)
+#include "ofxMidiClock.h" // used for external midi clock sync (1)
 #include "ofxMidi.h"
 #include "ofxMidiTimecode.h"
-#include "ofxDawMetro.h"//used for internal (using threaded timer) clock (2)
+#include "ofxDawMetro.h" // used for internal (using threaded timer) clock (2)
 #include "ofxSurfingHelpers.h"
 #include "CircleBeat.h"
 #include "BpmTapTempo.h"
@@ -479,7 +475,8 @@ public:
 #ifdef USE_OFX_SURFING_IM_GUI
 	void draw_ImGuiWidgets();
 	void draw_ImGuiControl();
-	void draw_ImGuiclockWidget();
+	void draw_ImGuiClockMonitor();
+	void draw_ImGuiBpmClock();
 #endif
 
 	//-
@@ -516,8 +513,8 @@ private:
 	ofParameter<bool> PLAYING_External_State;//player state only for external clock
 
 	ofParameter<bool> ENABLE_CLOCKS;//enable clock (affects all clock types)
-	ofParameter<bool> ENABLE_INTERNAL_CLOCK;//enable internal clock
-	ofParameter<bool> ENABLE_EXTERNAL_MIDI_CLOCK;//enable midi clock sync
+	ofParameter<bool> MODE_INTERNAL_CLOCK;//enable internal clock
+	ofParameter<bool> MODE_EXTERNAL_MIDI_CLOCK;//enable midi clock sync
 	ofParameter<int> midiIn_Port_SELECT;
 	int midiIn_numPorts = 0;
 
@@ -552,18 +549,18 @@ public:
 	//--------------------------------------------------------------
 	bool getInternalClockModeState()
 	{
-		return ENABLE_INTERNAL_CLOCK;
+		return MODE_INTERNAL_CLOCK;
 	}
 	//--------------------------------------------------------------
 	bool getExternalClockModeState()
 	{
-		return ENABLE_EXTERNAL_MIDI_CLOCK;
+		return MODE_EXTERNAL_MIDI_CLOCK;
 	}
 #ifdef USE_ofxAbletonLink
 	//--------------------------------------------------------------
 	bool getLinkClockModeState()
 	{
-		return ENABLE_LINK_SYNC;
+		return MODE_ABLETON_LINK_SYNC;
 	}
 #endif
 
@@ -799,7 +796,7 @@ private:
 
 	ofxAbletonLink link;
 
-	ofParameter<bool> ENABLE_LINK_SYNC;
+	ofParameter<bool> MODE_ABLETON_LINK_SYNC;
 
 #ifdef USE_OFX_GUI_EXTENDED2
 	ofxGuiGroup2* group_LINK;
@@ -834,7 +831,7 @@ private:
 	//--------------------------------------------------------------
 	void LINK_update()
 	{
-		if (ENABLE_LINK_SYNC)//not required but prophylactic
+		if (MODE_ABLETON_LINK_SYNC)//not required but prophylactic
 		{
 			//display text
 			clockActive_Type = "ABLETON LINK";
@@ -1071,7 +1068,7 @@ private:
 				link.setBPM(LINK_Bpm);
 			}
 
-			if (ENABLE_LINK_SYNC)
+			if (MODE_ABLETON_LINK_SYNC)
 			{
 				//TODO: 
 				// it's required if ofxDawMetro is not being used?
@@ -1089,7 +1086,7 @@ private:
 
 			link.setBeat(0.0);
 
-			if (ENABLE_LINK_SYNC)
+			if (MODE_ABLETON_LINK_SYNC)
 			{
 				Tick_16th_current = 0;
 				Tick_16th_string = ofToString(Tick_16th_current);
@@ -1126,7 +1123,7 @@ private:
 		//
 		//		link.setBeat(LINK_Beat_Selector);
 		//
-		//		if (ENABLE_LINK_SYNC)
+		//		if (MODE_ABLETON_LINK_SYNC)
 		//		{
 		//			//Tick_16th_current = 0;
 		//			//Tick_16th_string = ofToString(Tick_16th_current);
@@ -1168,7 +1165,7 @@ private:
 		ofLogNotice(__FUNCTION__) << (state ? "play" : "stop");
 
 		// don't need update if it's already "mirrored"
-		if (state != LINK_Play && ENABLE_LINK_SYNC && LINK_Enable)
+		if (state != LINK_Play && MODE_ABLETON_LINK_SYNC && LINK_Enable)
 		{
 			LINK_Play = state;
 		}
