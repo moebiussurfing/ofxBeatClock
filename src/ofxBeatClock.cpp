@@ -290,35 +290,36 @@ void ofxBeatClock::setup()
 	// customize widgets
 	if (0) 
 	{
-		widgetsManager.AddWidgetConf(RESET_BPM_Global, SurfingTypes::OFX_IM_STEPPER);
+		//guiManager.AddStyle(bMode3, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG, true, 2);
+		guiManager.AddStyle(RESET_BPM_Global, SurfingImGuiTypes::OFX_IM_STEPPER);
 
-		widgetsManager.AddWidgetConf(ENABLE_CLOCKS, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
-		widgetsManager.AddWidgetConf(ENABLE_INTERNAL_CLOCK, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
-		widgetsManager.AddWidgetConf(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
+		guiManager.AddStyle(ENABLE_CLOCKS, SurfingImGuiTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
+		guiManager.AddStyle(ENABLE_INTERNAL_CLOCK, SurfingImGuiTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
+		guiManager.AddStyle(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingImGuiTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
 #ifdef USE_ofxAbletonLink
-		widgetsManager.AddWidgetConf(ENABLE_LINK_SYNC, SurfingTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
+		guiManager.AddStyle(ENABLE_LINK_SYNC, SurfingImGuiTypes::OFX_IM_BUTTON_BIG, false, 1, 0);
 #endif
 
-		widgetsManager.AddWidgetConf(PLAYING_State, SurfingTypes::OFX_IM_TOGGLE_BIG, false, 1, 0);
-		widgetsManager.AddWidgetConf(BPM_Tap_Tempo_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, false, 1, 0);
+		guiManager.AddStyle(PLAYING_State, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG, false, 1, 0);
+		guiManager.AddStyle(BPM_Tap_Tempo_TRIG, SurfingImGuiTypes::OFX_IM_BUTTON_SMALL, false, 1, 0);
 
-		widgetsManager.AddWidgetConf(bGui_PreviewWidget, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
-		widgetsManager.AddWidgetConf(bGui_Advanced, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
+		guiManager.AddStyle(bGui_PreviewWidget, SurfingImGuiTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
+		guiManager.AddStyle(bGui_Advanced, SurfingImGuiTypes::OFX_IM_TOGGLE_SMALL, false, 1, 0);
 
-		widgetsManager.AddWidgetConf(BPM_half_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, true, 2, 0);
-		widgetsManager.AddWidgetConf(BPM_double_TRIG, SurfingTypes::OFX_IM_BUTTON_SMALL, false, 2, 0);
+		guiManager.AddStyle(BPM_half_TRIG, SurfingImGuiTypes::OFX_IM_BUTTON_SMALL, true, 2, 0);
+		guiManager.AddStyle(BPM_double_TRIG, SurfingImGuiTypes::OFX_IM_BUTTON_SMALL, false, 2, 0);
 
-		widgetsManager.AddWidgetConf(SHOW_Editor, SurfingTypes::OFX_IM_TOGGLE_SMALL, true, 2, 0);
-		widgetsManager.AddWidgetConf(MODE_Editor, SurfingTypes::OFX_IM_TOGGLE_SMALL, false, 2, 0);
+		guiManager.AddStyle(SHOW_Editor, SurfingImGuiTypes::OFX_IM_TOGGLE_SMALL, true, 2, 0);
+		guiManager.AddStyle(MODE_Editor, SurfingImGuiTypes::OFX_IM_TOGGLE_SMALL, false, 2, 0);
 	}
 
 #ifdef USE_ofxAbletonLink
 	if (1)
 	{
-		widgetsManager.AddWidgetConf(LINK_Peers_string, SurfingTypes::OFX_IM_TEXT_DISPLAY);
-		widgetsManager.AddWidgetConf(LINK_Beat_string, SurfingTypes::OFX_IM_TEXT_DISPLAY);
-		widgetsManager.AddWidgetConf(LINK_Phase, SurfingTypes::OFX_IM_INACTIVE);
-		widgetsManager.AddWidgetConf(LINK_Bpm, SurfingTypes::OFX_IM_INACTIVE);
+		guiManager.AddStyle(LINK_Peers_string, SurfingImGuiTypes::OFX_IM_TEXT_DISPLAY);
+		guiManager.AddStyle(LINK_Beat_string, SurfingImGuiTypes::OFX_IM_TEXT_DISPLAY);
+		guiManager.AddStyle(LINK_Phase, SurfingImGuiTypes::OFX_IM_INACTIVE);
+		guiManager.AddStyle(LINK_Bpm, SurfingImGuiTypes::OFX_IM_INACTIVE);
 	}
 #endif
 
@@ -969,7 +970,7 @@ void ofxBeatClock::draw_ImGuiControl()
 		float _w3 = ofxImGuiSurfing::getWidgetsWidth(3); // 3 widgets third width
 		float _w4 = ofxImGuiSurfing::getWidgetsWidth(4); // 4 widgets quarter width
 		float _h = ofxImGuiSurfing::getWidgetsHeightRelative(); // one unit height relative to ImGui theme
-		widgetsManager.refreshPanelShape();
+		guiManager.refresh();
 
 		//ofxImGuiSurfing::AddToggleRoundedButton(bGui);
 		ofxImGuiSurfing::AddToggleRoundedButton(bGui_Transport);
@@ -977,7 +978,7 @@ void ofxBeatClock::draw_ImGuiControl()
 		ofxImGuiSurfing::AddToggleRoundedButton(bGui_Advanced);
 		ofxImGuiSurfing::AddToggleRoundedButton(bKeys);
 
-		widgetsManager.Add(ENABLE_CLOCKS, SurfingTypes::OFX_IM_TOGGLE_BIG);
+		guiManager.Add(ENABLE_CLOCKS, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
 		//TODO:
 		//if (!ENABLE_CLOCKS)
 		//{
@@ -988,7 +989,7 @@ void ofxBeatClock::draw_ImGuiControl()
 
 		//--
 
-		//widgetsManager.Add(PLAYING_State, SurfingTypes::OFX_IM_TOGGLE_BIG);
+		//guiManager.Add(PLAYING_State, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
 		AddBigToggleNamed(PLAYING_State, _w1, 2 * _h, "PLAYING", "PLAY", true, link.getPhase());
 
 		ImGui::Dummy(ImVec2(0, 2));
@@ -1002,12 +1003,12 @@ void ofxBeatClock::draw_ImGuiControl()
 			_flagt |= ImGuiTreeNodeFlags_Framed;
 			if (ImGui::TreeNodeEx("SOURCES", _flagt))
 			{
-				widgetsManager.refreshPanelShape();
+				guiManager.refresh();
 
-				widgetsManager.Add(ENABLE_INTERNAL_CLOCK, SurfingTypes::OFX_IM_TOGGLE_BIG);
-				widgetsManager.Add(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingTypes::OFX_IM_TOGGLE_BIG);
+				guiManager.Add(ENABLE_INTERNAL_CLOCK, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
+				guiManager.Add(ENABLE_EXTERNAL_MIDI_CLOCK, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
 #ifdef USE_ofxAbletonLink
-				widgetsManager.Add(ENABLE_LINK_SYNC, SurfingTypes::OFX_IM_TOGGLE_BIG);
+				guiManager.Add(ENABLE_LINK_SYNC, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
 #endif
 				ImGui::TreePop();
 			}
@@ -1020,16 +1021,14 @@ void ofxBeatClock::draw_ImGuiControl()
 #ifdef USE_ofxAbletonLink
 		if (ENABLE_LINK_SYNC)
 		{
-			widgetsManager.Add(LINK_Enable, SurfingTypes::OFX_IM_TOGGLE_BIG);
+			guiManager.Add(LINK_Enable, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
 		}
 #endif
 		// link
 		{
-			widgetsManager.refreshPanelShape();
-
 			// group of parameters with customized tree/folder type
 			// will be applied to all nested groups inside this parent
-			// customization is defined above on setup(): widgetsManager.AddWidgetConf(..
+			// customization is defined above on setup(): guiManager.AddStyle(..
 
 			{
 				ImGuiTreeNodeFlags flags;
@@ -1037,10 +1036,9 @@ void ofxBeatClock::draw_ImGuiControl()
 				flags |= ImGuiTreeNodeFlags_Framed; // uncomment to draw dark tittle bar
 				//flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
 
-				//ofxImGuiSurfing::AddGroup(params_CONTROL, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+				//guiManager.AddGroup(params_CONTROL, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
 
 				ImGui::Dummy(ImVec2(0, 2));
-				widgetsManager.refreshPanelShape();
 			}
 
 			if (ENABLE_INTERNAL_CLOCK)
@@ -1051,14 +1049,13 @@ void ofxBeatClock::draw_ImGuiControl()
 
 				if (ENABLE_INTERNAL_CLOCK) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
 				{
-					//ofxImGuiSurfing::AddGroup(params_INTERNAL, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+					//guiManager.AddGroup(params_INTERNAL, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
 
 					//ofxImGuiSurfing::AddBigButton(BPM_Tap_Tempo_TRIG);
-					widgetsManager.Add(BPM_Tap_Tempo_TRIG, SurfingTypes::OFX_IM_BUTTON_BIG);
+					guiManager.Add(BPM_Tap_Tempo_TRIG, SurfingImGuiTypes::OFX_IM_BUTTON_BIG);
 				}
 
 				ImGui::Dummy(ImVec2(0, 2));
-				widgetsManager.refreshPanelShape();
 			}
 
 			if (ENABLE_EXTERNAL_MIDI_CLOCK)
@@ -1069,22 +1066,21 @@ void ofxBeatClock::draw_ImGuiControl()
 
 				if (ENABLE_EXTERNAL_MIDI_CLOCK) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
 				{
-					//ofxImGuiSurfing::AddGroup(params_EXTERNAL_MIDI, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+					//guiManager.AddGroup(params_EXTERNAL_MIDI, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
 
 					ofxImGuiSurfing::AddParameter(PLAYING_External_State);
 
 					////ofxImGuiSurfing::AddParameter(midiIn_Port_SELECT);
-					//widgetsManager.Add(midiIn_Port_SELECT, SurfingTypes::OFX_IM_STEPPER);
+					//guiManager.Add(midiIn_Port_SELECT, SurfingImGuiTypes::OFX_IM_STEPPER);
 					////ofxImGuiSurfing::AddParameter(midiIn_PortName);
-					//widgetsManager.Add(midiIn_PortName, SurfingTypes::OFX_IM_DEFAULT);
+					//guiManager.Add(midiIn_PortName, SurfingImGuiTypes::OFX_IM_DEFAULT);
 
-					widgetsManager.Add(midiIn_Port_SELECT, SurfingTypes::OFX_IM_STEPPER);
-					widgetsManager.Add(midiIn_PortName, SurfingTypes::OFX_IM_TEXT_DISPLAY);
+					guiManager.Add(midiIn_Port_SELECT, SurfingImGuiTypes::OFX_IM_STEPPER);
+					guiManager.Add(midiIn_PortName, SurfingImGuiTypes::OFX_IM_TEXT_DISPLAY);
 
 				}
 
 				ImGui::Dummy(ImVec2(0, 2));
-				widgetsManager.refreshPanelShape();
 			}
 
 #ifdef USE_ofxAbletonLink
@@ -1096,11 +1092,10 @@ void ofxBeatClock::draw_ImGuiControl()
 
 				if (ENABLE_LINK_SYNC) flags |= ImGuiTreeNodeFlags_DefaultOpen; // comment to start closed
 				{
-					ofxImGuiSurfing::AddGroup(params_LINK, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+					guiManager.AddGroup(params_LINK, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
 				}
 
 				ImGui::Dummy(ImVec2(0, 2));
-				widgetsManager.refreshPanelShape();
 			}
 #endif
 			//-
@@ -1110,7 +1105,7 @@ void ofxBeatClock::draw_ImGuiControl()
 				ImGuiTreeNodeFlags flags;
 				flags = ImGuiTreeNodeFlags_None;
 
-				ofxImGuiSurfing::AddGroup(params_Advanced, flags, ofxImGuiSurfing::IM_GUI_GROUP_COLLAPSED);
+				guiManager.AddGroup(params_Advanced, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
 			}
 		}
 	}
