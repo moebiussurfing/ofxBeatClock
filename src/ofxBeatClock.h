@@ -310,7 +310,7 @@ public:
 	//--------------------------------------------------------------
 	void setToggleVisible_GuiPreview()
 	{
-		bGui_PreviewWidget = !bGui_PreviewWidget;
+		bGui_PreviewClockNative = !bGui_PreviewClockNative;
 	}
 
 #ifdef USE_OFX_GUI_EXTENDED2
@@ -498,7 +498,7 @@ private:
 private:
 	ofParameterGroup params_INTERNAL;
 	ofParameterGroup params_EXTERNAL_MIDI;
-	ofParameterGroup params_Advanced;
+	ofParameterGroup params_BPM_Clock;
 
 	ofJson confg_Button_C, confg_Button_L, confg_ButtonSmall, confg_Sliders;//json theme
 
@@ -660,8 +660,8 @@ private:
 	//-
 
 	ofParameter<bool> bGui_Transport; 
-	ofParameter<bool> bGui_PreviewWidget; // beat boxes, text info and beat ball (all except gui panels)
-	ofParameter<bool> bGui_Advanced; // some helpers other secondary settings/controls 
+	ofParameter<bool> bGui_PreviewClockNative; // beat boxes, text info and beat ball (all except gui panels)
+	ofParameter<bool> bGui_BpmClock; // some helpers other secondary settings/controls 
 	glm::vec2 shapePreview;
 	void draw_PreviewWidgetItems();
 
@@ -815,7 +815,7 @@ private:
 	ofParameter<float> LINK_Bpm;//link bpm
 	ofParameter<bool> LINK_Play;//control and get Ableton Live playing too, mirrored like Link does
 	ofParameter<float> LINK_Phase;//phase on the bar. cycled from 0.0f to 4.0f
-	ofParameter<bool> LINK_RestartBeat;//set beat 0
+	ofParameter<bool> LINK_ResyncBeat;//set beat 0
 	ofParameter<bool> LINK_ResetBeats;//reset "unlimited-growing" beat counter
 	ofParameter<std::string> LINK_Beat_string;//monitor beat counter
 	//amount of beats are not limited nor in sync / mirrored with Ableton Live.
@@ -1082,10 +1082,10 @@ private:
 			}
 		}
 
-		else if (name == "RESYNC" && LINK_RestartBeat && LINK_Enable)
+		else if (name == "RESYNC" && LINK_ResyncBeat && LINK_Enable)
 		{
 			ofLogNotice(__FUNCTION__) << "LINK RESTART";
-			LINK_RestartBeat = false;
+			LINK_ResyncBeat = false;
 
 			link.setBeat(0.0);
 
