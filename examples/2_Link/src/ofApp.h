@@ -17,7 +17,6 @@ class ofApp : public ofBaseApp
 {
 public:
 	void setup();
-	void keyPressed(int key);
 
 	ofxBeatClock beatClock;
 
