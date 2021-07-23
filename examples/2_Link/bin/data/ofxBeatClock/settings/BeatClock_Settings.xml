@@ -4,6 +4,6 @@
 	<BPM>120</BPM>
 	<Clock_BPM>1</Clock_BPM>
 	<Clock_Native>0</Clock_Native>
-	<Clock_Monitor>0</Clock_Monitor>
+	<Clock_Monitor>1</Clock_Monitor>
 	<Draw_Box>1</Draw_Box>
 </USER_CONTROL>
