@@ -1,107 +1,89 @@
 # ofxBeatClock
 
-**openFrameworks** addon to run a *DAW-Styled* BPM Beat-Clock with Internal Clock with Tap Tempo and External MIDI Sync and Ableton Link.
+**openFrameworks** add-on to run a *DAW-Styled* BPM Beat-Clock with **Internal Clock**, **Tap Tempo** and **External MIDI Sync** and **Ableton Link**.
 
+<!-- 
 ## Screencast
 
-![gif](/readme_images/ofxBeatClock.gif?raw=true "gif")
+![gif](/readme_images/ofxBeatClock.gif?raw=true "gif") -->
 
 ## Screenshots
 
-1 - Internal Clock mode:  
+![image](/readme_images/Capture1.PNG?raw=true "image")
+
+<!-- 1 - Internal Clock mode:  
 ![image](/readme_images/Capture1.PNG?raw=true "image")
 
 2 - External MidiClock mode:  
 ![image](/readme_images/Capture2.PNG?raw=true "image")
 
 3 - Ableton Link mode:  
-![image](/readme_images/Capture3.PNG?raw=true "image")
+![image](/readme_images/Capture3.PNG?raw=true "image") -->
 
 
 ## Usage
 
-Create the example project or your own with ```OF Project Generator``` as usual.  
-Take care of required addons and the included ```bin/data``` files.  
+Create the example project or your own with **OF PROJECT GENERATOR**` as usual.  
+Take care of required add-ons and the included **/bin/data/** files.  
 
 ### ofApp.h
 ```cpp
 #include "ofxBeatClock.h"
 
 ofxBeatClock beatClock;
-
 ofEventListener listenerBeat;
 void Changed_BeatTick();
 ```
 
 ### ofApp.cpp
 ```cpp
-// ofApp::setup()
-beatClock.setup();
-
-//callback to receive BeatTicks
-listenerBeat = beatClock.BeatTick_TRIG.newListener([&](bool&) {this->Changed_BeatTick(); });
-
-// no need to update/draw/exit.
-
-//-
-
-// callback
-void ofApp::Changed_BeatTick()
+void ofApp::setup()
 {
-	if (beatClock.BeatTick_TRIG) ofLogWarning("ofApp") << "BeatTick ! Number: " << beatClock.Beat_current;
+  beatClock.setup();
+  listenerBeat = beatClock.BeatTick_TRIG.newListener([&](bool&) {this->Changed_BeatTick(); });
+}
+void ofApp::Changed_BeatTick() // callback to receive BeatTicks
+{
+  if (beatClock.BeatTick_TRIG) ofLogNotice(__FUNCTION__) << "BeatTick ! #" << beatClock.Beat_current;
 }
 ```
 
 ## Features
 
-* **New feature**:  
+* **NEW FEATURE**:  
 **Ableton LINK** sync engine (master/slave).  
   **_[WIP but almost working]_**  
   Link engine is (maybe) disabled by default. To enable Link:
-  * Add ```ofxAbletonLink``` addon to your app project. 
+  * Add ```ofxAbletonLink``` add-on to your app project. 
   * Uncomment ```#define USE_ofxAbletonLink``` on ```ofxBeatClock.h```. 
+**ImGUi** based **GUI**.  
 * **Internal Clock** based in a threaded timer from **ofxDawMetro** from **@castovoid**.  
 You can uncomment `#define USE_AUDIO_BUFFER_TIMER_MODE` on `ofxBeatClock.h` to enable *BETA* alternative timer. (*WIP*)
 * **External Clock Source** as **input MIDI Clock** (*Slave*) using **ofxMidi** from **@danomatika**.  
 Easy to Sync to **Ableton Live** or any sequencer app with **Midi Clock**.
 * **Tap Tempo Engine**.
 * **Auto Save/Load** of all settings.
-* Cute **customizable GUI** by editing the **JSON file theme**.
-* Customizable GUI positions by code. Check other *API* methods too.
 * Nice **Metronome Sound Ticks**.
-* Draggable box to edit to layout: change preview info and GUI panel positions.
 
 ## Requeriments
 
-* ofxMidi  
-https://github.com/danomatika/ofxMidi  
-
-* ofxGuiExtended2  
-https://github.com/moebiussurfing/ofxGuiExtended2 [fork]  
-
-* ofxSurfingHelpers  
-https://github.com/moebiussurfing/ofxSurfingHelpers
-
-* ofxAbletonLink  
-https://github.com/2bbb/ofxAbletonLink [optional]  
-
-* ofxDawMetro  
-(allready included into ```OF_ADDON/libs```. No need to add manually!)  
-https://github.com/castovoid/ofxDawMetro
-
-Take care of data folder files:
-```/data/ofxBeatClock/```  
-Xml settings, gui font file, and JSON theme. (app may crash if not present)
+* [ofxMidi](https://github.com/danomatika/ofxMidi)  
+* [ofxAbletonLink](https://github.com/2bbb/ofxAbletonLink) [optional]  
+* [ofxImGuiSurfing](https://github.com/moebiussurfing/ofxImGuiSurfing)
+* [ofxImGui](https://github.com/Daandelange/ofxImGui/) FORK from @**Daandelange**  
+* [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)
+(Allready included into ```OF_add-on/libs```. No need to add manually!)  
+* [ofxDawMetro](https://github.com/castovoid/ofxDawMetro)  
 
 ## Tested Systems
 - **Windows10** / **VS2017** / **OF ~0.11**
-- **macOS. High Sierra** / **Xcode9** & **Xcode10** / **OF ~0.11**
 
 ## Author
-Addon by **@moebiusSurfing**  
+add-on by **@moebiusSurfing**  
 *(ManuMolina). 2020.*
 
-**_Thanks to developers of the included add-ons! @danomatika, @2bb, @castovoid & @frauzufall._**
+**_Thanks to the developers of the included core add-ons!  
+@danomatika, @2bb and @castovoid._**
 
 ## License
 *MIT License.*
