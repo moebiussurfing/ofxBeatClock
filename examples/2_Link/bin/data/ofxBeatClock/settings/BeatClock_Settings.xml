@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <USER_CONTROL>
 	<ENABLE>1</ENABLE>
-	<BPM>241.935</BPM>
-	<Advanced>0</Advanced>
+	<BPM>121.212</BPM>
+	<BPM_Clock>0</BPM_Clock>
 	<Clock_Native>0</Clock_Native>
 	<Clock_Monitor>1</Clock_Monitor>
 </USER_CONTROL>
