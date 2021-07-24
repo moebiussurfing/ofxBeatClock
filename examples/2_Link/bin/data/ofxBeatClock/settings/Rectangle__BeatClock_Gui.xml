@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <interactiveRect>
 	<path>ofxBeatClock/settings/</path>
-	<x>225</x>
-	<y>325</y>
+	<x>990</x>
+	<y>253</y>
 	<width>208</width>
 	<height>362</height>
 	<name>_BeatClock_Gui</name>

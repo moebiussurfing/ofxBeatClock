@@ -6,7 +6,6 @@
 #define USE_OFX_SURFING_IM_GUI
 #define USE_ofxAbletonLink
 //#define USE_AUDIO_BUFFER_TIMER_MODE // -> Better alternative clock engine based on audio buffer (WIP)
-//#define USE_OFX_GUI_EXTENDED2 // -> Deprecated! Now using ImGui
 //
 //---------------------------------
 
@@ -84,10 +83,6 @@ Problems happen when minimizing or moving the app window.. Any help is welcome!
 #include "CircleBeat.h"
 #include "BpmTapTempo.h"
 #include "ofxInteractiveRect.h" // engine to move the gui. TODO: add resize by mouse too.
-
-#ifdef USE_OFX_GUI_EXTENDED2
-#include "ofxGuiExtended2.h"
-#endif
 
 #ifdef USE_OFX_SURFING_IM_GUI
 #include "ofxSurfingImGui.h"
@@ -258,7 +253,7 @@ private:
 	int pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_width;
 	int pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_radius;
 
-	ofParameter<glm::vec2> pos_Gui;
+	//ofParameter<glm::vec2> pos_Gui;
 
 	//TODO:
 	//ofParameter<glm::vec2> position_BeatBoxes;
@@ -268,40 +263,24 @@ private:
 
 	//----
 
-#ifdef USE_OFX_GUI_EXTENDED2
-//gui panels theme
-//NOTE: take care with the path font defined on the config json 
-//because ofxGuiExtended crashes if fonts are not located on /data
-//--------------------------------------------------------------
-	void loadTheme(std::string s)
-	{
-		path_Theme = s;
-
-		ofLogNotice(__FUNCTION__) << "Loadinoad JSON ofxGuiExtended2 Theme : " << path_Theme;
-
-		panel_BeatClock->loadTheme(s);
-		group_Controls->loadTheme(s);
-		group_Advanced->loadTheme(s);
-		group_INTERNAL->loadTheme(s);
-		group_EXTERNAL_MIDI->loadTheme(s);
-	}
-	std::string path_Theme;
-#endif
-
-	int gui_Panel_Width, gui_Panel_posX, gui_Panel_posY;
+	//int gui_Panel_Width, gui_Panel_posX, gui_Panel_posY;
 
 	//-
 
 	// api setters
 
-public:
+//public:
+private:
 
-	void setPosition_GuiPanel(int x, int y, int w);//gui panel
-	ofPoint getPosition_GuiPanel();
+	//void setPosition_GuiPanel(int x, int y, int w);//gui panel
+	//ofPoint getPosition_GuiPanel();
 	//glm::vec2 getPosition_GuiPanel();
 
 	void setVisible_GuiPanel(bool b);
 	void setVisible_GuiPreview(bool b);
+
+	void setPosition_GuiGlobal(int x, int y);//main global position setter for gui panel and extra elements
+	void setPosition_GuiPreviewWidget(int x, int y);//extra elements position setter with default layout of the other elements
 
 	//--------------------------------------------------------------
 	void setToggleVisible_GuiPreview()
@@ -309,35 +288,12 @@ public:
 		bGui_PreviewClockNative = !bGui_PreviewClockNative;
 	}
 
-#ifdef USE_OFX_GUI_EXTENDED2
-#ifdef USE_ofxAbletonLink
-	//--------------------------------------------------------------
-	bool getVisible_GuiPanel()
-	{
-
-		return gui.getVisible();
-	}
-#endif
-#endif
-#ifdef USE_ofxAbletonLink
-#ifdef USE_OFX_GUI_EXTENDED2
-	//--------------------------------------------------------------
-	void toggleVisible_GuiPanel()
-	{
-		bool b = getVisible_GuiPanel();
-		setVisible_GuiPanel(!b);
-	}
-#endif
-#endif
-
+public:
 	//--------------------------------------------------------------
 	void toggleVisibleGui()
 	{
 		bGui = !bGui;
 	}
-
-	void setPosition_GuiGlobal(int x, int y);//main global position setter for gui panel and extra elements
-	void setPosition_GuiPreviewWidget(int x, int y);//extra elements position setter with default layout of the other elements
 
 private:
 	void setPosition_BeatBoxes(int x, int y, int w);//position x, y and w = width of all 4 squares
@@ -465,12 +421,9 @@ public:
 
 public:
 
-	void setup_GuiPanel();
+	void setup_ImGui();
 	void refresh_Gui();
 	void refresh_GuiWidgets();
-
-	//#ifdef USE_OFX_GUI_EXTENDED2
-	//#endif
 
 #ifdef USE_OFX_SURFING_IM_GUI
 	void draw_ImGuiWidgets();
@@ -480,17 +433,6 @@ public:
 #endif
 
 	//-
-
-#ifdef USE_OFX_GUI_EXTENDED2
-	//ofxGui gui;
-private:
-	ofxGuiPanel* panel_BeatClock;//nested folder
-	//ofxGuiGroup2* group_BeatClock;//nested folder
-	ofxGuiGroup2* group_Controls;
-	ofxGuiGroup2* group_Advanced;
-	ofxGuiGroup2* group_INTERNAL;
-	ofxGuiGroup2* group_EXTERNAL_MIDI;
-#endif
 
 private:
 	ofParameterGroup params_INTERNAL;
@@ -503,13 +445,13 @@ private:
 
 	// params
 public:
-	//ofParameter<bool> PLAYING_Global_State;//for all different source clock modes
+	ofParameter<bool> PLAYING_Global_State;//for all different source clock modes
 	ofParameter<bool> bGui;
 
 private:
 	ofParameterGroup params_CONTROL;
 
-	ofParameter<bool> PLAYING_State;//player state only for internal clock
+	ofParameter<bool> PLAYING_Internal_State;//player state only for internal clock
 	ofParameter<bool> PLAYING_External_State;//player state only for external clock
 
 	ofParameter<bool> ENABLE_CLOCKS;//enable clock (affects all clock types)
@@ -593,7 +535,7 @@ private:
 	void onBeatEvent(int & beat) override;
 	void onSixteenthEvent(int & sixteenth) override;
 
-	ofParameter<float> clockInternal_Bpm;
+	ofParameter<float> BPM_ClockInternal;
 
 	//NOTE: 
 	//for the momment this bpm variables is being used as
@@ -806,10 +748,6 @@ private:
 
 	ofParameter<bool> MODE_ABLETON_LINK_SYNC;
 
-#ifdef USE_OFX_GUI_EXTENDED2
-	ofxGuiGroup2* group_LINK;
-#endif
-
 	ofParameterGroup params_LINK;
 
 	////TODO. test knobs
@@ -817,8 +755,8 @@ private:
 	//ofParameter<float> valueKnob{ "value", 0.5f, 0.f, 1.0f };
 
 	ofParameter<bool> LINK_Enable;//enable link
-	ofParameter<float> LINK_Bpm;//link bpm
-	ofParameter<bool> LINK_Play;//control and get Ableton Live playing too, mirrored like Link does
+	ofParameter<float> BPM_Link;//link bpm
+	ofParameter<bool> PLAYING_Link_State;//control and get Ableton Live playing too, mirrored like Link does
 	ofParameter<float> LINK_Phase;//phase on the bar. cycled from 0.0f to 4.0f
 	ofParameter<bool> LINK_ResyncBeat;//set beat 0
 	ofParameter<bool> LINK_ResetBeats;//reset "unlimited-growing" beat counter
@@ -868,7 +806,7 @@ private:
 			//---
 
 			//update mean clock counters and update gui
-			if (LINK_Enable && LINK_Play && (link.getNumPeers() != 0))
+			if (LINK_Enable && PLAYING_Link_State && (link.getNumPeers() != 0))
 			{
 				int _beats = (int)Beat_float_current;//starts in beat 0 not 1
 
@@ -938,8 +876,10 @@ private:
 		ofPushStyle();
 
 		// text
-		int xpos = 400;
-		int ypos = 750;
+		int xpos = rPreview.getX() + 20;
+		int ypos = rPreview.getBottomLeft().y + 30;
+		//int xpos = 20;
+		//int ypos = 20;
 
 		// line
 		float x = ofGetWidth() * link.getPhase() / link.getQuantum();
@@ -950,11 +890,11 @@ private:
 
 		std::stringstream ss("");
 		ss
-			<< "bpm  : " << ofToString(link.getBPM(), 2) << std::endl
-			<< "beat : " << ofToString(link.getBeat(), 2) << std::endl
-			<< "phase: " << ofToString(link.getPhase(), 2) << std::endl
-			<< "peers: " << link.getNumPeers() << std::endl
-			<< "play?: " << (link.isPlaying() ? "play" : "stop");
+			<< "Bpm  : " << ofToString(link.getBPM(), 2) << std::endl
+			<< "Beat : " << ofToString(link.getBeat(), 2) << std::endl
+			<< "Phase: " << ofToString(link.getPhase(), 2) << std::endl
+			<< "Peers: " << link.getNumPeers() << std::endl
+			<< "Play?: " << (link.isPlaying() ? "play" : "stop");
 
 		ofSetColor(255);
 		if (fontMedium.isLoaded())
@@ -998,7 +938,7 @@ private:
 
 		if (name == "PLAY")
 		{
-			ofLogNotice(__FUNCTION__) << "LINK PLAY: " << LINK_Play;
+			ofLogNotice(__FUNCTION__) << "LINK PLAY: " << PLAYING_Link_State;
 
 			if (LINK_Enable && (link.getNumPeers() != 0))
 			{
@@ -1007,13 +947,13 @@ private:
 				// play engine do not works fine
 
 				//TEST:
-				if (link.isPlaying() != LINK_Play) // don't need update if it's already "mirrored"
+				if (link.isPlaying() != PLAYING_Link_State) // don't need update if it's already "mirrored"
 				{
-					link.setIsPlaying(LINK_Play);
+					link.setIsPlaying(PLAYING_Link_State);
 				}
 
 				////TEST:
-				//if (LINK_Play)
+				//if (PLAYING_Link_State)
 				//{
 				//	link.play();
 				//}
@@ -1024,15 +964,15 @@ private:
 
 				// workflow
 				// set gui display text clock to 0:0:0
-				if (!LINK_Play)
+				if (!PLAYING_Link_State)
 				{
 					reset_ClockValues();
 				}
 			}
 			// workflow
-			else if (LINK_Play)
+			else if (PLAYING_Link_State)
 			{
-				LINK_Play = false; // if not enable block to play disabled
+				PLAYING_Link_State = false; // if not enable block to play disabled
 			}
 		}
 
@@ -1060,9 +1000,9 @@ private:
 				link.disableLink();
 
 				// workflow
-				if (LINK_Play)
+				if (PLAYING_Link_State)
 				{
-					LINK_Play = false; // if not enable block to play disabled
+					PLAYING_Link_State = false; // if not enable block to play disabled
 				}
 			}
 		}
@@ -1071,19 +1011,19 @@ private:
 		{
 			ofLogNotice(__FUNCTION__) << "LINK BPM";
 
-			if (link.getBPM() != LINK_Bpm)
+			if (link.getBPM() != BPM_Link)
 			{
-				link.setBPM(LINK_Bpm);
+				link.setBPM(BPM_Link);
 			}
 
 			if (MODE_ABLETON_LINK_SYNC)
 			{
 				//TODO: 
 				// it's required if ofxDawMetro is not being used?
-				clockInternal_Bpm = LINK_Bpm;
+				BPM_ClockInternal = BPM_Link;
 
 				// will be autoupdate on clockInternal callback
-				//BPM_Global = LINK_Bpm;
+				//BPM_Global = BPM_Link;
 			}
 		}
 
@@ -1149,10 +1089,10 @@ private:
 	{
 		ofLogNotice(__FUNCTION__) << bpm;
 
-		LINK_Bpm = bpm;
+		BPM_Link = bpm;
 
-		// BPM_Global will be update on the LINK_Bpm callback
-		// clockInternal_Bpm will be updated too
+		// BPM_Global will be update on the BPM_Link callback
+		// BPM_ClockInternal will be updated too
 	}
 
 	//--------------------------------------------------------------
@@ -1173,9 +1113,9 @@ private:
 		ofLogNotice(__FUNCTION__) << (state ? "play" : "stop");
 
 		// don't need update if it's already "mirrored"
-		if (state != LINK_Play && MODE_ABLETON_LINK_SYNC && LINK_Enable)
+		if (state != PLAYING_Link_State && MODE_ABLETON_LINK_SYNC && LINK_Enable)
 		{
-			LINK_Play = state;
+			PLAYING_Link_State = state;
 		}
 	}
 #endif
