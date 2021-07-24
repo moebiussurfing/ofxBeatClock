@@ -44,7 +44,7 @@ TODO:
 - Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers
 (https://forum.openframeworks.cc/t/audio-programming-basics/34392/10).
 Problems happen when minimizing or moving the app window.. Any help is welcome!
-- Add kind of plugin to add audio input to get Beat on the fly from incomming audio signal. (Using ofxBTrack)
+- Add kind of plugin to add audio input to get BeatTick on the fly from incomming audio signal. (Using ofxBTrack)
 
 */
 
@@ -326,7 +326,7 @@ public:
 	{
 		bool b = getVisible_GuiPanel();
 		setVisible_GuiPanel(!b);
-}
+	}
 #endif
 #endif
 
@@ -443,7 +443,7 @@ private:
 	//void draw_BeatBalFlash(int _onBeat){}
 
 public:
-	ofParameter<bool> BeatTick_TRIG;//get bang beat!!
+	ofParameter<bool> BeatTick;//get bang beat!!
 	//also this trigs to draw a flashing circle for a frame only
 	//this variable is used to subscribe external (in ofApp) listeners to get the beat bangs!
 
@@ -480,7 +480,7 @@ public:
 #endif
 
 	//-
-	
+
 #ifdef USE_OFX_GUI_EXTENDED2
 	//ofxGui gui;
 private:
@@ -503,7 +503,7 @@ private:
 
 	// params
 public:
-	ofParameter<bool> PLAYING_Global_State;//for all different source clock modes
+	//ofParameter<bool> PLAYING_Global_State;//for all different source clock modes
 	ofParameter<bool> bGui;
 
 private:
@@ -542,6 +542,14 @@ private:
 public:
 	float getBPM();//returns BPM_Global
 	int getTimeBar();//returns duration of global bar in ms
+
+	int getBeat() {
+		if (BeatTick) {
+			//ofLogNotice(__FUNCTION__) << "BeatTick ! #" << Beat_current;
+			return Beat_current;
+		}
+		else return -1;
+	}
 
 	//--
 
@@ -656,7 +664,7 @@ private:
 
 	//-
 
-	ofParameter<bool> bGui_Transport; 
+	ofParameter<bool> bGui_Transport;
 	ofParameter<bool> bGui_PreviewClockNative; // beat boxes, text info and beat ball (all except gui panels)
 	ofParameter<bool> bGui_BpmClock; // some helpers other secondary settings/controls 
 	glm::vec2 shapePreview;
