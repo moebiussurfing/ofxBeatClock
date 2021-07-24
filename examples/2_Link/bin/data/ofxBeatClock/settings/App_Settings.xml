@@ -1,8 +1,13 @@
 <?xml version="1.0"?>
 <AppSettings>
 	<Tick_Sound>0</Tick_Sound>
+	<INTERNAL>0</INTERNAL>
+	<EXTERNAL_MIDI>1</EXTERNAL_MIDI>
+	<ABLETON_LINK>0</ABLETON_LINK>
+	<PLAY>0</PLAY>
+	<PLAY_SYNC>1</PLAY_SYNC>
 	<Tick_Volume>0.5</Tick_Volume>
-	<GUI_POSITION_PANEL>800, 450</GUI_POSITION_PANEL>
+	<GUI_POSITION_PANEL>960, 527.5</GUI_POSITION_PANEL>
 	<Draw_Box>1</Draw_Box>
 	<BEAT_CLOCK>1</BEAT_CLOCK>
 	<Keys>1</Keys>
