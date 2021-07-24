@@ -5,3 +5,4 @@ ofxMidi
 ofxScaleDragRect
 ofxSurfingHelpers
 ofxSurfingImGui
+ofxWindowApp
