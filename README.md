@@ -15,7 +15,7 @@
 
 ofxBeatClock beatClock;
 
-ofEventListener listenerBeat;
+ofEventListener listener;
 void Changed_Tick();
 ```
 
@@ -24,11 +24,11 @@ void Changed_Tick();
 void ofApp::setup()
 {
   beatClock.setup();
-  listenerBeat = beatClock.BeatTick.newListener([&](bool&) {this->Changed_Tick(); });
+  listener = beatClock.BeatTick.newListener([&](bool&) {this->Changed_Tick(); });
 }
 void ofApp::Changed_Tick() // callback to receive BeatTicks
 {
-  ofLogNotice(__FUNCTION__) << "Beat! #" << beatClock.getBeat();
+  ofLogNotice() << "Beat! #" << beatClock.getBeat();
 }
 ```
 
