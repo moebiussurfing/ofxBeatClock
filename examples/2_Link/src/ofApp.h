@@ -23,7 +23,7 @@ public:
 	ofxBeatClock beatClock;
 
 	ofEventListener listenerBeat;
-	void Changed_BeatTick();
+	void Changed_Tick();
 
 	ofxWindowApp windowApp;
 };
