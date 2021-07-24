@@ -5,7 +5,7 @@
 
 ## Screencast
 
-[gif](/readme_images/ofxBeatClock.gif?raw=true "gif")
+![GIF](/readme_images/ofxBeatClock.gif?raw=true "gif")  
 
 ## Usage
 
