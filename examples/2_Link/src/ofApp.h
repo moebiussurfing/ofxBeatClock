@@ -3,6 +3,8 @@
 
 #include "ofMain.h"
 
+#include "ofxWindowApp.h"
+
 /*
 	NOTE:
 	This examples show how to sync with Ableton Live using Link.
@@ -22,4 +24,6 @@ public:
 
 	ofEventListener listenerBeat;
 	void Changed_BeatTick();
+
+	ofxWindowApp windowApp;
 };
