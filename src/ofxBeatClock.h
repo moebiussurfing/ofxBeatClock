@@ -3,9 +3,10 @@
 //
 //	OPTIONAL DEFINES
 
-#define USE_OFX_SURFING_IM_GUI
-#define USE_ofxAbletonLink
-//#define USE_AUDIO_BUFFER_TIMER_MODE // -> Better alternative clock engine based on audio buffer (WIP)
+#define USE_ofxAbletonLink // -> Can be commented to not include the Ableton Link feature/add-on
+
+//#define USE_AUDIO_BUFFER_TIMER_MODE // -> [WIP] Better alternative clock engine based on audio buffer 
+
 //
 //---------------------------------
 
@@ -15,7 +16,6 @@
 /*
 
 	TODO:
-
 		+	remove guiExtended
 		+	remove native preview clock widget
 		+ 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
@@ -75,6 +75,7 @@ Problems happen when minimizing or moving the app window.. Any help is welcome!
 
 #include "ofMain.h"
 
+
 #include "ofxMidiClock.h" // used for external midi clock sync (1)
 #include "ofxMidi.h"
 #include "ofxMidiTimecode.h"
@@ -84,6 +85,7 @@ Problems happen when minimizing or moving the app window.. Any help is welcome!
 #include "BpmTapTempo.h"
 #include "ofxInteractiveRect.h" // engine to move the gui. TODO: add resize by mouse too.
 
+#define USE_OFX_SURFING_IM_GUI // -> can't be disabled for the momment. but is not difficult if you need it.
 #ifdef USE_OFX_SURFING_IM_GUI
 #include "ofxSurfingImGui.h"
 #endif
