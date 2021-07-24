@@ -52,7 +52,7 @@ You can uncomment ´´´#define USE_AUDIO_BUFFER_TIMER_MODE´´ on ```ofxBeatClo
 * [ofxImGui](https://github.com/Daandelange/ofxImGui/) fork from @**Daandelange**.  
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)  
 
-Allready included into ```OF_add-on/libs```. No need to add manually:  
+Allready included into ```OF_ADD-ON/libs```. No need to add manually:  
 * [ofxDawMetro](https://github.com/castovoid/ofxDawMetro)  
 
 ## Tested Systems
@@ -66,5 +66,9 @@ An add-on by **@moebiusSurfing**
 
 ## License
 *MIT License.*
+
+## TODO
+* Test/improve all Ableton Link features like Ableton in slave mode or multiple peers. [?]
+* Finish the improved Audio Buffer-based clock to allow more precision. This seems important when moving/hiding the Window. Sometimes the sync is lost. [?]
 
 **PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!**
