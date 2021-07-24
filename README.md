@@ -35,12 +35,11 @@ void ofApp::Changed_Tick() // callback to receive BeatTicks
 ## Features
 
 * **NEW FEATURE**:  
-**Ableton LINK** sync engine (master/slave). [**WIP but almost working**]  
+  **Ableton LINK** sync engine (Master/Slave). [*WIP: Maybe some protocol feature could be missing.. but working*]  
 * **Internal Clock** based in a threaded timer from **ofxDawMetro** from **@castovoid**.  
-You can uncomment `#define USE_AUDIO_BUFFER_TIMER_MODE` on `ofxBeatClock.h` to enable *BETA* alternative timer. [**WIP**]
+You can uncomment ´´´#define USE_AUDIO_BUFFER_TIMER_MODE´´ on ```ofxBeatClock.h``` to enable *BETA* alternative timer. [**WIP**]
 * **Tap Tempo Engine**.
-* **External Clock Source** as **Input MIDI Clock** (*Slave*) using **ofxMidi** from **@danomatika**.  
-Easy to Sync to **Ableton Live** or any sequencer app with **Midi Clock**.
+* **External Source** as **Input MIDI Clock** (*Slave*) using **ofxMidi** from **@danomatika**. Easy to Sync to **Ableton Live** or any sequencer app with **Midi Clock**.
 * **Metronome Sound Ticks**.
 * **ImGui** based **GUI**.  
 * **Auto Save/Load** of all settings.
