@@ -3,24 +3,9 @@
 **openFrameworks** add-on to run a *DAW-Styled BPM Beat-Clock*.  
 **Internal Clock** with **Tap Tempo**, **External MIDI Sync** and **Ableton Link**.  
 
-<!-- 
 ## Screencast
 
-![gif](/readme_images/ofxBeatClock.gif?raw=true "gif") -->
-
-## Screenshot
-
-![image](/readme_images/Capture1.PNG?raw=true "image")
-
-<!-- 1 - Internal Clock mode:  
-![image](/readme_images/Capture1.PNG?raw=true "image")
-
-2 - External MidiClock mode:  
-![image](/readme_images/Capture2.PNG?raw=true "image")
-
-3 - Ableton Link mode:  
-![image](/readme_images/Capture3.PNG?raw=true "image") -->
-
+[gif](/readme_images/ofxBeatClock.gif?raw=true "gif")
 
 ## Usage
 
@@ -30,7 +15,7 @@
 
 ofxBeatClock beatClock;
 ofEventListener listenerBeat;
-void Changed_BeatTick();
+void Changed_Tick();
 ```
 
 ### ofApp.cpp
@@ -38,11 +23,11 @@ void Changed_BeatTick();
 void ofApp::setup()
 {
 	beatClock.setup();
-	listenerBeat = beatClock.BeatTick.newListener([&](bool&) {this->Changed_BeatTick(); });
+	listenerBeat = beatClock.BeatTick.newListener([&](bool&) {this->Changed_Tick(); });
 }
-void ofApp::Changed_BeatTick() // callback to receive BeatTicks
+void ofApp::Changed_Tick() // callback to receive BeatTicks
 {
-	ofLogNotice(__FUNCTION__) << "BeatTick ! #" << beatClock.getBeat();
+	ofLogNotice(__FUNCTION__) << "Beat! #" << beatClock.getBeat();
 }
 ```
 
