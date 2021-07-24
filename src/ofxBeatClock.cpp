@@ -423,6 +423,7 @@ void ofxBeatClock::setup_ImGui()
 	//--
 
 	// customize widgets
+	if(1)
 	{
 		//guiManager.AddStyle(bMode3, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG, true, 2);
 
@@ -460,6 +461,7 @@ void ofxBeatClock::setup_ImGui()
 
 	// link
 #ifdef USE_ofxAbletonLink
+	if (1)
 	{
 		guiManager.AddStyle(PLAYING_Link_State, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
 		guiManager.AddStyle(LINK_Enable, SurfingImGuiTypes::OFX_IM_TOGGLE_SMALL);
@@ -986,6 +988,8 @@ void ofxBeatClock::draw_ImGuiControl()
 //--------------------------------------------------------------
 void ofxBeatClock::draw_ImGuiBpmClock()
 {
+	//return;
+
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 	if (guiManager.bAutoResize) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
 
@@ -1039,7 +1043,7 @@ void ofxBeatClock::draw_ImGuiCircleBeatWidget()
 
 		// big circle segments outperforms..
 		//const int nsegm = 4;
-		const int nsegm = 24; 
+		const int nsegm = 24;
 
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -1159,8 +1163,9 @@ void ofxBeatClock::draw_ImGuiCircleBeatWidget()
 
 		if (MODE_INTERNAL_CLOCK) control = ofMap(Beat_current, 0, 4, 0, 1);
 		else if (MODE_EXTERNAL_MIDI_CLOCK) control = ofMap(Beat_current, 0, 4, 0, 1);
+#ifdef USE_ofxAbletonLink
 		else if (MODE_ABLETON_LINK_SYNC) control = ofMap(LINK_Phase.get(), LINK_Phase.getMin(), LINK_Phase.getMax(), 0.0f, 1.0f);
-
+#endif
 		const int padc = 0;
 		static float _radius = radius_outer + padc;
 		static int num_segments = 35;
@@ -1307,7 +1312,12 @@ void ofxBeatClock::draw(ofEventArgs & args)
 {
 	//TODO: maybe could improve performance with fbo drawings for all BeatBoxes/text/ball?
 
+#ifdef USE_ofxAbletonLink
 	if (!MODE_INTERNAL_CLOCK && !MODE_EXTERNAL_MIDI_CLOCK && !MODE_ABLETON_LINK_SYNC)
+#else
+	if (!MODE_INTERNAL_CLOCK && !MODE_EXTERNAL_MIDI_CLOCK)
+#endif
+
 	{
 		clockActive_Info = "";
 		strClock = "";
@@ -1326,6 +1336,7 @@ void ofxBeatClock::draw(ofEventArgs & args)
 			LINK_draw();
 		}
 #endif
+
 	}
 
 	//-
@@ -1987,7 +1998,11 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			// lock stopped if all modes disabled
 			if (PLAYING_Global_State)
 			{
+#ifdef USE_ofxAbletonLink
 				if (!MODE_EXTERNAL_MIDI_CLOCK && !MODE_ABLETON_LINK_SYNC && !MODE_INTERNAL_CLOCK) {
+#else
+				if (!MODE_EXTERNAL_MIDI_CLOCK && !MODE_INTERNAL_CLOCK) {
+#endif
 					PLAYING_Global_State = false;
 					return;
 				}
@@ -2171,6 +2186,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 	//-
 
+#ifdef USE_ofxAbletonLink
 	else if (name == BPM_Link.getName())
 	{
 		ofLogVerbose(__FUNCTION__) << "LINK BPM   : " << BPM_Global;
@@ -2178,6 +2194,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			BPM_Global = BPM_Link.get();
 		}
 	}
+#endif
 
 	//--
 
@@ -2460,7 +2477,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 		//	clockInternal.addBarListener(this);
 		//	clockInternal.addSixteenthListener(this);
 		//}
-		}
+	}
 #endif
 
 	//-
@@ -2583,7 +2600,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//		reSync();
 	//	}
 	//}
-	}
+}
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_midiIn_BeatsInBar(int &beatsInBar)
@@ -2855,9 +2872,9 @@ void ofxBeatClock::onBarEvent(int &bar)
 			}
 
 			Bar_string = ofToString(Bar_current);
-			}
 		}
 	}
+}
 
 //--------------------------------------------------------------
 void ofxBeatClock::onBeatEvent(int &beat)
@@ -3098,11 +3115,11 @@ void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
 						beatTick_MONITOR(Beat_current);
 
 						//ofLogNotice(__FUNCTION__) << "[audioBuffer] BEAT: " << Beat_string;
+					}
+				}
+			}
+		}
 	}
-}
-}
-}
-}
 }
 #endif
 
