@@ -78,14 +78,14 @@ void ofxBeatClock::setup()
 	params_CONTROL.add(clockInternal_Bpm.set("BPM", BPM_INIT, BPM_INIT_MIN, BPM_INIT_MAX));
 	params_CONTROL.add(RESET_BPM_Global);
 
-	params_CONTROL.add(MODE_INTERNAL_CLOCK.set("1 INTERNAL", false));
-	params_CONTROL.add(MODE_EXTERNAL_MIDI_CLOCK.set("2 EXTERNAL MIDI", true));
+	params_CONTROL.add(MODE_INTERNAL_CLOCK.set("INTERNAL", false));
+	params_CONTROL.add(MODE_EXTERNAL_MIDI_CLOCK.set("EXTERNAL MIDI", true));
 #ifdef USE_ofxAbletonLink
-	params_CONTROL.add(MODE_ABLETON_LINK_SYNC.set("3 ABLETON LINK", false));
+	params_CONTROL.add(MODE_ABLETON_LINK_SYNC.set("ABLETON LINK", false));
 #endif
-	params_CONTROL.add(bGui_BpmClock.set("Clock BPM", false));
-	params_CONTROL.add(bGui_PreviewClockNative.set("Clock Native", true));
-	params_CONTROL.add(bGui_Transport.set("Clock Monitor", false));
+	params_CONTROL.add(bGui_BpmClock.set("Clock BPM", true));
+	params_CONTROL.add(bGui_Transport.set("Clock Monitor", true));
+	params_CONTROL.add(bGui_PreviewClockNative.set("Clock Native", false));
 
 	bGui.set("BEAT CLOCK", true);
 
@@ -109,7 +109,10 @@ void ofxBeatClock::setup()
 	//-
 
 	params_INTERNAL.setName("INTERNAL CLOCK");
+
+	// global play
 	params_INTERNAL.add(PLAYING_State.set("PLAY", false));
+
 	params_INTERNAL.add(BPM_Tap_Tempo_TRIG.set("TAP", false));
 	params_INTERNAL.add(bKeys);
 
@@ -163,6 +166,8 @@ void ofxBeatClock::setup()
 	LINK_ResetBeats.setSerializable(false);
 	LINK_Peers_string.setSerializable(false);
 	//LINK_Beat_Selector.setSerializable(false);
+
+	//LINK_Play.makeReferenceTo(PLAYING_State);
 #endif
 
 	//--
@@ -198,29 +203,12 @@ void ofxBeatClock::setup()
 	//params_BPM_Clock.add(MODE_Editor);
 	params_CONTROL.add(SHOW_Editor);
 	params_CONTROL.add(MODE_Editor);
-	
-	//--
-
-	// other settings only to storing
-	params_App.setName("AppSettings");
-	params_App.add(ENABLE_sound);
-	params_App.add(volumeSound);
-	params_App.add(pos_Gui);
-	params_App.add(MODE_Editor);
-	params_App.add(SHOW_Editor);
-	params_App.add(bGui);
-	params_App.add(bKeys);
-
-	//TODO:
-	//params_App.add(pos_Global);
-	//params_App.add(pos_ClockInfo);
-	//params_App.add(pos_BpmInfo);
 
 	//-
 
 	//exclude
 	midiIn_PortName.setSerializable(false);
-	PLAYING_External_State.setSerializable(false);
+	//PLAYING_External_State.setSerializable(false);
 	RESET_BPM_Global.setSerializable(false);
 	MODE_Editor.setSerializable(false);
 
@@ -283,6 +271,35 @@ void ofxBeatClock::setup()
 	//#endif
 
 	//--
+
+	// other settings only to storing
+	params_App.setName("AppSettings");
+	params_App.add(ENABLE_sound);
+
+	params_App.add(MODE_INTERNAL_CLOCK);
+	params_App.add(MODE_EXTERNAL_MIDI_CLOCK);
+#ifdef USE_ofxAbletonLink
+	params_App.add(MODE_ABLETON_LINK_SYNC);
+#endif
+	params_App.add(PLAYING_State);
+	//params_App.add(PLAYING_External_State);
+	//params_App.add(PLAYING_Global_State);
+
+	params_App.add(volumeSound);
+	params_App.add(pos_Gui);
+	params_App.add(MODE_Editor);
+	params_App.add(SHOW_Editor);
+	params_App.add(bGui);
+	params_App.add(bKeys);
+
+	//TODO:
+	//params_App.add(pos_Global);
+	//params_App.add(pos_ClockInfo);
+	//params_App.add(pos_BpmInfo);
+
+	//--
+
+	// GUI
 
 #ifdef USE_OFX_SURFING_IM_GUI
 
@@ -393,7 +410,7 @@ void ofxBeatClock::setup()
 
 	//draw beat ball trigger for sound and visual feedback monitor
 	//this trigs to draw a flashing circle for a frame only
-	BeatTick_TRIG = false;
+	BeatTick = false;
 
 	//swap to a class..
 	bpmTapTempo.setPathSounds("assets/sounds/");
@@ -448,7 +465,9 @@ void ofxBeatClock::startup()
 
 	//B. load settings
 	//rPreview.loadSettings(name_r1, name_r2, false);
-	rPreview.loadSettings();
+	//rPreview.loadSettings();
+	rPreview.loadSettings("", path_Global + "settings/", false);
+
 	//setPosition_GuiPreviewWidget(rPreview.x + padx, rPreview.y + pady);// ?
 
 	//-
@@ -815,7 +834,7 @@ void ofxBeatClock::refresh_GuiWidgets()
 	int colorBoxes = 64; // grey
 	int colorGreyDark = 32;
 	//int colorBoxes = 192; // grey
-	int alphaBoxes = 128; // alpha of several above draw fills
+	int alphaBoxes = 164; // alpha of several above draw fills
 
 	//--
 
@@ -1022,7 +1041,7 @@ void ofxBeatClock::draw_ImGuiControl()
 		//ofxImGuiSurfing::AddToggleRoundedButton(bGui_PreviewClockNative);//TODO: remove all
 		ofxImGuiSurfing::AddToggleRoundedButton(bGui_BpmClock);
 
-		guiManager.Add(ENABLE_CLOCKS, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
+		guiManager.Add(ENABLE_CLOCKS, SurfingImGuiTypes::OFX_IM_TOGGLE_SMALL);
 
 		//TODO:
 		//hide all
@@ -1035,9 +1054,10 @@ void ofxBeatClock::draw_ImGuiControl()
 		//----
 
 		// play 
+		const int hUnits = 4;
 		//guiManager.Add(PLAYING_State, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
-		if (MODE_ABLETON_LINK_SYNC) AddBigToggleNamed(PLAYING_State, _w1, 3 * _h, "PLAYING", "PLAY", true, link.getPhase());
-		else AddBigToggleNamed(PLAYING_State, _w1, 3 * _h, "PLAYING", "PLAY", true, 1.f);
+		if (MODE_ABLETON_LINK_SYNC) AddBigToggleNamed(PLAYING_State, _w1, hUnits * _h, "PLAYING", "PLAY", true, link.getPhase());
+		else AddBigToggleNamed(PLAYING_State, _w1, hUnits * _h, "PLAYING", "PLAY", true, 1.f);
 
 		ImGui::Dummy(ImVec2(0, 2));
 
@@ -1148,16 +1168,22 @@ void ofxBeatClock::draw_ImGuiControl()
 
 		//--
 
+		static bool bExtra = false;
 		ImGui::Dummy(ImVec2(0, 5));
-		ofxImGuiSurfing::AddToggleRoundedButton(bGui_PreviewClockNative);//TODO: remove all+
-		if (bGui_PreviewClockNative) {
+		ofxImGuiSurfing::ToggleRoundedButton("Extra", &bExtra);//TODO: remove all+
+		if (bExtra) {
 			ImGui::Indent();
-			ofxImGuiSurfing::AddToggleRoundedButton(SHOW_Editor);
-			ofxImGuiSurfing::AddToggleRoundedButton(MODE_Editor);
+			ofxImGuiSurfing::AddToggleRoundedButton(bGui_PreviewClockNative);//TODO: remove all+
+			if (bGui_PreviewClockNative) {
+				ImGui::Indent();
+				ofxImGuiSurfing::AddToggleRoundedButton(SHOW_Editor);
+				ofxImGuiSurfing::AddToggleRoundedButton(MODE_Editor);
+				ImGui::Unindent();
+			}
+			ofxImGuiSurfing::AddToggleRoundedButton(bKeys);
+			ofxImGuiSurfing::AddToggleRoundedButton(guiManager.bAutoResize);
 			ImGui::Unindent();
 		}
-		ofxImGuiSurfing::AddToggleRoundedButton(bKeys);
-		ofxImGuiSurfing::AddToggleRoundedButton(guiManager.bAutoResize);
 	}
 	guiManager.endWindow();
 }
@@ -1375,7 +1401,7 @@ void ofxBeatClock::draw_ImGuiClockMonitor()
 		// 4. Tap
 		int speed = 10;//blink speed when measuring taps
 		bool b = (ofGetFrameNum() % (2 * speed) < speed);
-		ImVec4 c =ImVec4(1.f, 1.f, 1.f, b ? 0.5f : 1.f);
+		ImVec4 c = ImVec4(1.f, 1.f, 1.f, b ? 0.5f : 1.f);
 		guiManager.pushStyleFont(2);
 		ImGui::PushStyleColor(ImGuiCol_Text, c);
 		ImGui::TextWrapped(strTapTempo.c_str());
@@ -1754,9 +1780,9 @@ void ofxBeatClock::draw_BeatBall(int px, int py, int _radius)
 //#endif
 //	{
 //		//this trigs to draw a flashing circle for a frame only
-//		if (BeatTick_TRIG)
+//		if (BeatTick)
 //		{
-//			BeatTick_TRIG = false;
+//			BeatTick = false;
 //
 //			//TODO: this could be the problem of confusing when beat 1/2 are
 //			//highlight 1st beat
@@ -1911,12 +1937,14 @@ void ofxBeatClock::exit()
 	//gui layout
 	rPreview.disableEdit();
 	//rPreview.saveSettings(name_r1, path_Global + name_r2, false);
-	rPreview.saveSettings("", "", false);
+	//rPreview.saveSettings("", "", false);
+	rPreview.saveSettings("", path_Global + "settings/", false);
 
 	//-
 
-	//default desired settings when it will opened
-	PLAYING_State = false;
+	// workflow: force
+	////default desired settings when it will opened
+	//PLAYING_State = false;
 
 	//#ifdef USE_ofxAbletonLink
 	//	if (!MODE_INTERNAL_CLOCK && !MODE_EXTERNAL_MIDI_CLOCK && !MODE_ABLETON_LINK_SYNC)
@@ -2078,7 +2106,7 @@ void ofxBeatClock::beatTick_MONITOR(int _beat)
 	if (ENABLE_CLOCKS && (MODE_INTERNAL_CLOCK || MODE_EXTERNAL_MIDI_CLOCK))
 #endif
 	{
-		BeatTick_TRIG = true;
+		BeatTick = true;
 
 		//gui engine preview
 		circleBeat.bang();
@@ -2185,40 +2213,72 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 
 	else if (name == PLAYING_State.getName())//button for internal only
 	{
-		//worklow
-#ifdef USE_ofxAbletonLink
-		if (!MODE_EXTERNAL_MIDI_CLOCK && !MODE_ABLETON_LINK_SYNC && !MODE_INTERNAL_CLOCK)
-			MODE_INTERNAL_CLOCK = true;
-#else
-		if (!MODE_EXTERNAL_MIDI_CLOCK && !MODE_INTERNAL_CLOCK)
-			MODE_INTERNAL_CLOCK = true;
-#endif
-
 		ofLogNotice(__FUNCTION__) << "PLAYING_State: " << (PLAYING_State ? "TRUE" : "FALSE");
 
-		//clocks are disabled or using external midi clock. dont need playing, just to be enabled
+		// worklow
+		// put one mode active. default is internal
+#ifdef USE_ofxAbletonLink
+		if (!MODE_EXTERNAL_MIDI_CLOCK && !MODE_ABLETON_LINK_SYNC && !MODE_INTERNAL_CLOCK) MODE_INTERNAL_CLOCK = true;
+#else
+		if (!MODE_EXTERNAL_MIDI_CLOCK && !MODE_INTERNAL_CLOCK) MODE_INTERNAL_CLOCK = true;
+#endif
+		//-
 
-		if ((MODE_EXTERNAL_MIDI_CLOCK || !ENABLE_CLOCKS || !MODE_INTERNAL_CLOCK)
-			&& PLAYING_State)
+		if (MODE_ABLETON_LINK_SYNC)
 		{
-			PLAYING_State = false; //skip and restore to false the play button
+			// workflow
+			if (MODE_ABLETON_LINK_SYNC) {
+				if (!LINK_Enable) LINK_Enable = true;
+				LINK_Play = PLAYING_State;
+
+				// play
+				if (PLAYING_State)
+				{
+					start();
+				}
+
+				// stop
+				else
+				{
+					stop();
+				}
+			}
 		}
 
-		else if (ENABLE_CLOCKS && MODE_INTERNAL_CLOCK)
+		// clocks are disabled or using external midi clock. dont need playing, just to be enabled
+		else if ((MODE_EXTERNAL_MIDI_CLOCK || !ENABLE_CLOCKS || !MODE_INTERNAL_CLOCK) && PLAYING_State)
 		{
-			//play
-			if (PLAYING_State == true)
+			PLAYING_State = false; // skip and restore to false the play button
+		}
+
+		else if (MODE_INTERNAL_CLOCK && ENABLE_CLOCKS)
+		{
+			// play
+			if (PLAYING_State)
 			{
 				start();
 			}
 
-			//stop
+			// stop
 			else
 			{
 				stop();
 			}
 		}
 	}
+
+	//-
+
+#ifdef USE_ofxAbletonLink
+	else if (name == LINK_Play.getName()) {
+		if (!MODE_ABLETON_LINK_SYNC) MODE_ABLETON_LINK_SYNC = true;
+		if (MODE_ABLETON_LINK_SYNC)
+		{
+			if (!LINK_Enable) LINK_Enable = true;
+			PLAYING_State = LINK_Play;
+		}
+	}
+#endif
 
 	//-
 
@@ -2637,7 +2697,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 			group_Advanced->minimize();
 	}
 #endif
-		}
+	}
 
 	//-
 
@@ -2683,7 +2743,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter &e) //patch change
 	//		reSync();
 	//	}
 	//}
-	}
+}
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_midiIn_BeatsInBar(int &beatsInBar)
@@ -3208,7 +3268,7 @@ void ofxBeatClock::audioOut(ofSoundBuffer &buffer)
 				}
 			}
 		}
-}
+	}
 }
 #endif
 
