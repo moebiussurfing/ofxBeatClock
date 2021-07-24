@@ -14,6 +14,7 @@
 #include "ofxBeatClock.h"
 
 ofxBeatClock beatClock;
+
 ofEventListener listenerBeat;
 void Changed_Tick();
 ```
@@ -22,32 +23,27 @@ void Changed_Tick();
 ```cpp
 void ofApp::setup()
 {
-	beatClock.setup();
-	listenerBeat = beatClock.BeatTick.newListener([&](bool&) {this->Changed_Tick(); });
+  beatClock.setup();
+  listenerBeat = beatClock.BeatTick.newListener([&](bool&) {this->Changed_Tick(); });
 }
 void ofApp::Changed_Tick() // callback to receive BeatTicks
 {
-	ofLogNotice(__FUNCTION__) << "Beat! #" << beatClock.getBeat();
+  ofLogNotice(__FUNCTION__) << "Beat! #" << beatClock.getBeat();
 }
 ```
 
 ## Features
 
 * **NEW FEATURE**:  
-**Ableton LINK** sync engine (master/slave).  
-  [**WIP but almost working**]  
-  Link engine is (maybe) disabled by default. To enable Link:
-  * Add ```ofxAbletonLink``` add-on to your app project. 
-  * Uncomment ```#define USE_ofxAbletonLink``` on ```ofxBeatClock.h```.  
-
-* **ImGui** based **GUI**.  
+**Ableton LINK** sync engine (master/slave). [**WIP but almost working**]  
 * **Internal Clock** based in a threaded timer from **ofxDawMetro** from **@castovoid**.  
 You can uncomment `#define USE_AUDIO_BUFFER_TIMER_MODE` on `ofxBeatClock.h` to enable *BETA* alternative timer. [**WIP**]
-* **External Clock Source** as **input MIDI Clock** (*Slave*) using **ofxMidi** from **@danomatika**.  
-Easy to Sync to **Ableton Live** or any sequencer app with **Midi Clock**.
 * **Tap Tempo Engine**.
-* **Auto Save/Load** of all settings.
+* **External Clock Source** as **Input MIDI Clock** (*Slave*) using **ofxMidi** from **@danomatika**.  
+Easy to Sync to **Ableton Live** or any sequencer app with **Midi Clock**.
 * **Metronome Sound Ticks**.
+* **ImGui** based **GUI**.  
+* **Auto Save/Load** of all settings.
 
 ## Requeriments
 
@@ -67,10 +63,9 @@ Allready included into ```OF_add-on/libs```. No need to add manually:
 An add-on by **@moebiusSurfing**  
 *(ManuMolina). 2020-2021.*
 
-**_Thanks to the developers of the included core add-ons!  
-@danomatika, @2bb and @castovoid._**
+**_Thanks to the developers of the included core add-ons! @danomatika, @2bb and @castovoid._**
 
 ## License
 *MIT License.*
 
-**_PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!_**
+**PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!**
