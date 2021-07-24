@@ -1,7 +1,10 @@
 <?xml version="1.0"?>
 <USER_CONTROL>
 	<ENABLE>1</ENABLE>
-	<BPM>120</BPM>
+	<BPM>190.476</BPM>
+	<INTERNAL>0</INTERNAL>
+	<EXTERNAL_MIDI>1</EXTERNAL_MIDI>
+	<ABLETON_LINK>0</ABLETON_LINK>
 	<Clock_BPM>1</Clock_BPM>
 	<Clock_Native>0</Clock_Native>
 	<Clock_Monitor>1</Clock_Monitor>
