@@ -1184,7 +1184,7 @@ void ofxBeatClock::draw_ImGuiClockMonitor()
 {
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 	if (true) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
-	//if (guiManager.bAutoResize) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
+	if (guiManager.bAutoResize) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
 
 	ImGui::SetNextWindowPos(ImVec2(250, 10), ImGuiCond_FirstUseEver);
 
