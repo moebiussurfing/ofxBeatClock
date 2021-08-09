@@ -53,7 +53,7 @@ You can uncomment ```#define USE_AUDIO_BUFFER_TIMER_MODE``` on ```ofxBeatClock.h
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)  
 * [ofxWindowApp](https://github.com/moebiussurfing/ofxWindowApp). Optional. Can be disabled. 
 
-Allready included into ```OF_ADD-ON/libs```. No need to add manually:  
+Already included into ```OF_ADD-ON/libs```. No need to add manually:  
 * [ofxDawMetro](https://github.com/castovoid/ofxDawMetro)  
 
 ## Tested Systems
