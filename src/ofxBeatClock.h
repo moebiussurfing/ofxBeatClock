@@ -15,17 +15,25 @@
 
 /*
 
-	TODO:
-		+	remove guiExtended
-		+	remove native preview clock widget
-		+ 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
-		+ 	Add fast filter to smooth / stabilize BPM number when using external midi clock mode.
-		+ 	Add audio output selector to metronome sounds.
-				maybe share audioBuffer with better timer mode
-				on USE_AUDIO_BUFFER_TIMER_MODE. still disabled by default yet
-	NOTE:
-			more info about soundStream timer
-			https://forum.openframeworks.cc/t/pass-this-pointer-from-parent-to-child-object-scheduler-oftimer-system/22088/6?u=moebiussurfing
+TODO:
+
++	add minimal. 
++	add play into clock window
+	show toggle on clock 
++	set min size to avoid text wrap.
+	right align
+
++	remove all guiExtended
++	remove native preview clock widget
++ 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
++ 	Add fast filter to smooth / stabilize BPM number when using external midi clock mode.
++ 	Add audio output selector to metronome sounds.
+		maybe share audioBuffer with better timer mode
+		on USE_AUDIO_BUFFER_TIMER_MODE. still disabled by default yet
+
+NOTE:
+more info about soundStream timer
+https://forum.openframeworks.cc/t/pass-this-pointer-from-parent-to-child-object-scheduler-oftimer-system/22088/6?u=moebiussurfing
 
 */
 
@@ -469,6 +477,10 @@ public:
 	ofParameter<float> BPM_Global;//global tempo bpm.
 	ofParameter<int> BPM_Global_TimeBar;//ms time of 1 bar = 4 beats
 
+	//float getBpm() {
+	//	return BPM_Global.get();
+	//}
+
 	//----
 
 private:
@@ -484,7 +496,7 @@ private:
 	//API
 
 public:
-	float getBPM();//returns BPM_Global
+	float getBpm();//returns BPM_Global
 	int getTimeBar();//returns duration of global bar in ms
 
 	int getBeat() {
@@ -608,7 +620,8 @@ private:
 
 	//-
 
-	ofParameter<bool> bGui_Transport;
+	ofParameter<bool> bGui_MonitorTransport;
+	ofParameter<bool> bGui_Controls;
 	ofParameter<bool> bGui_PreviewClockNative; // beat boxes, text info and beat ball (all except gui panels)
 	ofParameter<bool> bGui_BpmClock; // some helpers other secondary settings/controls 
 	glm::vec2 shapePreview;
