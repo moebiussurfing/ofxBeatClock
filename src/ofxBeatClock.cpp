@@ -23,22 +23,22 @@ ofxBeatClock::~ofxBeatClock() {
 //--------------------------------------------------------------
 void ofxBeatClock::setup()
 {
-	reset_ClockValues();//set gui display text clock to 0:0:0
+	reset_ClockValues(); // set gui display text clock to 0:0:0
 
 	//--
 
 	setup_MidiIn_Clock();
-	//should be defined before rest of gui to list midi ports being included on gui
+	// should be defined before rest of gui to list midi ports being included on gui
 
 	//--
 
-	//define all parameters
+	// define all parameters
 
-	//gui layout
+	// gui layout
 	window_W = ofGetWidth();
 	window_H = ofGetHeight();
 
-	dt = 1.0f / 60.f;//default speed/fps is 60 fps
+	dt = 1.0f / 60.f;// default speed/fps is 60 fps
 
 	pos_Global.set("GUI POSITION GLOBAL",
 		glm::vec2(window_W * 0.5, window_H * 0.5),
@@ -68,7 +68,7 @@ void ofxBeatClock::setup()
 
 	bKeys.set("Keys", true);
 
-	//1.1 controls
+	// 1.1 controls
 
 	RESET_BPM_Global.set("Reset", false);
 
@@ -84,16 +84,17 @@ void ofxBeatClock::setup()
 	params_CONTROL.add(MODE_ABLETON_LINK_SYNC.set("ABLETON LINK", false));
 #endif
 	params_CONTROL.add(bGui_BpmClock.set("Clock BPM", true));
-	params_CONTROL.add(bGui_Transport.set("Clock Monitor", true));
+	params_CONTROL.add(bGui_MonitorTransport.set("Clock Monitor", true));
+	params_CONTROL.add(bGui_Controls.set("Clock Controls", true));
 	params_CONTROL.add(bGui_PreviewClockNative.set("Clock Native", false));
 
 	bGui.set("BEAT CLOCK", true);
 
 	//--
 
-	//1.2 internal clock
+	// 1.2 internal clock
 
-	//bar/beat/sixteenth listeners
+	// bar/beat/sixteenth listeners
 	clockInternal.addBeatListener(this);
 	clockInternal.addBarListener(this);
 	clockInternal.addSixteenthListener(this);
@@ -126,7 +127,7 @@ void ofxBeatClock::setup()
 
 	//-
 
-	//1.3 external midi
+	// 1.3 external midi
 	params_EXTERNAL_MIDI.setName("EXTERNAL MIDI CLOCK");
 	params_EXTERNAL_MIDI.add(PLAYING_External_State.set("PLAY SYNC", false));
 	params_EXTERNAL_MIDI.add(midiIn_Port_SELECT.set("INPUT", 0, 0, midiIn_numPorts - 1));
@@ -134,7 +135,7 @@ void ofxBeatClock::setup()
 
 	//-
 
-	//1.4 ableton link
+	// 1.4 ableton link
 
 	//-
 
@@ -156,7 +157,7 @@ void ofxBeatClock::setup()
 	params_LINK.add(LINK_ResetBeats.set("FORCE RESET", false));
 	//params_LINK.add(LINK_Beat_Selector.set("GO BEAT", 0, 0, 100));//TODO: TEST
 
-	//not required..
+	// not required..
 	LINK_Enable.setSerializable(false);
 	BPM_Link.setSerializable(false);
 	PLAYING_Link_State.setSerializable(false);
@@ -172,7 +173,7 @@ void ofxBeatClock::setup()
 
 	// 1.5 extra and advanced settings
 
-	//this smoothed (or maybe slower refreshed than fps) clock will be sended to target sequencer outside the class. see BPM_MIDI_CLOCK_REFRESH_RATE.
+	// this smoothed (or maybe slower refreshed than fps) clock will be sended to target sequencer outside the class. see BPM_MIDI_CLOCK_REFRESH_RATE.
 	params_BPM_Clock.setName("Clock BPM");
 	params_BPM_Clock.add(BPM_Global.set("BPM", BPM_INIT, BPM_INIT_MIN, BPM_INIT_MAX));
 	params_BPM_Clock.add(BPM_Global_TimeBar.set("BAR ms", (int)60000 / BPM_Global, 100, 2000));
@@ -204,7 +205,7 @@ void ofxBeatClock::setup()
 
 	//-
 
-	//exclude
+	// exclude
 	midiIn_PortName.setSerializable(false);
 	PLAYING_External_State.setSerializable(false);
 	RESET_BPM_Global.setSerializable(false);
@@ -220,7 +221,7 @@ void ofxBeatClock::setup()
 
 	//-
 
-	//display text
+	// display text
 	std::string strFont;
 
 	//strFont = "assets/fonts/telegrama_render.otf";
@@ -313,7 +314,7 @@ void ofxBeatClock::setup()
 
 	//-
 
-	//main text color white
+	// main text color white
 	colorText = ofColor(255, 255);
 
 	//---
@@ -402,7 +403,7 @@ void ofxBeatClock::setup_ImGui()
 #ifdef USE_OFX_SURFING_IM_GUI
 
 	//guiManager.setAutoResize(true);
-	guiManager.setAutoSaveSettings(true);
+	//guiManager.setAutoSaveSettings(true);
 	guiManager.setImGuiAutodraw(true);
 	guiManager.setup();
 
@@ -618,7 +619,8 @@ void ofxBeatClock::refresh_GuiWidgets()
 
 	//-
 
-	strBpmInfo = ofToString(BPM_Global.get(), 2) + "\nBPM";
+	strBpmInfo = ofToString(BPM_Global.get(), 2);
+	//strBpmInfo = ofToString(BPM_Global.get(), 2) + "\nBPM";
 	//strBpmInfo = ofToString(BPM_Global.get(), 2) + "BPM";
 	//strBpmInfo = "BPM: " + ofToString(BPM_Global.get(), 2);
 
@@ -816,14 +818,15 @@ void ofxBeatClock::draw_ImGuiControl()
 
 	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
 
-	guiManager.beginWindow(bGui.getName().c_str(), (bool*)&bGui.get(), window_flags);
+	guiManager.beginWindow(bGui_Controls.getName().c_str(), (bool*)&bGui_Controls.get(), window_flags);
 	{
-		ofxImGuiSurfing::AddToggleRoundedButton(bGui_Transport);
+		ofxImGuiSurfing::AddToggleRoundedButton(bGui_MonitorTransport);
 		ofxImGuiSurfing::AddToggleRoundedButton(bGui_BpmClock);
 		//ofxImGuiSurfing::AddToggleRoundedButton(bGui_PreviewClockNative);//TODO: remove all
 		//ofxImGuiSurfing::AddToggleRoundedButton(bGui);
 
 		guiManager.Add(ENABLE_CLOCKS, SurfingImGuiTypes::OFX_IM_TOGGLE_SMALL);
+
 		//hide all
 		if (!ENABLE_CLOCKS)
 		{
@@ -851,7 +854,7 @@ void ofxBeatClock::draw_ImGuiControl()
 		// sources
 
 		{
-			static bool bOpen = 1;
+			static bool bOpen = false;
 			ImGuiTreeNodeFlags _flagt = (bOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None);
 			_flagt |= ImGuiTreeNodeFlags_Framed;
 			if (ImGui::TreeNodeEx("SOURCES", _flagt))
@@ -878,7 +881,7 @@ void ofxBeatClock::draw_ImGuiControl()
 			ImGui::Indent();
 			if (MODE_INTERNAL_CLOCK)
 			{
-				static bool bOpen = true;
+				static bool bOpen = false;
 				ImGuiTreeNodeFlags _flagt = (bOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None);
 				_flagt |= ImGuiTreeNodeFlags_Framed;
 				if (ImGui::TreeNodeEx("INTERNAL", _flagt))
@@ -900,7 +903,7 @@ void ofxBeatClock::draw_ImGuiControl()
 
 			if (MODE_EXTERNAL_MIDI_CLOCK)
 			{
-				static bool bOpen = true;
+				static bool bOpen = false;
 				ImGuiTreeNodeFlags _flagt = (bOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None);
 				_flagt |= ImGuiTreeNodeFlags_Framed;
 
@@ -1183,12 +1186,17 @@ void ofxBeatClock::draw_ImGuiCircleBeatWidget()
 void ofxBeatClock::draw_ImGuiClockMonitor()
 {
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
-	if (true) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
-	if (guiManager.bAutoResize) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
+	//if (true) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
 
+	static bool auto_resize = true;
+	window_flags = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
+	//if (guiManager.bAutoResize) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
+	
 	ImGui::SetNextWindowPos(ImVec2(250, 10), ImGuiCond_FirstUseEver);
+	
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(PANEL_WIDGETS_WIDTH_MIN, PANEL_WIDGETS_WIDTH_MIN));
 
-	guiManager.beginWindow(bGui_Transport.getName().c_str(), (bool*)&bGui_Transport.get(), window_flags);
+	guiManager.beginWindow(bGui_MonitorTransport.getName().c_str(), (bool*)&bGui_MonitorTransport.get(), window_flags);
 	{
 		float __w100 = ImGui::GetContentRegionAvail().x;
 		float _w4 = __w100 / 4;
@@ -1196,13 +1204,33 @@ void ofxBeatClock::draw_ImGuiClockMonitor()
 
 		// 1. bpm + counters
 		guiManager.pushStyleFont(1);
-		ImGui::TextWrapped(strBpmInfo.c_str());
-		//ImGui::TextWrappedV(strBpmInfo.c_str());
-		//ImGui::TextWrapped(strBpmInfo.c_str());
+
+		// ImGui Infos
+		const auto sz1 = ImGui::CalcTextSize(strBpmInfo.c_str());
+		float sw1 = GetContentRegionAvail().x; 
+		ImGui::Text(""); 
+		ImGui::SameLine(sw1 - sz1.x);
+		ImGui::Text(strBpmInfo.c_str());
+		
+		string strBpmInfo2 = "BPM";
+		float sw2 = GetContentRegionAvail().x; 
+		ImGui::Text(""); 
+		const auto sz2 = ImGui::CalcTextSize(strBpmInfo2.c_str());
+		ImGui::SameLine(sw2 - sz2.x);
+		ImGui::Text(strBpmInfo2.c_str());
+
 		guiManager.popStyleFont();
 
+		//-
+
 		guiManager.pushStyleFont(2);
-		ImGui::TextWrapped(strTimeBeatPos.c_str());
+		{
+			const auto sz = ImGui::CalcTextSize(strTimeBeatPos.c_str());
+			float sw = GetContentRegionAvail().x;
+			ImGui::Text("");
+			ImGui::SameLine(sw - sz.x);
+			ImGui::Text(strTimeBeatPos.c_str());
+		}
 		guiManager.popStyleFont();
 
 		ImGui::Dummy(ImVec2(0, 5));
@@ -1210,8 +1238,13 @@ void ofxBeatClock::draw_ImGuiClockMonitor()
 		// 2. input info
 		if (strClock != "" && clockActive_Info != "") {
 			guiManager.pushStyleFont(3);
-			if (strClock != "") {
-				ImGui::TextWrapped(strClock.c_str());
+			if (strClock != "") 
+			{
+				const auto sz = ImGui::CalcTextSize(strClock.c_str());
+				float sw = GetContentRegionAvail().x;
+				ImGui::Text("");
+				ImGui::SameLine(sw - sz.x);
+				ImGui::Text(strClock.c_str());
 				ImGui::Dummy(ImVec2(0, 2));
 			}
 			if (clockActive_Info != "") {
@@ -1288,19 +1321,30 @@ void ofxBeatClock::draw_ImGuiClockMonitor()
 		//--
 
 		//guiManager.setDefaultFont();
+		//guiManager.Add(ENABLE_CLOCKS, SurfingImGuiTypes::OFX_IM_TOGGLE_SMALL);
+		guiManager.Add(PLAYING_Global_State, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
+
+		ofxImGuiSurfing::AddToggleRoundedButton(bGui_Controls);
+		ofxImGuiSurfing::AddToggleRoundedButton(bGui_BpmClock);
+
+		//ToggleRoundedButton("Auto Resize", &auto_resize);
 	}
 	guiManager.endWindow();
+
+	ImGui::PopStyleVar();
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::draw_ImGuiWidgets()
 {
+	if (!bGui) return;
+
 	guiManager.begin();
 	{
 		//guiManager.setDefaultFont();
 
-		if (bGui) draw_ImGuiControl();
-		if (bGui_Transport) draw_ImGuiClockMonitor();
+		if (bGui_Controls) draw_ImGuiControl();
+		if (bGui_MonitorTransport) draw_ImGuiClockMonitor();
 		if (bGui_BpmClock) draw_ImGuiBpmClock();
 	}
 	guiManager.end();
@@ -1958,7 +2002,7 @@ void ofxBeatClock::beatTick_MONITOR(int _beat)
 }
 
 //--------------------------------------------------------------
-float ofxBeatClock::getBPM()
+float ofxBeatClock::getBpm()
 {
 	return BPM_Global;
 }
@@ -3161,7 +3205,7 @@ void ofxBeatClock::keyPressed(ofKeyEventArgs &eventArgs)
 
 		// get some beatClock info. look api methods into ofxBeatClock.h
 	case OF_KEY_RETURN:
-		ofLogWarning(__FUNCTION__) << "BPM     : " << getBPM() << " beats per minute";
+		ofLogWarning(__FUNCTION__) << "BPM     : " << getBpm() << " beats per minute";
 		ofLogWarning(__FUNCTION__) << "BAR TIME: " << getTimeBar() << " ms";
 		break;
 
