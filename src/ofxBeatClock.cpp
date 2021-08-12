@@ -912,7 +912,8 @@ void ofxBeatClock::draw_ImGuiControl()
 					guiManager.refresh();
 					{
 						guiManager.Add(PLAYING_External_State, SurfingImGuiTypes::OFX_IM_TOGGLE_BIG);
-						guiManager.Add(midiIn_Port_SELECT, SurfingImGuiTypes::OFX_IM_STEPPER);
+						guiManager.Add(midiIn_Port_SELECT, SurfingImGuiTypes::OFX_IM_SLIDER);
+						//guiManager.Add(midiIn_Port_SELECT, SurfingImGuiTypes::OFX_IM_STEPPER);
 						guiManager.Add(midiIn_PortName, SurfingImGuiTypes::OFX_IM_TEXT_DISPLAY);
 						//guiManager.AddGroup(params_EXTERNAL_MIDI, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
 					}
