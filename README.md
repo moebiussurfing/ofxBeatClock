@@ -31,7 +31,7 @@ void ofApp::draw()
 {
   beatClock.draw();
 }
-void ofApp::Changed_Tick() // callback to receive BeatTicks
+void ofApp::Changed_Tick() // -> Callback to receive BeatTicks
 {
   ofLogNotice() << "Beat! #" << beatClock.getBeat();
 }
@@ -54,7 +54,7 @@ You can uncomment ```#define USE_AUDIO_BUFFER_TIMER_MODE``` on ```ofxBeatClock.h
 * [ofxMidi](https://github.com/danomatika/ofxMidi)  
 * [ofxAbletonLink](https://github.com/2bbb/ofxAbletonLink). [ _Optional. Can be disabled._ ]  
 * [ofxImGuiSurfing](https://github.com/moebiussurfing/ofxSurfingImGui)
-* [ofxImGui](https://github.com/Daandelange/ofxImGui/). [ _Fork from @**Daandelange**. _]  
+* [ofxImGui](https://github.com/Daandelange/ofxImGui/). [ _Fork from_ @**Daandelange**. ]  
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)  
 * [ofxWindowApp](https://github.com/moebiussurfing/ofxWindowApp). [ _Optional. Can be disabled._ ]  
 
