@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
 <USER_CONTROL>
 	<ENABLE>1</ENABLE>
-	<PLAY>1</PLAY>
-	<BPM>245.902</BPM>
+	<PLAY>0</PLAY>
+	<BPM>120</BPM>
 	<INTERNAL>1</INTERNAL>
 	<EXTERNAL_MIDI>0</EXTERNAL_MIDI>
 	<ABLETON_LINK>0</ABLETON_LINK>
-	<Clock_BPM>1</Clock_BPM>
+	<Clock_BPM>0</Clock_BPM>
 	<Clock_Monitor>1</Clock_Monitor>
+	<Clock_Controls>1</Clock_Controls>
 	<Clock_Native>0</Clock_Native>
 	<Draw_Box>1</Draw_Box>
 </USER_CONTROL>
