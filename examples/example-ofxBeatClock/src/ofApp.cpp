@@ -7,6 +7,7 @@ void ofApp::setup()
 
 	beatClock.setup();
 
+	// Beat Tick Callback
 	listenerBeat = beatClock.BeatTick.newListener([&](bool&) {this->Changed_Tick(); });
 }
 
