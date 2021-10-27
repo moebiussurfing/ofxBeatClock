@@ -2,6 +2,7 @@
 
 **openFrameworks** add-on to run a *DAW-Styled BPM Beat-Clock*.  
 **Internal Clock** with **Tap Tempo**, **External MIDI Sync** and **Ableton Link**.  
+Receives notfication callback when each beat happens.  
 
 ## Screencast
 
@@ -26,6 +27,10 @@ void ofApp::setup()
   beatClock.setup();
   listener = beatClock.BeatTick.newListener([&](bool&) {this->Changed_Tick(); });
 }
+void ofApp::draw()
+{
+  beatClock.draw();
+}
 void ofApp::Changed_Tick() // callback to receive BeatTicks
 {
   ofLogNotice() << "Beat! #" << beatClock.getBeat();
@@ -47,11 +52,11 @@ You can uncomment ```#define USE_AUDIO_BUFFER_TIMER_MODE``` on ```ofxBeatClock.h
 ## Requeriments
 
 * [ofxMidi](https://github.com/danomatika/ofxMidi)  
-* [ofxAbletonLink](https://github.com/2bbb/ofxAbletonLink). Optional. Can be disabled.  
+* [ofxAbletonLink](https://github.com/2bbb/ofxAbletonLink). [ _Optional. Can be disabled._ ]  
 * [ofxImGuiSurfing](https://github.com/moebiussurfing/ofxSurfingImGui)
-* [ofxImGui](https://github.com/Daandelange/ofxImGui/). Fork from @**Daandelange**.  
+* [ofxImGui](https://github.com/Daandelange/ofxImGui/). [ _Fork from @**Daandelange**. _]  
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)  
-* [ofxWindowApp](https://github.com/moebiussurfing/ofxWindowApp). Optional. Can be disabled. 
+* [ofxWindowApp](https://github.com/moebiussurfing/ofxWindowApp). [ _Optional. Can be disabled._ ]  
 
 Already included into ```OF_ADD-ON/libs```. No need to add manually:  
 * [ofxDawMetro](https://github.com/castovoid/ofxDawMetro)  
@@ -61,7 +66,7 @@ Already included into ```OF_ADD-ON/libs```. No need to add manually:
 
 ## Author
 An add-on by **@moebiusSurfing**  
-*(ManuMolina). 2020-2021.*
+( _ManuMolina_ ). _2020-2021_.
 
 **_Thanks to the developers of the included core add-ons! @danomatika, @2bb and @castovoid._**
 
@@ -71,6 +76,7 @@ An add-on by **@moebiusSurfing**
 ## TODO
 * Improve on-the-fly pushing sync/tweaking BPM smoothly.
 * Test/improve all Ableton Link features like Ableton in slave mode or multiple peers. [?]
-* Finish the improved Audio Buffer-based clock to allow more precision. This seems important when moving/hiding the Window. Sometimes the sync is lost. [?]
+* Finish the improved Audio Buffer-based clock to allow more precision.  
+This seems important when moving/hiding the Window. Sometimes the sync is lost. [?]
 
-**PLEASE FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!**
+**FEEL FREE TO ADD MODIFICATIONS OR FEATURES AND TO SEND ME PULL REQUESTS OR ISSUES!**
