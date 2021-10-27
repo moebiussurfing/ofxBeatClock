@@ -172,7 +172,9 @@ public:
 
 	void setup();
 	void update(ofEventArgs & args);
-	void draw(ofEventArgs & args);
+	void draw();
+	void drawImGui();
+	//void draw(ofEventArgs & args);
 	void exit();
 	void windowResized(int w, int h);
 	void keyPressed(ofKeyEventArgs &eventArgs);
@@ -432,6 +434,7 @@ public:
 public:
 
 	void setup_ImGui();
+	void setupImGuiStyles();
 	void refresh_Gui();
 	void refresh_GuiWidgets();
 
