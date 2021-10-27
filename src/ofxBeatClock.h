@@ -3,9 +3,9 @@
 //
 //	OPTIONAL DEFINES
 
-#define USE_ofxAbletonLink // -> Can be commented to not include the Ableton Link feature/add-on
+#define USE_ofxAbletonLink // -> Can be commented to not include the Ableton Link feature/add-on.
 
-//#define USE_AUDIO_BUFFER_TIMER_MODE // -> [WIP] Better alternative clock engine based on audio buffer 
+//#define USE_AUDIO_BUFFER_TIMER_MODE // -> [WIP] A better alternative clock engine based on audio buffer. 
 
 //
 //---------------------------------
@@ -17,14 +17,6 @@
 
 TODO:
 
-+	add minimal. 
-+	add play into clock window
-	show toggle on clock 
-+	set min size to avoid text wrap.
-	right align
-
-+	remove all guiExtended
-+	remove native preview clock widget
 + 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
 + 	Add fast filter to smooth / stabilize BPM number when using external midi clock mode.
 + 	Add audio output selector to metronome sounds.
@@ -43,8 +35,8 @@ https://forum.openframeworks.cc/t/pass-this-pointer-from-parent-to-child-object-
 
 TODO:
 
-- **BUG**: Repair problems when sometimes beat 1 tick it's displaced to beat 2...
-- **BUG**: Some log errors must be repaired on ofxAbletonLink that seems drop down fps/performance...
+- BUG: Repair problems when sometimes beat 1 tick it's displaced to beat 2...
+- BUG: Some log errors must be repaired on ofxAbletonLink that seems drop down fps/performance...
 - Add the correct workflow for LINK. Must add some mode toggle.
 - On-the-fly re-sync to bar beat start.
 - A better link between play button/params in all internal/external clock source modes, with one unique play button for all clock sources.
@@ -195,7 +187,6 @@ private:
 
 private:
 	void startup();
-	void draw_PreviewWidget();
 
 	CircleBeat circleBeat;
 	BpmTapTempo bpmTapTempo;
@@ -205,9 +196,9 @@ private:
 private:
 	ofParameter<bool> bKeys;
 
-	ofxInteractiveRect rPreview = { "_BeatClock_Gui" };
-	ofParameter<bool> MODE_Editor;
-	ofParameter<bool> SHOW_Editor;
+	//ofxInteractiveRect rPreview = { "_BeatClock_Gui" };
+	//ofParameter<bool> bEdit_PreviewBoxEditor;
+	//ofParameter<bool> bShow_PreviewBoxEditor;
 	std::string name_r1 = "_BeatClock";
 	std::string name_r2 = "Gui_";
 	const int padx = 10;
@@ -258,12 +249,12 @@ private:
 private:
 	bool DEBUG_moreInfo = false;//more debug
 
-	ofParameter<glm::vec2> pos_Global;//main anchor to reference all the other above gui elements
-	ofParameter<glm::vec2> pos_ClockInfo;
-	ofParameter<glm::vec2> pos_BpmInfo;
+	//ofParameter<glm::vec2> pos_Global;//main anchor to reference all the other above gui elements
+	//ofParameter<glm::vec2> pos_ClockInfo;
+	//ofParameter<glm::vec2> pos_BpmInfo;
 
-	int pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_width;
-	int pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_radius;
+	//int pos_BeatBoxes_x, pos_BeatBoxes_y, pos_BeatBoxes_width;
+	//int pos_BeatBall_x, pos_BeatBall_y, pos_BeatBall_radius;
 
 	//ofParameter<glm::vec2> pos_Gui;
 
@@ -288,17 +279,17 @@ private:
 	//ofPoint getPosition_GuiPanel();
 	//glm::vec2 getPosition_GuiPanel();
 
-	void setVisible_GuiPanel(bool b);
-	void setVisible_GuiPreview(bool b);
+	//void setVisible_GuiPanel(bool b);
+	//void setVisible_GuiPreview(bool b);
 
-	void setPosition_GuiGlobal(int x, int y);//main global position setter for gui panel and extra elements
-	void setPosition_GuiPreviewWidget(int x, int y);//extra elements position setter with default layout of the other elements
+	//void setPosition_GuiGlobal(int x, int y);//main global position setter for gui panel and extra elements
+	//void setPosition_GuiPreviewWidget(int x, int y);//extra elements position setter with default layout of the other elements
 
-	//--------------------------------------------------------------
-	void setToggleVisible_GuiPreview()
-	{
-		bGui_PreviewClockNative = !bGui_PreviewClockNative;
-	}
+	////--------------------------------------------------------------
+	//void setToggleVisible_GuiPreview()
+	//{
+	//	bGui_PreviewClockNative = !bGui_PreviewClockNative;
+	//}
 
 public:
 	//--------------------------------------------------------------
@@ -308,27 +299,27 @@ public:
 	}
 
 private:
-	void setPosition_BeatBoxes(int x, int y, int w);//position x, y and w = width of all 4 squares
-	void setPosition_BeatBall(int x, int y, int w);//position x, y and w = width of ball
-	void setPosition_ClockInfo(int _x, int _y);//all clock source info
-	void setPosition_BpmInfo(int _x, int _y);//current bpm
+	//void setPosition_BeatBoxes(int x, int y, int w);//position x, y and w = width of all 4 squares
+	//void setPosition_BeatBall(int x, int y, int w);//position x, y and w = width of ball
+	//void setPosition_ClockInfo(int _x, int _y);//all clock source info
+	//void setPosition_BpmInfo(int _x, int _y);//current bpm
 
-	// beat boxes
-	void draw_BeatBoxes(int x, int y, int w);
+	//// beat boxes
+	//void draw_BeatBoxes(int x, int y, int w);
 
-	// beat tick ball
-	void draw_BeatBall(int x, int y, int radius);
+	//// beat tick ball
+	//void draw_BeatBall(int x, int y, int radius);
 
-	// beat tick ball
-	void draw_ClockInfo(int x, int y);
+	//// beat tick ball
+	//void draw_ClockInfo(int x, int y);
 
-	// beat tick ball
-	void draw_BpmInfo(int x, int y);
+	//// beat tick ball
+	//void draw_BpmInfo(int x, int y);
 
-	// big clock
-	void draw_BigClockTime(int x, int y);
+	//// big clock
+	//void draw_BigClockTime(int x, int y);
 
-	void draw_ImGuiCircleBeatWidget();
+	void draw_ImGui_CircleBeatWidget();
 
 	bool bb[4];
 	ofColor cb[4];
@@ -392,7 +383,7 @@ private:
 	// monitor_visual_feedback
 
 private:
-	//beat ball
+	// beat ball
 	ofPoint circlePos;
 	//float fadeOut_animTime, fadeOut_animCounter;
 	//bool fadeOut_animRunning;
@@ -403,17 +394,17 @@ public:
 		dt = 1.0f / _fps;
 	}
 private:
-	//main receiver
-	//trigs sound and gui drawing ball visual feedback
-	void beatTick_MONITOR(int beat);//trigs ball drawing and sound ticker
+	// main receiver
+	// trigs sound and gui drawing ball visual feedback
+	void doBeatTickMonitor(int beat);//trigs ball drawing and sound ticker
 
 	int lastBeatFlash = -1;
 	//void draw_BeatBalFlash(int _onBeat){}
 
 public:
 	ofParameter<bool> BeatTick;//get bang beat!!
-	//also this trigs to draw a flashing circle for a frame only
-	//this variable is used to subscribe external (in ofApp) listeners to get the beat bangs!
+	// also this trigs to draw a flashing circle for a frame only
+	// this variable is used to subscribe external (in ofApp) listeners to get the beat bangs!
 
 	//-
 
@@ -433,16 +424,16 @@ public:
 
 public:
 
-	void setup_ImGui();
+	void setupImGui();
 	void setupImGuiStyles();
 	void refresh_Gui();
 	void refresh_GuiWidgets();
 
 #ifdef USE_OFX_SURFING_IM_GUI
-	void draw_ImGuiWidgets();
-	void draw_ImGuiControl();
-	void draw_ImGuiClockMonitor();
-	void draw_ImGuiBpmClock();
+	void draw_ImGui_Widgets();
+	void draw_ImGui_Control();
+	void draw_ImGui_ClockMonitor();
+	void draw_ImGui_ClockBpm();
 #endif
 
 	//-
@@ -458,18 +449,18 @@ private:
 
 	// params
 public:
-	ofParameter<bool> PLAYING_Global_State;//for all different source clock modes
+	ofParameter<bool> bPlay_Global_State;//for all different source clock modes
 	ofParameter<bool> bGui;
 
 private:
 	ofParameterGroup params_CONTROL;
 
-	ofParameter<bool> PLAYING_Internal_State;//player state only for internal clock
-	ofParameter<bool> PLAYING_External_State;//player state only for external clock
+	ofParameter<bool> bPlaying_Internal_State;//player state only for internal clock
+	ofParameter<bool> bPlaying_External_State;//player state only for external clock
 
-	ofParameter<bool> ENABLE_CLOCKS;//enable clock (affects all clock types)
-	ofParameter<bool> MODE_INTERNAL_CLOCK;//enable internal clock
-	ofParameter<bool> MODE_EXTERNAL_MIDI_CLOCK;//enable midi clock sync
+	ofParameter<bool> bEnableClock;//enable clock (affects all clock types)
+	ofParameter<bool> bMode_Internal_Clock;//enable internal clock
+	ofParameter<bool> bMode_External_MIDI_Clock;//enable midi clock sync
 	ofParameter<int> midiIn_Port_SELECT;
 	int midiIn_numPorts = 0;
 
@@ -490,13 +481,13 @@ private:
 	ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig the measurements of tap tempo
 
 	// helpers to modify current bpm
-	ofParameter<bool> RESET_BPM_Global;
-	ofParameter<bool> BPM_half_TRIG;//divide bpm by 2
-	ofParameter<bool> BPM_double_TRIG;//multiply bpm by 2
+	ofParameter<bool> bReset_BPM_Global;
+	ofParameter<bool> bHalf_BPM;//divide bpm by 2
+	ofParameter<bool> bDouble_BPM;//multiply bpm by 2
 
 	//-
 
-	//API
+	// API
 
 public:
 	float getBpm();//returns BPM_Global
@@ -516,24 +507,25 @@ public:
 	//--------------------------------------------------------------
 	bool getInternalClockModeState()
 	{
-		return MODE_INTERNAL_CLOCK;
+		return bMode_Internal_Clock;
 	}
 	//--------------------------------------------------------------
 	bool getExternalClockModeState()
 	{
-		return MODE_EXTERNAL_MIDI_CLOCK;
+		return bMode_External_MIDI_Clock;
 	}
 #ifdef USE_ofxAbletonLink
 	//--------------------------------------------------------------
 	bool getLinkClockModeState()
 	{
-		return MODE_ABLETON_LINK_SYNC;
+		return bMODE_AbletonLinkSync;
 	}
 #endif
 
 	//--
 
 private:
+
 	// main callback handler
 	void Changed_Params(ofAbstractParameter& e);
 
@@ -598,7 +590,7 @@ private:
 	std::string file_Midi = "Midi_Settings.xml";
 	std::string file_App = "App_Settings.xml";
 
-	ofParameterGroup params_App;
+	ofParameterGroup params_AppSettings;
 
 	//-
 
@@ -623,18 +615,20 @@ private:
 
 	//-
 
-	ofParameter<bool> bGui_MonitorTransport;
+	ofParameter<bool> bGui_ClockMonitorTransport;
 	ofParameter<bool> bGui_Controls;
-	ofParameter<bool> bGui_PreviewClockNative; // beat boxes, text info and beat ball (all except gui panels)
-	ofParameter<bool> bGui_BpmClock; // some helpers other secondary settings/controls 
-	glm::vec2 shapePreview;
-	void draw_PreviewWidgetItems();
+	//ofParameter<bool> bGui_PreviewClockNative; // beat boxes, text info and beat ball (all except gui panels)
+	ofParameter<bool> bGui_ClockBpm; // some helpers other secondary settings/controls 
+
+	//glm::vec2 shapePreview;
+	//void draw_PreviewWidgetItems();
+	//void draw_PreviewWidget();
 
 	//-
 
 	//sound metronome
-	ofParameter<bool> ENABLE_sound; // enable sound ticks
-	ofParameter<float> volumeSound; // sound ticks volume
+	ofParameter<bool> bSoundTickEnable; // enable sound ticks
+	ofParameter<float> soundVolume; // sound ticks volume
 
 	//-
 
@@ -764,7 +758,7 @@ private:
 
 	ofxAbletonLink link;
 
-	ofParameter<bool> MODE_ABLETON_LINK_SYNC;
+	ofParameter<bool> bMODE_AbletonLinkSync;
 
 	ofParameterGroup params_LINK;
 
@@ -773,8 +767,8 @@ private:
 	//ofParameter<float> valueKnob{ "value", 0.5f, 0.f, 1.0f };
 
 	ofParameter<bool> LINK_Enable;//enable link
-	ofParameter<float> BPM_Link;//link bpm
-	ofParameter<bool> PLAYING_Link_State;//control and get Ableton Live playing too, mirrored like Link does
+	ofParameter<float> LINK_BPM;//link bpm
+	ofParameter<bool> bPlaying_LinkState;//control and get Ableton Live playing too, mirrored like Link does
 	ofParameter<float> LINK_Phase;//phase on the bar. cycled from 0.0f to 4.0f
 	ofParameter<bool> LINK_ResyncBeat;//set beat 0
 	ofParameter<bool> LINK_ResetBeats;//reset "unlimited-growing" beat counter
@@ -795,7 +789,7 @@ private:
 	//--------------------------------------------------------------
 	void LINK_update()
 	{
-		if (MODE_ABLETON_LINK_SYNC)//not required but prophylactic
+		if (bMODE_AbletonLinkSync)//not required but prophylactic
 		{
 			//display text
 			clockActive_Type = "ABLETON LINK";
@@ -824,7 +818,7 @@ private:
 			//---
 
 			//update mean clock counters and update gui
-			if (LINK_Enable && PLAYING_Link_State && (link.getNumPeers() != 0))
+			if (LINK_Enable && bPlaying_LinkState && (link.getNumPeers() != 0))
 			{
 				int _beats = (int)Beat_float_current;//starts in beat 0 not 1
 
@@ -864,7 +858,7 @@ private:
 
 					//-
 
-					beatTick_MONITOR(Beat_current);
+					doBeatTickMonitor(Beat_current);
 
 					//-
 				}
@@ -891,40 +885,40 @@ private:
 	//--------------------------------------------------------------
 	void LINK_draw()
 	{
-		ofPushStyle();
+		//ofPushStyle();
 
-		// text
-		int xpos = rPreview.getX() + 20;
-		int ypos = rPreview.getBottomLeft().y + 30;
-		//int xpos = 20;
-		//int ypos = 20;
+		//// text
+		//int xpos = rPreview.getX() + 20;
+		//int ypos = rPreview.getBottomLeft().y + 30;
+		////int xpos = 20;
+		////int ypos = 20;
 
-		// line
-		float x = ofGetWidth() * link.getPhase() / link.getQuantum();
+		//// line
+		//float x = ofGetWidth() * link.getPhase() / link.getQuantum();
 
-		// red vertical line
-		ofSetColor(255, 0, 0);
-		ofDrawLine(x, 0, x, ofGetHeight());
+		//// red vertical line
+		//ofSetColor(255, 0, 0);
+		//ofDrawLine(x, 0, x, ofGetHeight());
 
-		std::stringstream ss("");
-		ss
-			<< "Bpm  : " << ofToString(link.getBPM(), 2) << std::endl
-			<< "Beat : " << ofToString(link.getBeat(), 2) << std::endl
-			<< "Phase: " << ofToString(link.getPhase(), 2) << std::endl
-			<< "Peers: " << link.getNumPeers() << std::endl
-			<< "Play?: " << (link.isPlaying() ? "play" : "stop");
+		//std::stringstream ss("");
+		//ss
+		//	<< "Bpm  : " << ofToString(link.getBPM(), 2) << std::endl
+		//	<< "Beat : " << ofToString(link.getBeat(), 2) << std::endl
+		//	<< "Phase: " << ofToString(link.getPhase(), 2) << std::endl
+		//	<< "Peers: " << link.getNumPeers() << std::endl
+		//	<< "Play?: " << (link.isPlaying() ? "play" : "stop");
 
-		ofSetColor(255);
-		if (fontMedium.isLoaded())
-		{
-			fontMedium.drawString(ss.str(), xpos, ypos);
-		}
-		else
-		{
-			ofDrawBitmapString(ss.str(), xpos, ypos);
-		}
+		//ofSetColor(255);
+		//if (fontMedium.isLoaded())
+		//{
+		//	fontMedium.drawString(ss.str(), xpos, ypos);
+		//}
+		//else
+		//{
+		//	ofDrawBitmapString(ss.str(), xpos, ypos);
+		//}
 
-		ofPopStyle();
+		//ofPopStyle();
 	}
 
 	//--------------------------------------------------------------
@@ -940,7 +934,7 @@ private:
 
 	//--
 
-	// callbacks
+	// Callbacks
 
 	//--------------------------------------------------------------
 	void Changed_LINK_Params(ofAbstractParameter &e)
@@ -956,7 +950,7 @@ private:
 
 		if (name == "PLAY")
 		{
-			ofLogNotice(__FUNCTION__) << "LINK PLAY: " << PLAYING_Link_State;
+			ofLogNotice(__FUNCTION__) << "LINK PLAY: " << bPlaying_LinkState;
 
 			if (LINK_Enable && (link.getNumPeers() != 0))
 			{
@@ -965,13 +959,13 @@ private:
 				// play engine do not works fine
 
 				//TEST:
-				if (link.isPlaying() != PLAYING_Link_State) // don't need update if it's already "mirrored"
+				if (link.isPlaying() != bPlaying_LinkState) // don't need update if it's already "mirrored"
 				{
-					link.setIsPlaying(PLAYING_Link_State);
+					link.setIsPlaying(bPlaying_LinkState);
 				}
 
 				////TEST:
-				//if (PLAYING_Link_State)
+				//if (bPlaying_LinkState)
 				//{
 				//	link.play();
 				//}
@@ -982,15 +976,15 @@ private:
 
 				// workflow
 				// set gui display text clock to 0:0:0
-				if (!PLAYING_Link_State)
+				if (!bPlaying_LinkState)
 				{
 					reset_ClockValues();
 				}
 			}
 			// workflow
-			else if (PLAYING_Link_State)
+			else if (bPlaying_LinkState)
 			{
-				PLAYING_Link_State = false; // if not enable block to play disabled
+				bPlaying_LinkState = false; // if not enable block to play disabled
 			}
 		}
 
@@ -1018,9 +1012,9 @@ private:
 				link.disableLink();
 
 				// workflow
-				if (PLAYING_Link_State)
+				if (bPlaying_LinkState)
 				{
-					PLAYING_Link_State = false; // if not enable block to play disabled
+					bPlaying_LinkState = false; // if not enable block to play disabled
 				}
 			}
 		}
@@ -1029,19 +1023,19 @@ private:
 		{
 			ofLogNotice(__FUNCTION__) << "LINK BPM";
 
-			if (link.getBPM() != BPM_Link)
+			if (link.getBPM() != LINK_BPM)
 			{
-				link.setBPM(BPM_Link);
+				link.setBPM(LINK_BPM);
 			}
 
-			if (MODE_ABLETON_LINK_SYNC)
+			if (bMODE_AbletonLinkSync)
 			{
 				//TODO: 
 				// it's required if ofxDawMetro is not being used?
-				BPM_ClockInternal = BPM_Link;
+				BPM_ClockInternal = LINK_BPM;
 
 				// will be autoupdate on clockInternal callback
-				//BPM_Global = BPM_Link;
+				//BPM_Global = LINK_BPM;
 			}
 		}
 
@@ -1052,7 +1046,7 @@ private:
 
 			link.setBeat(0.0);
 
-			if (MODE_ABLETON_LINK_SYNC)
+			if (bMODE_AbletonLinkSync)
 			{
 				Tick_16th_current = 0;
 				Tick_16th_string = ofToString(Tick_16th_current);
@@ -1089,7 +1083,7 @@ private:
 		//
 		//		link.setBeat(LINK_Beat_Selector);
 		//
-		//		if (MODE_ABLETON_LINK_SYNC)
+		//		if (bMODE_AbletonLinkSync)
 		//		{
 		//			//Tick_16th_current = 0;
 		//			//Tick_16th_string = ofToString(Tick_16th_current);
@@ -1107,9 +1101,9 @@ private:
 	{
 		ofLogNotice(__FUNCTION__) << bpm;
 
-		BPM_Link = bpm;
+		LINK_BPM = bpm;
 
-		// BPM_Global will be update on the BPM_Link callback
+		// BPM_Global will be update on the LINK_BPM callback
 		// BPM_ClockInternal will be updated too
 	}
 
@@ -1131,9 +1125,9 @@ private:
 		ofLogNotice(__FUNCTION__) << (state ? "play" : "stop");
 
 		// don't need update if it's already "mirrored"
-		if (state != PLAYING_Link_State && MODE_ABLETON_LINK_SYNC && LINK_Enable)
+		if (state != bPlaying_LinkState && bMODE_AbletonLinkSync && LINK_Enable)
 		{
-			PLAYING_Link_State = state;
+			bPlaying_LinkState = state;
 		}
 	}
 #endif
