@@ -11,7 +11,13 @@ void ofApp::setup()
 }
 
 //--------------------------------------------------------------
-void ofApp::Changed_Tick() // callback to receive BeatTicks
+void ofApp::draw()
+{
+	beatClock.draw();
+}
+
+//--------------------------------------------------------------
+void ofApp::Changed_Tick() // Callback to receive BeatTicks
 {
 	ofLogNotice(__FUNCTION__) << "Beat! #" << beatClock.getBeat();
 }
