@@ -616,7 +616,7 @@ private:
 	//-
 
 	ofParameter<bool> bGui_ClockMonitorTransport;
-	ofParameter<bool> bGui_Controls;
+	ofParameter<bool> bGui_Sources;
 	//ofParameter<bool> bGui_PreviewClockNative; // beat boxes, text info and beat ball (all except gui panels)
 	ofParameter<bool> bGui_ClockBpm; // some helpers other secondary settings/controls 
 
