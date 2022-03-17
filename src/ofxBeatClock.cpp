@@ -85,7 +85,7 @@ void ofxBeatClock::setup()
 #endif
 	params_CONTROL.add(bGui_ClockBpm.set("Clock BPM", true));
 	params_CONTROL.add(bGui_ClockMonitorTransport.set("Clock Monitor", true));
-	params_CONTROL.add(bGui_Controls.set("Clock Controls", true));
+	params_CONTROL.add(bGui_Sources.set("Clock Sources", true));
 	//params_CONTROL.add(bGui_PreviewClockNative.set("Clock Native", false));
 
 	bGui.set("BEAT CLOCK", true);
@@ -820,7 +820,7 @@ void ofxBeatClock::draw_ImGui_Control()
 
 	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
 
-	guiManager.beginWindow(bGui_Controls.getName().c_str(), (bool*)&bGui_Controls.get(), window_flags);
+	guiManager.beginWindow(bGui_Sources.getName().c_str(), (bool*)&bGui_Sources.get(), window_flags);
 	{
 		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
 
@@ -1013,7 +1013,10 @@ void ofxBeatClock::draw_ImGui_ClockBpm()
 	{
 		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
 
+		float _w1 = ofxImGuiSurfing::getWidgetsWidth(1);
+		ImGui::PushItemWidth(_w1 * 0.5);
 		guiManager.AddGroup(params_BPM_Clock, ImGuiTreeNodeFlags_DefaultOpen, OFX_IM_GROUP_HIDDEN_HEADER);
+		ImGui::PopItemWidth();
 	}
 	guiManager.endWindow();
 }
@@ -1345,7 +1348,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 
 		if (!guiManager.bMinimize)
 		{
-			ofxImGuiSurfing::AddToggleRoundedButton(bGui_Controls);
+			ofxImGuiSurfing::AddToggleRoundedButton(bGui_Sources);
 			ofxImGuiSurfing::AddToggleRoundedButton(bGui_ClockBpm);
 		}
 
@@ -1365,7 +1368,7 @@ void ofxBeatClock::draw_ImGui_Widgets()
 	{
 		//guiManager.setDefaultFont();
 
-		if (bGui_Controls) draw_ImGui_Control();
+		if (bGui_Sources) draw_ImGui_Control();
 		if (bGui_ClockMonitorTransport) draw_ImGui_ClockMonitor();
 		if (bGui_ClockBpm) draw_ImGui_ClockBpm();
 	}
