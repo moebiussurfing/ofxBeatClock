@@ -16,6 +16,7 @@
 
 	TODO:
 
+	+	BPM slider on internal clock does applies only when releasing the slider..
 	+ 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
 	+ 	Add fast filter to smooth / stabilize BPM number when using external midi clock mode.
 	+ 	Add audio output selector to metronome sounds.
@@ -23,11 +24,12 @@
 			on USE_AUDIO_BUFFER_TIMER_MODE. still disabled by default yet
 
 	NOTE:
-	More info about soundStream timer
+	More info about SoundStream buffer timer. For better precision and/or performance.
 	https://forum.openframeworks.cc/t/pass-this-pointer-from-parent-to-child-object-scheduler-oftimer-system/22088/6?u=moebiussurfing
 
 	NOTE:
 	From @dimitre:
+	Audio buffer + some alternative modes like bet beat 1 on sinus or to add phase.
 	https://forum.openframeworks.cc/t/hola/33161/10
 	https://github.com/dimitre/ofxMicroUI/
 	#ifdef USEAUDIOOUT
@@ -64,14 +66,19 @@
 
 //-
 
-/// BUG: [1] ?
-///sometimes metronome ticks goes on beat 2 instead 1.
-///works better with 0 and 4 detectors, but why?
-///SOLUTION:
-///we must check better all the beat%limit bc should be the problem!!
-///maybe we can add another beat_current varialbe, independent of the received beat from source clocks
-///then to eliminate the all the limiters.
-///must check each source clock type what's the starting beat: 0 or 1!!
+/*
+
+	BUG:
+	
+	Sometimes metronome ticks goes to beat 2 instead 1.
+	Works better with 0 and 4 detectors, but why?
+	SOLUTION:
+	We must check better all the beat%limit bc should be the problem!!
+	Maybe we can add another beat_current varialbe, independent of the received beat from source clocks
+	Then to eliminate the all the limiters.
+	Must check each source clock type what's the starting beat: 0 or 1!!
+
+*/
 
 
 //----
@@ -97,7 +104,7 @@
 
 //----
 
-//* OPTIONAL : Ableton Link feature *
+// * OPTIONAL : Ableton Link feature *
 
 #ifdef USE_ofxAbletonLink
 #include "ofxAbletonLink.h"//used for external Ableton Live Link engine (3)
@@ -259,8 +266,6 @@ private:
 
 private:
 
-	bool DEBUG_moreInfo = false;//more debug
-
 	//ofParameter<glm::vec2> pos_Global;//main anchor to reference all the other above gui elements
 	//ofParameter<glm::vec2> pos_ClockInfo;
 	//ofParameter<glm::vec2> pos_BpmInfo;
@@ -343,11 +348,11 @@ private:
 	// Debug helpers
 
 	// Red anchor circle to debug mark
-	bool DEBUG_Layout = false;
+	bool bDebugLayout = false;
 	//--------------------------------------------------------------
 	void draw_Anchor(int x, int y)
 	{
-		if (DEBUG_Layout)
+		if (bDebugLayout)
 		{
 			ofPushStyle();
 			ofFill();
@@ -367,29 +372,29 @@ private:
 	//--------------------------------------------------------------
 	void setDebug_Clock(bool b)
 	{
-		DEBUG_moreInfo = b;
+		guiManager.bDebug = b;
 	}
 	//--------------------------------------------------------------
 	void toggleDebug_Clock()
 	{
-		DEBUG_moreInfo = !DEBUG_moreInfo;
+		guiManager.bDebug = !guiManager.bDebug;
 	}
 	//--------------------------------------------------------------
 	void setDebug_Layout(bool b)
 	{
-		DEBUG_Layout = b;
+		bDebugLayout = b;
 	}
 	//--------------------------------------------------------------
 	void toggleDebug_Layout()
 	{
-		DEBUG_Layout = !DEBUG_Layout;
+		bDebugLayout = !bDebugLayout;
 	}
 
 	//--
 
 private:
 
-	// main text color
+	// Main text color
 	ofColor colorText;
 
 	//-
@@ -413,8 +418,8 @@ public:
 
 private:
 
-	// main receiver
-	// trigs sound and gui drawing ball visual feedback
+	// Main receiver
+	// Trigs sound and gui drawing ball visual feedback
 	void doBeatTickMonitor(int beat);//trigs ball drawing and sound ticker
 
 	int lastBeatFlash = -1;
@@ -422,9 +427,9 @@ private:
 
 public:
 
-	ofParameter<bool> BeatTick;//get bang beat!!
-	// also this trigs to draw a flashing circle for a frame only
-	// this variable is used to subscribe external (in ofApp) listeners to get the beat bangs!
+	ofParameter<bool> BeatTick; // Get bang beat!!
+	// Also this trigs to draw a flashing circle for a frame only
+	// This variable is used to subscribe external (in ofApp) listeners to get the beat bangs!
 
 	//-
 
@@ -468,7 +473,7 @@ private:
 
 	//-
 
-	// params
+	// Params
 
 public:
 
@@ -492,7 +497,7 @@ private:
 
 public:
 
-	// this is the main and final target bpm, is the destination of all other clocks (internal, external midi sync or ableton link)
+	// This is the main and final target bpm, is the destination of all other clocks (internal, external midi sync or ableton link)
 	ofParameter<float> BPM_Global;//global tempo bpm.
 	ofParameter<int> BPM_Global_TimeBar;//ms time of 1 bar = 4 beats
 
