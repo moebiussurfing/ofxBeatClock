@@ -15,7 +15,6 @@ public:
 	void draw();
 
 	ofxBeatClock beatClock;
-
 	ofEventListener listenerBeat;
 	void Changed_Tick();
 
