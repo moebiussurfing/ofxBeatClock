@@ -183,7 +183,7 @@ public:
 	void windowResized(int w, int h);
 	void keyPressed(ofKeyEventArgs& eventArgs);
 
-	void drawImGui();
+	void drawGui();
 	
 	//-
 
@@ -213,16 +213,8 @@ private:
 
 	ofParameter<bool> bKeys;
 
-	//ofxInteractiveRect rPreview = { "_BeatClock_Gui" };
-	//ofParameter<bool> bEdit_PreviewBoxEditor;
-	//ofParameter<bool> bShow_PreviewBoxEditor;
-	std::string name_r1 = "_BeatClock";
-	std::string name_r2 = "Gui_";
-	const int padx = 10;
-	const int pady = 30;
-	//ofParameter<float> _rectRatio;
-	//float _RectClick_w;
-	//float _RectClick_Pad;
+	//const int padx = 10;
+	//const int pady = 30;
 
 	//-
 
@@ -254,7 +246,7 @@ private:
 
 	//-
 
-	// External_midi_clock
+	// External Midi Clock
 
 	void setup_MidiIn_Clock();
 
@@ -407,6 +399,7 @@ private:
 	ofPoint circlePos;
 	//float fadeOut_animTime, fadeOut_animCounter;
 	//bool fadeOut_animRunning;
+
 	float dt;
 
 public:
@@ -449,8 +442,8 @@ public:
 
 public:
 
-	void setupImGui();
-	void setupImGuiStyles();
+	void setupGui();
+	void buildGuiStyles();
 	void refresh_Gui();
 	void refresh_GuiWidgets();
 
@@ -477,8 +470,8 @@ private:
 
 public:
 
-	ofParameter<bool> bPlay_Global_State;//for all different source clock modes
-	ofParameter<bool> bGui;
+	ofParameter<bool> bPlay; // Play global for all different source clock modes
+	ofParameter<bool> bGui; // Main GUI
 
 private:
 
@@ -733,7 +726,7 @@ private:
 
 public:
 
-	void tap_Trig();
+	void doTapTrig();
 	void tap_Update();
 
 private:
