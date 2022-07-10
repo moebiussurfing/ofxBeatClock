@@ -1,12 +1,12 @@
 # ofxBeatClock
 
 **openFrameworks** add-on to run a *DAW-Styled BPM Beat-Clock*.  
-**Internal Clock** with **Tap Tempo**, **External MIDI Sync** and **Ableton Link**.  
-Receives notfication callback when each beat happens.  
+**Internal Clock** with **Tap Tempo**, **External MIDI Sync** and **Ableton Link** modes.  
+Receives a callback notfication when each beat happens.  
 
 ## Screencast
 
-![GIF](/readme_images/ofxBeatClock.gif?raw=true "gif")  
+![](/readme_images/ofxBeatClock.gif)  
 
 ## Usage
 
@@ -52,21 +52,21 @@ You can uncomment ```#define USE_AUDIO_BUFFER_TIMER_MODE``` on ```ofxBeatClock.h
 ## Requeriments
 
 * [ofxMidi](https://github.com/danomatika/ofxMidi)  
-* [ofxAbletonLink](https://github.com/2bbb/ofxAbletonLink). [ _Optional. Can be disabled._ ]  
 * [ofxImGuiSurfing](https://github.com/moebiussurfing/ofxSurfingImGui)
-* [ofxImGui](https://github.com/Daandelange/ofxImGui/). [ _Fork from_ @**Daandelange**. ]  
-* [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)  
-* [ofxWindowApp](https://github.com/moebiussurfing/ofxWindowApp). [ _Optional. Can be disabled._ ]  
+* [ofxImGui](https://github.com/Daandelange/ofxImGui/). / _Fork from_ @**Daandelange**.  
+- [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)
+* [ofxAbletonLink](https://github.com/2bbb/ofxAbletonLink). / _Optional. Can be disabled._  
+* [ofxWindowApp](https://github.com/moebiussurfing/ofxWindowApp). / _Not required. For examples only._  
 
 Already included into ```OF_ADD-ON/libs```. No need to add manually:  
 * [ofxDawMetro](https://github.com/castovoid/ofxDawMetro)  
 
 ## Tested Systems
-- **Windows10** / **VS2017** / **OF ~0.11**
+- **Windows10** / **VS2022** / **OF 0.12+**
 
 ## Author
 An add-on by **@moebiusSurfing**  
-( _ManuMolina_ ). _2020-2021_.
+( _ManuMolina_ ). _2020-2021-2022_.
 
 **_Thanks to the developers of the included core add-ons! @danomatika, @2bb and @castovoid._**
 
