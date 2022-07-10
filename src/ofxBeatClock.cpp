@@ -48,7 +48,7 @@ void ofxBeatClock::setup()
 
 	params_CONTROL.setName("USER CONTROL");
 	params_CONTROL.add(bEnableClock.set("ENABLE", true));
-	params_CONTROL.add(bPlay_Global_State.set("PLAY", false));//TEST
+	params_CONTROL.add(bPlay.set("PLAY", false));//TEST
 	params_CONTROL.add(BPM_ClockInternal.set("BPM", BPM_INIT, BPM_INIT_MIN, BPM_INIT_MAX));
 	params_CONTROL.add(bReset_BPM_Global);
 
@@ -59,8 +59,8 @@ void ofxBeatClock::setup()
 	params_CONTROL.add(bMODE_AbletonLinkSync.set("ABLETON LINK", false));
 #endif
 
-	params_CONTROL.add(bGui_ClockBpm.set("CLOCK BPM", true));
 	params_CONTROL.add(bGui_ClockMonitor.set("CLOCK MONITOR", true));
+	params_CONTROL.add(bGui_ClockBpm.set("CLOCK BPM", true));
 	params_CONTROL.add(bGui_Sources.set("CLOCK SOURCES", true));
 
 	//params_CONTROL.add(bGui_PreviewClockNative.set("Clock Native", false));
@@ -254,7 +254,7 @@ void ofxBeatClock::setup()
 	//--
 
 	// add already initiated params from transport and all controls to the gui panel
-	setupImGui();
+	setupGui();
 
 	//--
 
@@ -262,8 +262,8 @@ void ofxBeatClock::setup()
 	params_AppSettings.setName("AppSettings");
 
 	params_AppSettings.add(bGui);
-	params_AppSettings.add(bGui_ClockBpm);
 	params_AppSettings.add(bGui_ClockMonitor);
+	params_AppSettings.add(bGui_ClockBpm);
 	params_AppSettings.add(bGui_Sources);
 
 	params_AppSettings.add(bMode_Internal_Clock);
@@ -273,7 +273,7 @@ void ofxBeatClock::setup()
 	params_AppSettings.add(bMODE_AbletonLinkSync);
 #endif
 
-	params_AppSettings.add(bPlay_Global_State);
+	params_AppSettings.add(bPlay);
 	params_AppSettings.add(bSoundTickEnable);
 	params_AppSettings.add(soundVolume);
 	params_AppSettings.add(guiManager.bDebug);
@@ -342,23 +342,6 @@ void ofxBeatClock::startup()
 
 	//-
 
-	// edit layout
-	/*
-	// A. hardcoded init. comment to use settings file
-	//rPreview.enableEdit();
-	rPreview.setLockResize(true);
-	rPreview.disableEdit();
-	rPreview.setRect(225, 325, 35, 70);
-
-	// B. load settings
-	//rPreview.loadSettings(name_r1, name_r2, false);
-	//rPreview.loadSettings();
-	rPreview.loadSettings("", path_Global + "settings/", false);
-
-	//setPosition_GuiPreviewWidget(rPreview.x + padx, rPreview.y + pady);// ?
-	*/
-	//-
-
 	//TODO:
 	// workaround
 	// to ensure that gui workflow is updated after settings are loaded...
@@ -377,7 +360,7 @@ void ofxBeatClock::startup()
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::setupImGuiStyles()
+void ofxBeatClock::buildGuiStyles()
 {
 	ofLogNotice(__FUNCTION__);
 
@@ -431,20 +414,20 @@ void ofxBeatClock::setupImGuiStyles()
 		guiManager.AddStyle(LINK_BPM, OFX_IM_INACTIVE);
 		guiManager.AddStyle(LINK_ResyncBeat, OFX_IM_BUTTON_SMALL);
 		guiManager.AddStyle(LINK_ResetBeats, OFX_IM_BUTTON_SMALL);
-}
+	}
 #endif
 }
 
 //--------------------------------------------------------------
-void ofxBeatClock::setupImGui()
+void ofxBeatClock::setupGui()
 {
 #ifdef USE_OFX_SURFING_IM_GUI
 
 	guiManager.setWindowsMode(IM_GUI_MODE_WINDOWS_SPECIAL_ORGANIZER);
 	guiManager.setup();
 
-	guiManager.addWindowSpecial(bGui_Sources);
 	guiManager.addWindowSpecial(bGui_ClockMonitor);
+	guiManager.addWindowSpecial(bGui_Sources);
 	guiManager.addWindowSpecial(bGui_ClockBpm);
 
 	guiManager.startup();
@@ -463,7 +446,7 @@ void ofxBeatClock::setupImGui()
 	//--
 
 	// Customize widgets
-	setupImGuiStyles();
+	buildGuiStyles();
 
 #endif
 }
@@ -483,7 +466,7 @@ void ofxBeatClock::refresh_Gui()
 		clockActive_Type = bMode_Internal_Clock.getName();
 		clockActive_Type += "\n";
 		clockActive_Info = "";
-}
+	}
 
 	//-
 
@@ -564,7 +547,7 @@ void ofxBeatClock::refresh_GuiWidgets()
 	else if (bMODE_AbletonLinkSync)
 	{
 		strLink = ofToString(clockActive_Info);
-}
+	}
 #endif	
 
 	//--
@@ -647,7 +630,7 @@ void ofxBeatClock::refresh_GuiWidgets()
 				else if (bMode_Internal_Clock)
 				{
 					cb[i] = (bPlaying_Internal_State) ? ofColor(colorBoxes, alphaBoxes) : ofColor(colorGreyDark, alphaBoxes);
-		}
+				}
 
 #else
 				if (bMode_Internal_Clock)
@@ -807,79 +790,53 @@ void ofxBeatClock::draw_PreviewWidgetItems()
 void ofxBeatClock::draw_ImGui_Sources()
 {
 	IMGUI_SUGAR__WINDOWS_CONSTRAINTSW;
-
-	if (guiManager.beginWindowSpecial(bGui_Sources))
-	{
-		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
-		guiManager.AddSpacingSeparated();
-
-		guiManager.Add(bGui_ClockMonitor, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
-		guiManager.Add(bGui_ClockBpm, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
-
-		guiManager.AddSpacingSeparated();
-
-		guiManager.Add(bEnableClock, OFX_IM_TOGGLE_SMALL);
-
-		// Hide all
-
-		if (!bEnableClock)
+	if (bGui_Sources)
+		if (guiManager.beginWindowSpecial(bGui_Sources))
 		{
-			guiManager.endWindow();
-			return;
-		}
-
-		//----
-
-		// Play
-
-		const int hUnits = 4;
-
-		float val = ofMap(circleBeat.getValue(), 0, 1, 0.25, 1.f, true);
-		ofxImGuiSurfing::AddBigToggleNamed(bPlay_Global_State, -1, -1, "PLAYING", "PLAY", true, val);
-
-		//guiManager.Add(bPlay_Global_State, OFX_IM_TOGGLE_BIG_XXL);
-
-		//TODO:
-		////guiManager.Add(bPlaying_Internal_State, OFX_IM_TOGGLE_BIG);
-		//if (bMODE_AbletonLinkSync) AddBigToggleNamed(bPlaying_Internal_State, _w1, hUnits * _h, "PLAYING", "PLAY", true, link.getPhase());
-		//else AddBigToggleNamed(bPlaying_Internal_State, _w1, hUnits * _h, "PLAYING", "PLAY", true, 1.f);
-
-		//ImGui::Spacing();
-
-		//--
-
-		// Sources
-
-		if (!guiManager.bMinimize)
-		{
+			guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
 			guiManager.AddSpacingSeparated();
 
-			static bool bOpen = false;
-			ImGuiTreeNodeFlags _flagt = (bOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None);
-			_flagt |= ImGuiTreeNodeFlags_Framed;
+			guiManager.Add(bGui_ClockMonitor, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+			guiManager.Add(bGui_ClockBpm, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+			guiManager.AddSpacingSeparated();
 
-			if (ImGui::TreeNodeEx("SOURCES", _flagt))
+			guiManager.Add(bEnableClock, OFX_IM_TOGGLE_SMALL);
+
+			// Hide all
+
+			if (!bEnableClock)
 			{
-				guiManager.refreshLayout();
+				guiManager.endWindowSpecial();
 
-				guiManager.Add(bMode_Internal_Clock, OFX_IM_TOGGLE_BIG);
-				guiManager.Add(bMode_External_MIDI_Clock, OFX_IM_TOGGLE_BIG);
-#ifdef USE_ofxAbletonLink
-				guiManager.Add(bMODE_AbletonLinkSync, OFX_IM_TOGGLE_BIG);
-#endif
-				ImGui::TreePop();
+				return;
 			}
-		}
 
-		//ImGui::Spacing();
+			//----
 
-		//--
+			// Play
 
-		// modes
-		if (!guiManager.bMinimize)
-		{
-			//ImGui::Indent();
-			if (bMode_Internal_Clock)
+			if (!bGui)
+			{
+				const int hUnits = 4;
+
+				float val = ofMap(circleBeat.getValue(), 0, 1, 0.25, 1.f, true);
+				ofxImGuiSurfing::AddBigToggleNamed(bPlay, -1, -1, "PLAYING", "PLAY", true, val);
+
+				//guiManager.Add(bPlay, OFX_IM_TOGGLE_BIG_XXL);
+
+				//TODO:
+				////guiManager.Add(bPlaying_Internal_State, OFX_IM_TOGGLE_BIG);
+				//if (bMODE_AbletonLinkSync) AddBigToggleNamed(bPlaying_Internal_State, _w1, hUnits * _h, "PLAYING", "PLAY", true, link.getPhase());
+				//else AddBigToggleNamed(bPlaying_Internal_State, _w1, hUnits * _h, "PLAYING", "PLAY", true, 1.f);
+			}
+
+			//ImGui::Spacing();
+
+			//--
+
+			// Sources
+
+			if (!guiManager.bMinimize)
 			{
 				guiManager.AddSpacingSeparated();
 
@@ -887,122 +844,150 @@ void ofxBeatClock::draw_ImGui_Sources()
 				ImGuiTreeNodeFlags _flagt = (bOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None);
 				_flagt |= ImGuiTreeNodeFlags_Framed;
 
-				if (ImGui::TreeNodeEx("INTERNAL", _flagt))
+				if (ImGui::TreeNodeEx("SOURCES", _flagt))
 				{
 					guiManager.refreshLayout();
 
-					guiManager.Add(bPlaying_Internal_State, OFX_IM_TOGGLE_BIG);
-					guiManager.Add(BPM_Tap_Tempo_TRIG, OFX_IM_BUTTON_BIG);
-					//guiManager.AddGroup(params_INTERNAL, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
-
+					guiManager.Add(bMode_Internal_Clock, OFX_IM_TOGGLE_BIG);
+					guiManager.Add(bMode_External_MIDI_Clock, OFX_IM_TOGGLE_BIG);
+#ifdef USE_ofxAbletonLink
+					guiManager.Add(bMODE_AbletonLinkSync, OFX_IM_TOGGLE_BIG);
+#endif
 					ImGui::TreePop();
 				}
-				//ImGui::Spacing();
 			}
 
-			//-
+			//--
 
-			if (bMode_External_MIDI_Clock)
+			// modes
+			if (!guiManager.bMinimize)
 			{
-				guiManager.AddSpacingSeparated();
-
-				static bool bOpen = false;
-				ImGuiTreeNodeFlags _flagt = (bOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None);
-				_flagt |= ImGuiTreeNodeFlags_Framed;
-
-				if (ImGui::TreeNodeEx("EXTERNAL", _flagt))
+				//ImGui::Indent();
+				if (bMode_Internal_Clock)
 				{
-					guiManager.refreshLayout();
+					guiManager.AddSpacingSeparated();
+
+					static bool bOpen = false;
+					ImGuiTreeNodeFlags _flagt = (bOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None);
+					_flagt |= ImGuiTreeNodeFlags_Framed;
+
+					if (ImGui::TreeNodeEx("INTERNAL", _flagt))
 					{
-						guiManager.Add(bPlaying_External_State, OFX_IM_TOGGLE_BIG);
-						guiManager.Add(midiIn_Port_SELECT, OFX_IM_SLIDER);
-						//guiManager.Add(midiIn_Port_SELECT, OFX_IM_STEPPER);
-						guiManager.Add(midiIn_PortName, OFX_IM_TEXT_DISPLAY);
-						//guiManager.AddGroup(params_EXTERNAL_MIDI, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
+						guiManager.refreshLayout();
+
+						guiManager.Add(bPlaying_Internal_State, OFX_IM_TOGGLE_BIG);
+						guiManager.Add(BPM_Tap_Tempo_TRIG, OFX_IM_BUTTON_BIG);
+						//guiManager.AddGroup(params_INTERNAL, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
+
+						ImGui::TreePop();
 					}
-					ImGui::TreePop();
+					//ImGui::Spacing();
 				}
-				guiManager.refreshLayout();
 
-				//ImGui::Spacing();
-			}
+				//-
 
-			//-
+				if (bMode_External_MIDI_Clock)
+				{
+					guiManager.AddSpacingSeparated();
 
-			// Link
+					static bool bOpen = false;
+					ImGuiTreeNodeFlags _flagt = (bOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None);
+					_flagt |= ImGuiTreeNodeFlags_Framed;
+
+					if (ImGui::TreeNodeEx("EXTERNAL", _flagt))
+					{
+						guiManager.refreshLayout();
+						{
+							guiManager.Add(bPlaying_External_State, OFX_IM_TOGGLE_BIG);
+							guiManager.Add(midiIn_Port_SELECT, OFX_IM_SLIDER);
+							//guiManager.Add(midiIn_Port_SELECT, OFX_IM_STEPPER);
+							guiManager.Add(midiIn_PortName, OFX_IM_TEXT_DISPLAY);
+							//guiManager.AddGroup(params_EXTERNAL_MIDI, flags, SurfingImGuiTypesGroups::OFX_IM_GROUP_COLLAPSED);
+						}
+						ImGui::TreePop();
+					}
+					guiManager.refreshLayout();
+
+					//ImGui::Spacing();
+				}
+
+				//-
+
+				// Link
 
 #ifdef USE_ofxAbletonLink
-			if (bMODE_AbletonLinkSync)
+				if (bMODE_AbletonLinkSync)
+				{
+					guiManager.AddSpacingSeparated();
+
+					guiManager.AddGroup(params_LINK);
+
+					//--
+
+					//TODO: 
+					// Circled progress preview... 
+					if (0)
+					{
+						const char* label = "label";
+						float control = ofMap(LINK_Phase.get(), LINK_Phase.getMin(), LINK_Phase.getMax(), 0.0f, 1.0f);
+						static float radius = 20;
+						static int thickness = 9;
+						//static float thickness = 1.0f;
+
+						//ImGui::SliderFloat("control", &control, 0, 1);
+						//ImGui::SliderFloat("radius", &radius, 10, 200);
+						//ImGui::SliderInt("thickness", &thickness, 0, 40);
+						////ImGui::SliderFloat("thickness", &thickness, 0, 1.0f);
+
+						//ImGui::ColorConvertFloat4ToU32(_color));
+						ofColor colorTick = ofColor(128, 200);
+						ImVec4 _color = colorTick;
+						//ImVec4 _color = ImVec4(1, 1, 1, 1);
+						static ImU32 color = ImGui::ColorConvertFloat4ToU32(_color);
+
+						////circleCycled(label, &control);
+						circleCycled(label, &control, radius, false, thickness, color, 20);
+					}
+
+					//ImGui::Spacing();
+				}
+#endif
+				//ImGui::Unindent();
+			}
+
+			//--
+
+			if (!guiManager.bMinimize)
 			{
+				static bool bExtra = false;
+				//ImGui::Dummy(ImVec2(0, 5));
+
 				guiManager.AddSpacingSeparated();
 
-				guiManager.AddGroup(params_LINK);
-
-				//--
-
-				//TODO: 
-				// Circled progress preview... 
-				if (0)
+				ofxImGuiSurfing::ToggleRoundedButton("Extra", &bExtra);//TODO: remove all+
+				if (bExtra)
 				{
-					const char* label = "label";
-					float control = ofMap(LINK_Phase.get(), LINK_Phase.getMin(), LINK_Phase.getMax(), 0.0f, 1.0f);
-					static float radius = 20;
-					static int thickness = 9;
-					//static float thickness = 1.0f;
+					ImGui::Indent();
 
-					//ImGui::SliderFloat("control", &control, 0, 1);
-					//ImGui::SliderFloat("radius", &radius, 10, 200);
-					//ImGui::SliderInt("thickness", &thickness, 0, 40);
-					////ImGui::SliderFloat("thickness", &thickness, 0, 1.0f);
+					guiManager.Add(guiManager.bDebug, OFX_IM_TOGGLE_ROUNDED);
 
-					//ImGui::ColorConvertFloat4ToU32(_color));
-					ofColor colorTick = ofColor(128, 200);
-					ImVec4 _color = colorTick;
-					//ImVec4 _color = ImVec4(1, 1, 1, 1);
-					static ImU32 color = ImGui::ColorConvertFloat4ToU32(_color);
+					//ofxImGuiSurfing::AddToggleRoundedButton(bGui_PreviewClockNative);//TODO: remove all+
+					//if (bGui_PreviewClockNative) {
+					//	ImGui::Indent();
+					//	ofxImGuiSurfing::AddToggleRoundedButton(bShow_PreviewBoxEditor);
+					//	ofxImGuiSurfing::AddToggleRoundedButton(bEdit_PreviewBoxEditor);
+					//	ImGui::Unindent();
+					//}
 
-					////circleCycled(label, &control);
-					circleCycled(label, &control, radius, false, thickness, color, 20);
+					ofxImGuiSurfing::AddToggleRoundedButton(bKeys);
+					ofxImGuiSurfing::AddToggleRoundedButton(guiManager.bAutoResize);
+
+					ImGui::Unindent();
 				}
-
-				//ImGui::Spacing();
-		}
-#endif
-			//ImGui::Unindent();
-	}
-
-		//--
-
-		if (!guiManager.bMinimize)
-		{
-			static bool bExtra = false;
-			//ImGui::Dummy(ImVec2(0, 5));
-
-			guiManager.AddSpacingSeparated();
-
-			ofxImGuiSurfing::ToggleRoundedButton("Extra", &bExtra);//TODO: remove all+
-			if (bExtra)
-			{
-				ImGui::Indent();
-
-				guiManager.Add(guiManager.bDebug, OFX_IM_TOGGLE_ROUNDED);
-
-				//ofxImGuiSurfing::AddToggleRoundedButton(bGui_PreviewClockNative);//TODO: remove all+
-				//if (bGui_PreviewClockNative) {
-				//	ImGui::Indent();
-				//	ofxImGuiSurfing::AddToggleRoundedButton(bShow_PreviewBoxEditor);
-				//	ofxImGuiSurfing::AddToggleRoundedButton(bEdit_PreviewBoxEditor);
-				//	ImGui::Unindent();
-				//}
-
-				ofxImGuiSurfing::AddToggleRoundedButton(bKeys);
-				ofxImGuiSurfing::AddToggleRoundedButton(guiManager.bAutoResize);
-
-				ImGui::Unindent();
 			}
+
+			guiManager.endWindowSpecial();
 		}
-		guiManager.endWindowSpecial();
-}
 }
 
 //--------------------------------------------------------------
@@ -1010,29 +995,30 @@ void ofxBeatClock::draw_ImGui_ClockBpm()
 {
 	IMGUI_SUGAR__WINDOWS_CONSTRAINTSW;
 
-	if (guiManager.beginWindowSpecial(bGui_ClockBpm))
-	{
-		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
-		guiManager.AddSpacingSeparated();
+	if (bGui_ClockBpm)
+		if (guiManager.beginWindowSpecial(bGui_ClockBpm))
+		{
+			guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+			guiManager.AddSpacingSeparated();
 
-		float _w1 = ofxImGuiSurfing::getWidgetsWidth(1);
-		ImGui::PushItemWidth(_w1 * 0.5);
-		guiManager.AddGroup(params_BPM_Clock, ImGuiTreeNodeFlags_DefaultOpen, OFX_IM_GROUP_HIDDEN_HEADER);
-		ImGui::PopItemWidth();
+			float _w1 = ofxImGuiSurfing::getWidgetsWidth(1);
+			ImGui::PushItemWidth(_w1 * 0.5);
+			guiManager.AddGroup(params_BPM_Clock, ImGuiTreeNodeFlags_DefaultOpen, OFX_IM_GROUP_HIDDEN_HEADER);
+			ImGui::PopItemWidth();
 
-		guiManager.endWindowSpecial();
-	}
+			guiManager.endWindowSpecial();
+		}
 }
 
 //--------------------------------------------------------------
 void ofxBeatClock::draw_ImGui_CircleBeatWidget()
 {
 	//TODO:
-	// Converto to a new ImGui widget
+	// Convert to a new ImGui widget
 	// Circle widget
 
 	{
-		// big circle segments outperforms..
+		// Big circle segments outperforms..
 		//const int nsegm = 4;
 		const int nsegm = 24;
 
@@ -1195,199 +1181,190 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 {
 	IMGUI_SUGAR__WINDOWS_CONSTRAINTSW;
 
-	if (guiManager.beginWindowSpecial(bGui_ClockMonitor))
-	{
-		float __w100 = ImGui::GetContentRegionAvail().x;
-		float _w4 = __w100 / 4;
-		float _h = _w4;
-
-		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
-		guiManager.AddSpacingSeparated();
-
-		// 1. Bpm + counters
-
-		// ImGui Infos
-		guiManager.pushStyleFont(3);
-		const auto sz1 = ImGui::CalcTextSize(strBpmInfo.c_str());
-		float sw1 = GetContentRegionAvail().x;
-		ImGui::Text("");
-		ImGui::SameLine(sw1 - sz1.x);
-		ImGui::Text(strBpmInfo.c_str());
-		guiManager.popStyleFont();
-
-		//guiManager.AddLabelHuge(strBpmInfo.c_str(), false, true);
-
-		//--
-
-		string strBpmInfo2 = "BPM";
-		guiManager.pushStyleFont(3);
-		float sw2 = GetContentRegionAvail().x;
-		ImGui::Text("");
-		const auto sz2 = ImGui::CalcTextSize(strBpmInfo2.c_str());
-		ImGui::SameLine(sw2 - sz2.x);
-		ImGui::Text(strBpmInfo2.c_str());
-		guiManager.popStyleFont();
-
-		//guiManager.AddLabelHuge(strBpmInfo2.c_str(), false, true);
-
-		//-
-
-		if (!guiManager.bMinimize)
+	if (bGui_ClockMonitor)
+		if (guiManager.beginWindowSpecial(bGui_ClockMonitor))
 		{
-			guiManager.pushStyleFont(2);
-			{
-				const auto sz = ImGui::CalcTextSize(strTimeBeatPos.c_str());
-				float sw = GetContentRegionAvail().x;
-				ImGui::Text("");
-				ImGui::SameLine(sw - sz.x);
-				ImGui::Text(strTimeBeatPos.c_str());
+			float __w100 = ImGui::GetContentRegionAvail().x;
+			float _w4 = __w100 / 4;
+			float _h = _w4;
 
-				//guiManager.AddLabelHuge(strTimeBeatPos.c_str(), false, true);
-			}
-			guiManager.popStyleFont();
+			// Minimize
 
-			ImGui::Spacing();
-
-			// 2. Input Info
-			if (strClock != "" && clockActive_Info != "") {
-				guiManager.pushStyleFont(3);
-				{
-					if (strClock != "")
-					{
-						const auto sz = ImGui::CalcTextSize(strClock.c_str());
-						float sw = GetContentRegionAvail().x;
-						ImGui::Text("");
-						ImGui::SameLine(sw - sz.x);
-						ImGui::Text(strClock.c_str());
-
-						//guiManager.AddLabelHuge(strClock.c_str(), false, true);
-
-						ImGui::Spacing();
-					}
-					if (clockActive_Info != "")
-					{
-						ImGui::TextWrapped(clockActive_Info.c_str());
-					}
-				}
-				guiManager.popStyleFont();
-
-				ImGui::Dummy(ImVec2(0, 5));
-			}
-		}
-
-		//ImGui::TextWrapped(strExtMidiClock.c_str());
-		//ImGui::TextWrapped(strLink.c_str());
-
-		if (!guiManager.bMinimize)
-		{
-			// 3. Debug
-			if (strDebugInfo != "")
-			{
-				guiManager.pushStyleFont(0);
-				{
-					ImGui::TextWrapped(strDebugInfo.c_str());
-				}
-				guiManager.popStyleFont();
-			}
-		}
-
-		//ImGui::TextWrapped(strMessageInfoFull.c_str());
-
-		//ImGui::Dummy(ImVec2(0, 5));
-
-		//--
-
-		// 1. Beat Boxes 1-2-3-4
-
-		if (!guiManager.bMinimize)
-		{
-			//guiManager.setDefaultFont();
-
-			guiManager.pushStyleFont(1);
-			{
-				ImGui::PushStyleColor(ImGuiCol_Button, cb[0]);
-				ImGui::Button("1", ImVec2(_w4, _h));
-				ImGui::PopStyleColor();
-				ImGui::SameLine(0, 0);
-
-				ImGui::PushStyleColor(ImGuiCol_Button, cb[1]);
-				ImGui::Button("2", ImVec2(_w4, _h));
-				ImGui::PopStyleColor();
-				ImGui::SameLine(0, 0);
-
-				ImGui::PushStyleColor(ImGuiCol_Button, cb[2]);
-				ImGui::Button("3", ImVec2(_w4, _h));
-				ImGui::PopStyleColor();
-				ImGui::SameLine(0, 0);
-
-				ImGui::PushStyleColor(ImGuiCol_Button, cb[3]);
-				ImGui::Button("4", ImVec2(_w4, _h));
-				ImGui::PopStyleColor();
-
-				ImGui::Spacing();
-			}
-			guiManager.popStyleFont();
-		}
-
-		//--
-
-		// 2. Circle Beat
-		draw_ImGui_CircleBeatWidget();
-
-		////guiManager.popStyleFont();
-
-		//--
-
-		// 4. Tap
-		if (strTapTempo != "")
-		{
-			guiManager.pushStyleFont(2);
-			{
-				int speed = 10;//blink speed when measuring taps
-				bool b = (ofGetFrameNum() % (2 * speed) < speed);
-				ImVec4 c = ImVec4(1.f, 1.f, 1.f, b ? 0.5f : 1.f);
-				ImGui::PushStyleColor(ImGuiCol_Text, c);
-				ImGui::TextWrapped(strTapTempo.c_str());
-				ImGui::PopStyleColor();
-			}
-			guiManager.popStyleFont();
-		}
-
-		//--
-
-		// 5. Play 
-		//guiManager.setDefaultFont();
-		//guiManager.Add(bEnableClock, OFX_IM_TOGGLE_SMALL);
-		//float val = ofxSurfingHelpers::getFadeBlink();
-		float val = ofMap(circleBeat.getValue(), 0, 1, 0.25, 1.f, true);
-		ofxImGuiSurfing::AddBigToggleNamed(bPlay_Global_State, -1, -1, "PLAYING", "PLAY", true, val);
-		//guiManager.Add(bPlay_Global_State, OFX_IM_TOGGLE_BIG);
-
-		//if (guiManager.bMinimize)
-		{
-			if (bMode_Internal_Clock)
-			{
-				if (!!bGui_Sources || guiManager.bMinimize)
-					guiManager.Add(BPM_Tap_Tempo_TRIG, OFX_IM_BUTTON_BIG);
-
-				if (!bGui_ClockBpm || guiManager.bMinimize) {
-					guiManager.AddSpacing();
-					guiManager.Add(BPM_Global);
-					guiManager.Add(bReset_BPM_Global, OFX_IM_BUTTON);
-				}
-			}
-		}
-
-		if (!guiManager.bMinimize)
-		{
+			guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
 			guiManager.AddSpacingSeparated();
 
-			ofxImGuiSurfing::AddToggleRoundedButton(bGui_Sources);
-			ofxImGuiSurfing::AddToggleRoundedButton(bGui_ClockBpm);
-		}
+			//--
 
-		guiManager.endWindowSpecial();
-	}
+			// 1. BPM + counters
+
+			guiManager.pushStyleFont(3);
+			const auto sz1 = ImGui::CalcTextSize(strBpmInfo.c_str());
+			float sw1 = GetContentRegionAvail().x;
+			ImGui::Text("");
+			ImGui::SameLine(sw1 - sz1.x);
+			ImGui::Text(strBpmInfo.c_str());
+			guiManager.popStyleFont();
+
+			//--
+
+			string strBpmInfo2 = "BPM";
+			guiManager.pushStyleFont(3);
+			float sw2 = GetContentRegionAvail().x;
+			ImGui::Text("");
+			const auto sz2 = ImGui::CalcTextSize(strBpmInfo2.c_str());
+			ImGui::SameLine(sw2 - sz2.x);
+			ImGui::Text(strBpmInfo2.c_str());
+			guiManager.popStyleFont();
+
+			//guiManager.AddLabelHuge(strBpmInfo2.c_str(), false, true);
+
+			//-
+
+			if (!guiManager.bMinimize)
+			{
+				guiManager.pushStyleFont(2);
+				{
+					const auto sz = ImGui::CalcTextSize(strTimeBeatPos.c_str());
+					float sw = GetContentRegionAvail().x;
+					ImGui::Text("");
+					ImGui::SameLine(sw - sz.x);
+					ImGui::Text(strTimeBeatPos.c_str());
+				}
+				guiManager.popStyleFont();
+
+				ImGui::Spacing();
+
+				// 2. Input Info
+				if (strClock != "" && clockActive_Info != "") {
+					guiManager.pushStyleFont(3);
+					{
+						if (strClock != "")
+						{
+							const auto sz = ImGui::CalcTextSize(strClock.c_str());
+							float sw = GetContentRegionAvail().x;
+							ImGui::Text("");
+							ImGui::SameLine(sw - sz.x);
+							ImGui::Text(strClock.c_str());
+
+							ImGui::Spacing();
+						}
+						if (clockActive_Info != "")
+						{
+							ImGui::TextWrapped(clockActive_Info.c_str());
+						}
+					}
+					guiManager.popStyleFont();
+
+					guiManager.AddSpacing();
+				}
+			}
+
+			//ImGui::TextWrapped(strExtMidiClock.c_str());
+			//ImGui::TextWrapped(strLink.c_str());
+
+			if (!guiManager.bMinimize)
+			{
+				// 3. Debug
+				if (strDebugInfo != "")
+				{
+					guiManager.pushStyleFont(0);
+					{
+						ImGui::TextWrapped(strDebugInfo.c_str());
+					}
+					guiManager.popStyleFont();
+				}
+			}
+
+			//ImGui::TextWrapped(strMessageInfoFull.c_str());
+
+			//--
+
+			// 1. Beat Boxes 1-2-3-4
+
+			if (!guiManager.bMinimize)
+			{
+				guiManager.pushStyleFont(1);
+				{
+					ImGui::PushStyleColor(ImGuiCol_Button, cb[0]);
+					ImGui::Button("1", ImVec2(_w4, _h));
+					ImGui::PopStyleColor();
+					ImGui::SameLine(0, 0);
+
+					ImGui::PushStyleColor(ImGuiCol_Button, cb[1]);
+					ImGui::Button("2", ImVec2(_w4, _h));
+					ImGui::PopStyleColor();
+					ImGui::SameLine(0, 0);
+
+					ImGui::PushStyleColor(ImGuiCol_Button, cb[2]);
+					ImGui::Button("3", ImVec2(_w4, _h));
+					ImGui::PopStyleColor();
+					ImGui::SameLine(0, 0);
+
+					ImGui::PushStyleColor(ImGuiCol_Button, cb[3]);
+					ImGui::Button("4", ImVec2(_w4, _h));
+					ImGui::PopStyleColor();
+
+					ImGui::Spacing();
+				}
+				guiManager.popStyleFont();
+			}
+
+			//--
+
+			// 2. Circle Beat
+			draw_ImGui_CircleBeatWidget();
+
+			//--
+
+			// 4. Tap
+			if (strTapTempo != "")
+			{
+				guiManager.pushStyleFont(2);
+				{
+					int speed = 10;//blink speed when measuring taps
+					bool b = (ofGetFrameNum() % (2 * speed) < speed);
+					ImVec4 c = ImVec4(1.f, 1.f, 1.f, b ? 0.5f : 1.f);
+					ImGui::PushStyleColor(ImGuiCol_Text, c);
+					ImGui::TextWrapped(strTapTempo.c_str());
+					ImGui::PopStyleColor();
+				}
+				guiManager.popStyleFont();
+			}
+
+			//--
+
+			// 5. Play 
+			float val = ofMap(circleBeat.getValue(), 0, 1, 0.25, 1.f, true);
+			ofxImGuiSurfing::AddBigToggleNamed(bPlay, -1, -1, "PLAYING", "PLAY", true, val);
+
+			//if (guiManager.bMinimize)
+			{
+				if (bMode_Internal_Clock)
+				{
+					if (!bGui_Sources || guiManager.bMinimize)
+						guiManager.Add(BPM_Tap_Tempo_TRIG, OFX_IM_BUTTON_BIG);
+
+					if (!bGui_ClockBpm || guiManager.bMinimize) {
+						guiManager.AddSpacing();
+						guiManager.Add(BPM_Global);
+						guiManager.Add(bReset_BPM_Global, OFX_IM_BUTTON);
+					}
+				}
+			}
+
+			//--
+
+			// 6. Panels
+			if (!guiManager.bMinimize)
+			{
+				guiManager.AddSpacingSeparated();
+
+				guiManager.Add(bGui_Sources, OFX_IM_TOGGLE_ROUNDED);
+				guiManager.Add(bGui_ClockBpm, OFX_IM_TOGGLE_ROUNDED);
+			}
+
+			guiManager.endWindowSpecial();
+		}
 }
 
 //--------------------------------------------------------------
@@ -1397,8 +1374,8 @@ void ofxBeatClock::draw_ImGui_Widgets()
 
 	guiManager.begin();
 	{
-		if (bGui_Sources) draw_ImGui_Sources();
 		if (bGui_ClockMonitor) draw_ImGui_ClockMonitor();
+		if (bGui_Sources) draw_ImGui_Sources();
 		if (bGui_ClockBpm) draw_ImGui_ClockBpm();
 	}
 	guiManager.end();
@@ -1406,7 +1383,7 @@ void ofxBeatClock::draw_ImGui_Widgets()
 #endif
 
 //--------------------------------------------------------------
-void ofxBeatClock::drawImGui()
+void ofxBeatClock::drawGui()
 {
 #ifdef USE_OFX_SURFING_IM_GUI
 	if (bGui) draw_ImGui_Widgets();
@@ -1446,7 +1423,7 @@ void ofxBeatClock::draw()
 
 	//-
 
-	drawImGui();
+	drawGui();
 }
 
 ////--------------------------------------------------------------
@@ -1823,12 +1800,6 @@ void ofxBeatClock::exit()
 {
 	ofLogNotice(__FUNCTION__);
 
-	//// Gui Layout
-	//rPreview.disableEdit();
-	////rPreview.saveSettings(name_r1, path_Global + name_r2, false);
-	////rPreview.saveSettings("", "", false);
-	//rPreview.saveSettings("", path_Global + "settings/", false);
-
 	//-
 
 	// workflow: force
@@ -1924,7 +1895,7 @@ void ofxBeatClock::start()//only used in internal and link modes
 	{
 		ofLogNotice(__FUNCTION__) << "skip start";
 	}
-}
+	}
 
 //--------------------------------------------------------------
 void ofxBeatClock::stop() // only used in internal mode
@@ -1983,7 +1954,7 @@ void ofxBeatClock::setTogglePlay() // only used in internal mode
 	{
 		bPlaying_Internal_State = !bPlaying_Internal_State;
 		ofLogNotice(__FUNCTION__) << "PLAY internal: " << bPlaying_Internal_State;
-}
+	}
 
 	//-
 
@@ -2094,24 +2065,24 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 
 	// Global
 
-	else if (name == bPlay_Global_State.getName())
+	else if (name == bPlay.getName())
 	{
-		ofLogNotice(__FUNCTION__) << name << (bPlay_Global_State ? "TRUE" : "FALSE");
+		ofLogNotice(__FUNCTION__) << name << (bPlay ? "TRUE" : "FALSE");
 		{
 			//-
 
 			// lock stopped if all modes disabled
-			if (bPlay_Global_State)
+			if (bPlay)
 			{
 #ifdef USE_ofxAbletonLink
 				if (!bMode_External_MIDI_Clock && !bMODE_AbletonLinkSync && !bMode_Internal_Clock) {
 #else
 				if (!bMode_External_MIDI_Clock && !bMode_Internal_Clock) {
 #endif
-					bPlay_Global_State = false;
+					bPlay = false;
 					return;
 				}
-				}
+			}
 
 			//// worklow
 			//// put one mode active. default is internal
@@ -2122,21 +2093,21 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 			//#endif
 
 			if (bMode_Internal_Clock) {
-				if (bPlaying_Internal_State != bPlay_Global_State)
-					bPlaying_Internal_State = bPlay_Global_State;
+				if (bPlaying_Internal_State != bPlay)
+					bPlaying_Internal_State = bPlay;
 			}
 			else if (bMode_External_MIDI_Clock) {
-				if (bPlaying_External_State != bPlay_Global_State)
-					bPlaying_External_State = bPlay_Global_State;
+				if (bPlaying_External_State != bPlay)
+					bPlaying_External_State = bPlay;
 			}
 #ifdef USE_ofxAbletonLink
 			else if (bMODE_AbletonLinkSync) {
-				if (bPlaying_LinkState != bPlay_Global_State)
-					bPlaying_LinkState = bPlay_Global_State;
+				if (bPlaying_LinkState != bPlay)
+					bPlaying_LinkState = bPlay;
 			}
 #endif
+			}
 		}
-	}
 
 	//-
 
@@ -2144,7 +2115,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 
 	if (name == guiManager.bMinimize.getName())
 	{
-		setupImGuiStyles();
+		buildGuiStyles();
 	}
 
 	//-
@@ -2154,8 +2125,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 	else if (name == bPlaying_External_State.getName())//button for internal only
 	{
 		if (bMode_External_MIDI_Clock)
-			if (bPlay_Global_State != bPlaying_External_State)
-				bPlay_Global_State = bPlaying_External_State;
+			if (bPlay != bPlaying_External_State)
+				bPlay = bPlaying_External_State;
 	}
 
 	//-
@@ -2219,8 +2190,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 
 			//-
 
-			if (bPlay_Global_State != bPlaying_Internal_State)
-				bPlay_Global_State = bPlaying_Internal_State;
+			if (bPlay != bPlaying_Internal_State)
+				bPlay = bPlaying_Internal_State;
 		}
 	}
 
@@ -2238,10 +2209,10 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 
 			//-
 
-			if (bPlay_Global_State != bPlaying_LinkState)
-				bPlay_Global_State = bPlaying_LinkState;
+			if (bPlay != bPlaying_LinkState)
+				bPlay = bPlaying_LinkState;
 		}
-		}
+	}
 #endif
 
 	//----
@@ -2355,8 +2326,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 			}
 		}
 
-		if (bPlay_Global_State != bPlaying_Internal_State)
-			bPlay_Global_State = bPlaying_Internal_State;
+		if (bPlay != bPlaying_Internal_State)
+			bPlay = bPlaying_Internal_State;
 	}
 
 	//-
@@ -2423,8 +2394,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 			}
 		}
 
-		if (bPlay_Global_State != bPlaying_External_State)
-			bPlay_Global_State = bPlaying_External_State;
+		if (bPlay != bPlaying_External_State)
+			bPlay = bPlaying_External_State;
 	}
 
 	//--
@@ -2483,9 +2454,9 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 			ofRemoveListener(link.playStateChanged, this, &ofxBeatClock::LINK_playStateChanged);
 		}
 
-		if (bPlay_Global_State != bPlaying_LinkState)
-			bPlay_Global_State = bPlaying_LinkState;
-		}
+		if (bPlay != bPlaying_LinkState)
+			bPlay = bPlaying_LinkState;
+	}
 #endif
 
 	//--
@@ -2531,7 +2502,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 #endif
 		{
 			bMode_Internal_Clock = true;//default state / clock selected
-		}
+	}
 	}
 
 	//---
@@ -2597,7 +2568,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 		//	clockInternal.addBarListener(this);
 		//	clockInternal.addSixteenthListener(this);
 		//}
-		}
+	}
 #endif
 
 	//-
@@ -2675,7 +2646,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 
 			ofLogNotice(__FUNCTION__) << "BPM_Tap_Tempo_TRIG: " << BPM_Tap_Tempo_TRIG;
 
-			tap_Trig();
+			doTapTrig();
 		}
 	}
 
@@ -2995,7 +2966,7 @@ void ofxBeatClock::onBarEvent(int& bar)
 
 			Bar_string = ofToString(Bar_current);
 		}
-		}
+}
 	}
 
 //--------------------------------------------------------------
@@ -3026,7 +2997,7 @@ void ofxBeatClock::onBeatEvent(int& beat)
 
 			//-
 		}
-		}
+}
 	}
 
 //--------------------------------------------------------------
@@ -3043,8 +3014,8 @@ void ofxBeatClock::onSixteenthEvent(int& sixteenth)
 			Tick_16th_current = sixteenth;
 			Tick_16th_string = ofToString(Tick_16th_current);
 		}
-	}
 }
+			}
 
 //-
 
@@ -3073,7 +3044,7 @@ void ofxBeatClock::reset_ClockValues()//set gui display text clock to 0:0:0
 
 //todo: implement bpm divider / multiplier x2 x4 /2 /4
 //--------------------------------------------------------------
-void ofxBeatClock::tap_Trig()
+void ofxBeatClock::doTapTrig()
 {
 	if (bMode_Internal_Clock)//extra verified, not mandatory
 		bpmTapTempo.bang();
@@ -3237,10 +3208,10 @@ void ofxBeatClock::audioOut(ofSoundBuffer & buffer)
 						doBeatTickMonitor(Beat_current);
 
 						//ofLogNotice(__FUNCTION__) << "[audioBuffer] BEAT: " << Beat_string;
-}
-}
-	}
-	}
+					}
+				}
+			}
+		}
 	}
 }
 #endif
@@ -3278,7 +3249,7 @@ void ofxBeatClock::keyPressed(ofKeyEventArgs & eventArgs)
 		// when using internal clock 
 		// only to set the bpm on the fly
 	case 't':
-		tap_Trig();
+		doTapTrig();
 		break;
 
 		// Get some beatClock info. look api methods into ofxBeatClock.h
