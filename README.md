@@ -2,7 +2,7 @@
 
 **openFrameworks** add-on to run a *DAW-Styled BPM Beat-Clock*.  
 **Internal Clock** with **Tap Tempo**, **External MIDI Sync** and **Ableton Link** modes.  
-Receives a callback notfication when each beat happens.  
+Receives a callback notification when each beat happens.  
 
 ## Screencast
 
@@ -54,7 +54,7 @@ You can uncomment ```#define USE_AUDIO_BUFFER_TIMER_MODE``` on ```ofxBeatClock.h
 * [ofxMidi](https://github.com/danomatika/ofxMidi)  
 * [ofxImGuiSurfing](https://github.com/moebiussurfing/ofxSurfingImGui)
 * [ofxImGui](https://github.com/Daandelange/ofxImGui/). / _Fork from_ @**Daandelange**.  
-- [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)
+* [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)
 * [ofxAbletonLink](https://github.com/2bbb/ofxAbletonLink). / _Optional. Can be disabled._  
 * [ofxWindowApp](https://github.com/moebiussurfing/ofxWindowApp). / _Not required. For examples only._  
 
@@ -62,11 +62,11 @@ Already included into ```OF_ADD-ON/libs```. No need to add manually:
 * [ofxDawMetro](https://github.com/castovoid/ofxDawMetro)  
 
 ## Tested Systems
-- **Windows10** / **VS2022** / **OF 0.12+**
+- **Windows 10** / **VS 2022** / **oF 0.12+**
 
 ## Author
 An add-on by **@moebiusSurfing**  
-( _ManuMolina_ ). _2020-2021-2022_.
+( _ManuMolina_ ). _2020-2022_.
 
 **_Thanks to the developers of the included core add-ons! @danomatika, @2bb and @castovoid._**
 
