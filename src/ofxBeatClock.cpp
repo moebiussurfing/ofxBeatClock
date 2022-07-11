@@ -562,9 +562,9 @@ void ofxBeatClock::refresh_Gui()
 		// Display Text
 		clockActive_Type = bMODE_AbletonLinkSync.getName();
 		//clockActive_Type = "3 ABLETON LINK";
-		infoClock2 = "";
 
 		infoClock1 = clockActive_Type;
+		infoClock2 = "";
 
 		if (bPlay != bPlaying_LinkState) bPlay = bPlaying_LinkState;
 	}
@@ -580,8 +580,8 @@ void ofxBeatClock::refresh_Gui()
 	if (!bMode_Internal_Clock && !bMode_External_MIDI_Clock)
 #endif
 	{
-		infoClock1 = "";
-		infoClock2 = "";
+		infoClock1 = "\n";
+		infoClock2 = "\n";
 	}
 }
 
@@ -2122,13 +2122,13 @@ void ofxBeatClock::doBeatTickMonitor(int _beat)
 }
 
 //--------------------------------------------------------------
-float ofxBeatClock::getBpm()
+float ofxBeatClock::getBpm() const
 {
 	return BPM_Global;
 }
 
 //--------------------------------------------------------------
-int ofxBeatClock::getTimeBar()
+int ofxBeatClock::getTimeBar() const
 {
 	return BPM_Global_TimeBar;
 }
@@ -2418,7 +2418,6 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 	{
 		if (bMODE_AbletonLinkSync)
 		{
-
 			bMode_External_MIDI_Clock.setWithoutEventNotifications(false);
 			bMode_Internal_Clock.setWithoutEventNotifications(false);
 
@@ -2616,10 +2615,10 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 
 */
 
-//--
+	//--
 
-//TODO:
-// Should check this better
+	//TODO:
+	// Should check this better
 
 	else if (name == bEnableClock.getName())
 	{
@@ -2653,19 +2652,22 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 
 		// workflow
 		// if none clock mode is selected, we select the internal clock by default
-#ifndef USE_ofxAbletonLink
-		if (!bMode_Internal_Clock && !bMode_External_MIDI_Clock)
-#else
-		if (!bMode_Internal_Clock && !bMode_External_MIDI_Clock && !bMODE_AbletonLinkSync)
-#endif
+		if (bEnableClock)
 		{
-			bMode_Internal_Clock = true;//default state / clock selected
+#ifndef USE_ofxAbletonLink
+			if (!bMode_Internal_Clock && !bMode_External_MIDI_Clock)
+#else
+			if (!bMode_Internal_Clock && !bMode_External_MIDI_Clock && !bMODE_AbletonLinkSync)
+#endif
+			{
+				bMode_Internal_Clock = true; // force default state / clock selected
+			}
 		}
 	}
 
 	//---
 
-	// External midi clock
+	// External Midi Clock
 
 	else if (name == midiIn_Port_SELECT.getName())
 	{
