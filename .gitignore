@@ -561,3 +561,5 @@ examples/2_Link/bin/data/assets/ofxBeatClock Project/Samples/Imported/The evil i
 examples/example-ofxBeatClock/bin/data/ofxBeatClock/settings/App_Settings.xml
 examples/example-ofxBeatClock/bin/data/ofxBeatClock/settings/BeatClock_Settings.xml
 examples/example-ofxBeatClock/bin/imgui.ini
+examples/example-ofxBeatClock/bin/data/Gui/guiManager_WindowsSpecials.json
+examples/example-ofxBeatClock/bin/data/Gui/guiManager_Panels.json
