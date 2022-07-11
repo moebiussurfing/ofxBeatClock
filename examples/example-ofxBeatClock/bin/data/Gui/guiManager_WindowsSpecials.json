@@ -3,7 +3,7 @@
         "Enablers": {
             "CLOCK_BPM": "0",
             "CLOCK_MONITOR": "1",
-            "CLOCK_SOURCES": "0"
+            "CLOCK_SOURCES": "1"
         },
         "Organizer": {
             "Align_Shapes": "1",
@@ -12,7 +12,7 @@
             "ORGANIZER": "0",
             "Orientation": "0",
             "Pad": "0",
-            "Position_Anchor": "1044, 137",
+            "Position_Anchor": "956, 41",
             "SHOW_GLOBAL": "1",
             "ShapesX": "1",
             "ShapesY": "0"
