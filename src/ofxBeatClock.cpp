@@ -1319,6 +1319,10 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 				guiManager.popStyleFont();
 			}
 
+			// Extra
+			if (!bGui_Sources)
+			guiManager.Add(bEnableClock, OFX_IM_TOGGLE_SMALL);
+
 			//--
 
 			// 5. Play 
@@ -1332,6 +1336,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 			// BPM, reset 
 			//if (guiManager.bMinimize)
 			{
+
 				if (bMode_Internal_Clock)
 				{
 					if (!bGui_Sources || guiManager.bMinimize)
