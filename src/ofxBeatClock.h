@@ -184,8 +184,82 @@ public:
 	~ofxBeatClock();
 
 	void setup();
-	void update(ofEventArgs& args);
 	void draw();
+
+	ofParameter<bool> BeatTick; // Get bang beat!!
+	// Also this trigs to draw a flashing circle for a frame only
+	// This variable is used to subscribe an external (in ofApp) callback / listeners to get the beat bangs!
+
+	//----
+
+	// API
+
+	//----
+
+public:
+
+	// main transport control for master mode (not in external midi sync that OF app is slave)
+	void start(); // only used on internal or link clock source mode
+	void stop(); // only used on internal or link clock source mode
+	void setTogglePlay(); // only used on internal or link clock source mode
+	 
+	// A super simple callback
+	//--------------------------------------------------------------
+	int getBeat() {
+		if (BeatTick) {
+			//ofLogNotice(__FUNCTION__) << "BeatTick ! #" << Beat_current;
+			return Beat_current;
+		}
+		else return -1;
+	}
+
+	// Current_bpm_clock_values
+	float getBpm() const;//returns BPM_Global
+	int getTimeBar() const;//returns duration of global bar in ms
+
+	void setBpm_ClockInternal(float bpm); // to set bpm from outside
+
+	//--------------------------------------------------------------
+	void setPathglobal(std::string _path) {
+		path_Global = _path;
+
+		ofxSurfingHelpers::CheckFolder(path_Global);
+	}
+
+	// Gui visible toggles
+	ofParameter<bool> bGui_ClockMonitor;
+	ofParameter<bool> bGui_Sources;
+	ofParameter<bool> bGui_ClockBpm;
+	//ofParameter<bool> bGui_PreviewClockNative; // beat boxes, text info and beat ball (all except gui panels)
+
+	//--------------------------------------------------------------
+	bool isPlaying() const
+	{
+		bool _isPlaying = false;
+#ifdef USE_ofxAbletonLink
+		_isPlaying = bPlaying_Internal_State || bPlaying_External_State || bPlaying_LinkState;
+#else
+		_isPlaying = bPlaying_Internal_State || bPlaying_External_State;
+#endif
+		return _isPlaying;
+	}
+
+	// Tap_engine
+	void doTapTrig();
+	void tap_Update();
+
+private:
+	
+	//TODO: could be nice to add some listener system..
+	ofParameter<int> Bar_current;
+	ofParameter<int> Beat_current;
+	ofParameter<int> Tick_16th_current; // used only with audioBuffer timer mode
+
+	//--
+
+private:
+	
+	void update(ofEventArgs& args);
 	void exit();
 	void windowResized(int w, int h);
 	void keyPressed(ofKeyEventArgs& eventArgs);
@@ -257,13 +331,13 @@ private:
 
 	void setup_MidiIn_Clock();
 
-	//-
+	//--
 
 	// Layout
 
 	// NOTE: all the layout system is a little messy yet. sometimes using glm, or x y points ...etc
 
-private:
+//private:
 
 	//ofParameter<glm::vec2> pos_Global;//main anchor to reference all the other above gui elements
 	//ofParameter<glm::vec2> pos_ClockInfo;
@@ -288,7 +362,7 @@ private:
 
 	// API setters
 
-private:
+//private:
 
 	//void setPosition_GuiPanel(int x, int y, int w);//gui panel
 	//ofPoint getPosition_GuiPanel();
@@ -314,7 +388,7 @@ public:
 		bGui = !bGui;
 	}
 
-private:
+//private:
 
 	//void setPosition_BeatBoxes(int x, int y, int w);//position x, y and w = width of all 4 squares
 	//void setPosition_BeatBall(int x, int y, int w);//position x, y and w = width of ball
@@ -335,6 +409,10 @@ private:
 
 	//// big clock
 	//void draw_BigClockTime(int x, int y);
+
+	//--
+
+private:
 
 	void draw_ImGui_CircleBeatWidget();
 
@@ -368,6 +446,9 @@ private:
 			ofPopStyle();
 		}
 	}
+	
+//public:
+	 
 	//--------------------------------------------------------------
 	void setDebug_Clock(bool b)
 	{
@@ -409,7 +490,7 @@ private:
 
 	float dt;
 
-public:
+//public:
 	
 	//--------------------------------------------------------------
 	void setFrameRate(float _fps) {
@@ -424,12 +505,6 @@ private:
 
 	int lastBeatFlash = -1;
 	//void draw_BeatBalFlash(int _onBeat){}
-
-public:
-
-	ofParameter<bool> BeatTick; // Get bang beat!!
-	// Also this trigs to draw a flashing circle for a frame only
-	// This variable is used to subscribe external (in ofApp) listeners to get the beat bangs!
 
 	//-
 
@@ -447,7 +522,8 @@ public:
 
 	//-
 
-public:
+//public:
+private:
 
 	void setupGui();
 	void buildGuiStyles();
@@ -498,8 +574,9 @@ private:
 public:
 
 	// This is the main and final target bpm, is the destination of all other clocks (internal, external midi sync or ableton link)
-	ofParameter<float> BPM_Global;//global tempo bpm.
-	ofParameter<int> BPM_Global_TimeBar;//ms time of 1 bar = 4 beats
+
+	ofParameter<float> BPM_Global; // Global tempo bpm.
+	ofParameter<int> BPM_Global_TimeBar; // ms time of 1 bar = 4 beats
 
 	//float getBpm() {
 	//	return BPM_Global.get();
@@ -509,33 +586,23 @@ public:
 
 private:
 
-	ofParameter<bool> BPM_Tap_Tempo_TRIG;//trig the measurements of tap tempo
+	ofParameter<bool> BPM_Tap_Tempo_TRIG; // Trig the measurements of tap tempo
 
-	// helpers to modify current bpm
+	// Helpers to modify current bpm
 	ofParameter<bool> bReset_BPM_Global;
-	ofParameter<bool> bHalf_BPM;//divide bpm by 2
-	ofParameter<bool> bDouble_BPM;//multiply bpm by 2
-
-	//-
-
-	// API
-
-public:
-
-	float getBpm();//returns BPM_Global
-	int getTimeBar();//returns duration of global bar in ms
-
-	int getBeat() {
-		if (BeatTick) {
-			//ofLogNotice(__FUNCTION__) << "BeatTick ! #" << Beat_current;
-			return Beat_current;
-		}
-		else return -1;
-	}
+	ofParameter<bool> bHalf_BPM; // Divide bpm by 2
+	ofParameter<bool> bDouble_BPM; // Multiply bpm by 2
 
 	//--
 
-	// this methods could be useful only to visualfeedback on integrating to other bigger guis on ofApp..
+	// API
+
+//public:
+private:
+
+	//--
+
+	// These methods could be useful only to visualfeedback on integrating to other bigger guis on ofApp..
 	//--------------------------------------------------------------
 	bool getInternalClockModeState()
 	{
@@ -598,26 +665,11 @@ private:
 
 	//-
 
-public:
-
-	void setBpm_ClockInternal(float bpm); // to set bpm from outside
-
-	//-
-
 	// settings
 
 private:
 
 	std::string path_Global;
-
-public:
-
-	//--------------------------------------------------------------
-	void setPathglobal(std::string _path) {
-		path_Global = _path;
-
-		ofxSurfingHelpers::CheckFolder(path_Global);
-	}
 
 private:
 
@@ -653,12 +705,7 @@ private:
 
 	//-
 
-public:
-
-	ofParameter<bool> bGui_ClockMonitor;
-	ofParameter<bool> bGui_Sources;
-	ofParameter<bool> bGui_ClockBpm; // some helpers other secondary settings/controls 
-	//ofParameter<bool> bGui_PreviewClockNative; // beat boxes, text info and beat ball (all except gui panels)
+//public:
 
 	//glm::vec2 shapePreview;
 	//void draw_PreviewWidgetItems();
@@ -674,16 +721,10 @@ private:
 
 	//-
 
-	// Current_bpm_clock_values
-
-public:
+//public:
+private:
 
 	void reset_ClockValues(); // set gui display text clock to 0:0:0
-
-	//TODO: could be nice to add some listener system..
-	ofParameter<int> Bar_current;
-	ofParameter<int> Beat_current;
-	ofParameter<int> Tick_16th_current; // used only with audioBuffer timer mode
 
 	//TODO: 
 	// Link
@@ -706,36 +747,7 @@ private:
 
 	//----
 
-	// API
-
-	//----
-
-public:
-
-	// main transport control for master mode (not in external midi sync that OF app is slave)
-	void start(); // only used on internal or link clock source mode
-	void stop(); // only used on internal or link clock source mode
-	void setTogglePlay(); // only used on internal or link clock source mode
-
-	//bool isPlaying()
-	//{
-	//	return bIsPlaying;
-	//}
-
-	//----
-
-private:
-
-	//bool bIsPlaying; // used only for internal clock mode.. should be usefull for all clock types
-
-	//----
-
 	// Tap_engine
-
-public:
-
-	void doTapTrig();
-	void tap_Update();
 
 private:
 
@@ -743,7 +755,7 @@ private:
 	//int tap_Count, tap_LastTime, tap_AvgBarMillis;
 	//vector<int> tap_Intervals;
 	//bool bTap_Running;
-	bool SOUND_wasDisabled = false; // sound disbler to better user workflow
+	bool SOUND_wasDisabled = false; // sound disabler to better user workflow
 
 	//----
 
