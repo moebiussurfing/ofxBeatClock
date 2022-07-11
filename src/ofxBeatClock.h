@@ -3,6 +3,7 @@
 //
 //	OPTIONAL DEFINES
 
+//TODO: broken
 //#define USE_ofxAbletonLink // -> Can be commented to not include the Ableton Link feature/add-on.
 
 //#define USE_AUDIO_BUFFER_TIMER_MODE // -> [WIP] A better alternative clock engine based on audio buffer. 
@@ -16,18 +17,23 @@
 
 	TODO:
 
-	+	BPM slider on internal clock does applies only when releasing the slider..
+	+	BPM slider on internal clock does applies only when releasing the slider.
 	+ 	On-the-fly bang re-sync to bar beat start. (kind of manual syncer)
 	+ 	Add fast filter to smooth / stabilize BPM number when using external midi clock mode.
 	+ 	Add audio output selector to metronome sounds.
 			maybe share audioBuffer with better timer mode
 			on USE_AUDIO_BUFFER_TIMER_MODE. still disabled by default yet
+	+	Fix workflow of labels internal, external, etc...
+
 
 	NOTE:
+
 	More info about SoundStream buffer timer. For better precision and/or performance.
 	https://forum.openframeworks.cc/t/pass-this-pointer-from-parent-to-child-object-scheduler-oftimer-system/22088/6?u=moebiussurfing
 
+
 	NOTE:
+
 	From @dimitre:
 	Audio buffer + some alternative modes like bet beat 1 on sinus or to add phase.
 	https://forum.openframeworks.cc/t/hola/33161/10
@@ -42,7 +48,7 @@
 		bpm3.setSeconds(seconds);
 		tapper.setSeconds(seconds);
 	}
-#endif
+	#endif
 
 */
 
@@ -74,7 +80,7 @@
 	Works better with 0 and 4 detectors, but why?
 	SOLUTION:
 	We must check better all the beat%limit bc should be the problem!!
-	Maybe we can add another beat_current varialbe, independent of the received beat from source clocks
+	Maybe we can add another beat_current variable, independent of the received beat from source clocks
 	Then to eliminate the all the limiters.
 	Must check each source clock type what's the starting beat: 0 or 1!!
 
@@ -107,54 +113,55 @@
 // * OPTIONAL : Ableton Link feature *
 
 #ifdef USE_ofxAbletonLink
-#include "ofxAbletonLink.h"//used for external Ableton Live Link engine (3)
+#include "ofxAbletonLink.h" // used for external Ableton Live Link engine (3)
 #endif
 
-///* Is the only external mode where OF app works as clock master. 
-///(besides external midi sync slave)
-///* It can control the Ableton bpm, play/stop etc from OF.
-///What is Ableton Link?
-///"This is the codebase for Ableton Link, a technology that synchronizes musical beat,
-///tempo, and phase across multiple applications running on one or more devices.
-///Applications on devices connected to a local network discover each other automatically
-///and form a musical session in which each participant can perform independently: 
-///anyone can start or stop while still staying in time.Anyone can change the tempo, 
-///the others will follow.Anyone can join or leave without disrupting the session."
-///https://github.com/Ableton/link -> original libs
-///https://www.ableton.com/en/link/ -> videos and tutorials
-///NOTES:(?)
-///I don't understand yet what does when we make link.setBeat()...
-///bc beat position of Ableton will not be updated changing this..
-///So, it seems this is not the philosophy behind LINK:
-///The idea of LINK seems to link the "gloabl" /phase/bar/beat to play live simultaneously
-///many musicians or devices/apps, not to sync two long musics projects playing together.
+/// * Is the only external mode where OF app works as clock master. 
+/// (besides external midi sync slave)
+/// * It can control the Ableton bpm, play/stop etc from OF.
+/// What is Ableton Link?
+/// "This is the codebase for Ableton Link, a technology that synchronizes musical beat,
+/// tempo, and phase across multiple applications running on one or more devices.
+/// Applications on devices connected to a local network discover each other automatically
+/// and form a musical session in which each participant can perform independently: 
+/// anyone can start or stop while still staying in time.Anyone can change the tempo, 
+/// the others will follow.Anyone can join or leave without disrupting the session."
+/// https://github.com/Ableton/link -> original libs
+/// https://www.ableton.com/en/link/ -> videos and tutorials
+/// NOTES:(?)
+/// I don't understand yet what does when we make link.setBeat()...
+/// bc beat position of Ableton will not be updated changing this..
+/// So, it seems this is not the philosophy behind LINK:
+/// The idea of LINK seems to link the "gloabl" /phase/bar/beat to play live simultaneously
+/// many musicians or devices/apps, not to sync two long musics projects playing together.
 
 //----
 
 //* OPTIONAL : maybe better alternative internal clock *
 
 ///TODO:
-//used as audioBuffer timer as an alternative for the internal clock (4)
-///when it's enabled ofxDawMetro is not used and could be not loaded.
-///WIP: alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers
-///(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). 
-///Problems happen when minimizing or moving the app window.. Any help is welcome!
-///(code is at the bottom)
-///un-comment to enable this NOT WORKING yet alternative mode
-///THE PROBLEM: clock drift very often.. maybe bc wasapi sound api? ASIO seems a better choice.
-///help on improve this is welcome!
-///NOTE: if the audio output/driver is not opened properly, fps performance seems to fall...
-///TODO: should make easier to select sound output
+/// used as audioBuffer timer as an alternative for the internal clock (4)
+/// when it's enabled ofxDawMetro is not used and could be not loaded.
+/// WIP: alternative and better timer approach using the audio-buffer
+/// to avoid out-of-sync problems of current timers
+/// (https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). 
+/// Problems happen when minimizing or moving the app window.. Any help is welcome!
+/// (code is at the bottom)
+/// un-comment to enable this NOT WORKING yet alternative mode
+/// THE PROBLEM: clock drift very often.. maybe bc wasapi sound api? ASIO seems a better choice.
+/// help on improve this is welcome!
+/// NOTE: if the audio output/driver is not opened properly, fps performance seems to fall...
+/// TODO: should make easier to select sound output
 
 //----
 
-///TODO:
-///WIP
-///smooth global bpm clock that is received from external fluctuating clocks
-///could be done with only visual refreshing the midi clock slower,
-///or using a real filter to the bpm variable.
-///#define BPM_MIDI_CLOCK_REFRESH_RATE 1000
-///refresh received MTC by clock. disabled/commented to "realtime" by every-frame-update
+/// TODO:
+/// WIP
+/// smooth global bpm clock that is received from external fluctuating clocks
+/// could be done with only visual refreshing the midi clock slower,
+/// or using a real filter to the bpm variable.
+/// #define BPM_MIDI_CLOCK_REFRESH_RATE 1000
+/// refresh received MTC by clock. disabled/commented to "realtime" by every-frame-update
 
 //----
 
@@ -241,7 +248,7 @@ private:
 	//-
 
 	ofParameter<int> midiIn_BeatsInBar;//compute remainder as # TARGET_NOTES_params within the current bar
-	void Changed_midiIn_BeatsInBar(int& beatsInBar);//only used in midiIn clock sync 
+	void Changed_Midi_In_BeatsInBar(int& beatsInBar);//only used in midiIn clock sync 
 	int beatsInBar_PRE;//not required
 
 	//-
@@ -333,7 +340,7 @@ private:
 
 	bool bb[4];
 	ofColor cb[4];
-	std::string strTimeBeatPos;
+	std::string infoClockTimer;
 
 	//--
 
@@ -477,12 +484,12 @@ private:
 
 	ofParameterGroup params_CONTROL;
 
-	ofParameter<bool> bPlaying_Internal_State;//player state only for internal clock
-	ofParameter<bool> bPlaying_External_State;//player state only for external clock
+	ofParameter<bool> bPlaying_Internal_State; // Player state only for internal clock
+	ofParameter<bool> bPlaying_External_State; // Player state only for external clock
 
-	ofParameter<bool> bEnableClock;//enable clock (affects all clock types)
-	ofParameter<bool> bMode_Internal_Clock;//enable internal clock
-	ofParameter<bool> bMode_External_MIDI_Clock;//enable midi clock sync
+	ofParameter<bool> bEnableClock; // Enable clock (affects all clock types)
+	ofParameter<bool> bMode_Internal_Clock; // Enable internal clock
+	ofParameter<bool> bMode_External_MIDI_Clock; // Enable external midi clock sync
 	ofParameter<int> midiIn_Port_SELECT;
 	int midiIn_numPorts = 0;
 
@@ -539,6 +546,7 @@ public:
 	{
 		return bMode_External_MIDI_Clock;
 	}
+
 #ifdef USE_ofxAbletonLink
 	//--------------------------------------------------------------
 	bool getLinkClockModeState()
@@ -625,13 +633,13 @@ private:
 	//-
 
 	// fonts
-	std::string strBpmInfo;
+	std::string infoClockBpmLabel;
 	std::string strTapTempo;
 	std::string strExtMidiClock;
-	std::string strClock;
+	std::string infoClock1;
 	std::string strLink;
 	std::string strMessageInfo;
-	std::string strDebugInfo;
+	std::string infoDebug;
 	std::string strMessageInfoFull;
 	ofTrueTypeFont fontSmall;
 	ofTrueTypeFont fontMedium;
@@ -694,7 +702,7 @@ private:
 	std::string Tick_16th_string;
 
 	std::string clockActive_Type; // internal/external/link clock types name
-	std::string clockActive_Info; // midi in port, and extra info for any clock source
+	std::string infoClock2; // midi in port, and extra info for any clock source
 
 	//----
 
@@ -832,11 +840,11 @@ private:
 			//display text
 			clockActive_Type = "ABLETON LINK";
 
-			clockActive_Info = "BEAT   " + ofToString(link.getBeat(), 1);
-			clockActive_Info += "\n";
-			clockActive_Info += "PHASE  " + ofToString(link.getPhase(), 1);
-			clockActive_Info += "\n";
-			clockActive_Info += "PEERS  " + ofToString(link.getNumPeers());
+			infoClock2 = "BEAT   " + ofToString(link.getBeat(), 1);
+			infoClock2 += "\n";
+			infoClock2 += "PHASE  " + ofToString(link.getPhase(), 1);
+			infoClock2 += "\n";
+			infoClock2 += "PEERS  " + ofToString(link.getNumPeers());
 
 			//-
 
