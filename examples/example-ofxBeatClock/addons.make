@@ -1,3 +1,4 @@
+ofxAbletonLink
 ofxBeatClock
 ofxImGui
 ofxMidi
