@@ -3,7 +3,7 @@
 
 #include "ofMain.h"
 
-#include "ofxWindowApp.h" // -> Not required. can be removed.
+#include "ofxWindowApp.h" // -> Not required. Can be removed.
 
 #include "ofxBeatClock.h"
 
