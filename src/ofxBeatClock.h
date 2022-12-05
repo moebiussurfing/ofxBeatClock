@@ -16,6 +16,8 @@
 /*
 	BUG:
 
+	+ add circle widget to show external beat happens!
+
 	+ USE_ofxAbletonLink broken:
 		fix callbacks by hard coded name
 		disable parts to fix error
@@ -214,7 +216,7 @@ public:
 	//--------------------------------------------------------------
 	int getBeat() {
 		if (BeatTick) {
-			//ofLogNotice(__FUNCTION__) << "BeatTick ! #" << Beat_current;
+			//ofLogNotice("ofxBeatClock")<<(__FUNCTION__) << "BeatTick ! #" << Beat_current;
 			return Beat_current;
 		}
 		else return -1;
@@ -237,9 +239,9 @@ public:
 	{
 		bool _isPlaying = false;
 #ifdef USE_ofxAbletonLink
-		_isPlaying = bPlaying_Internal_State || bPlaying_External_State || bPlaying_LinkState;
+		_isPlaying = bPlaying_Internal_State || bPlaying_ExternalSync_State || bPlaying_LinkState;
 #else
-		_isPlaying = bPlaying_Internal_State || bPlaying_External_State;
+		_isPlaying = bPlaying_Internal_State || bPlaying_ExternalSync_State;
 #endif
 		return _isPlaying;
 	}
@@ -275,7 +277,7 @@ private:
 	//-
 
 #ifdef USE_OFX_SURFING_IM_GUI
-	ofxSurfing_ImGui_Manager guiManager;
+	ofxSurfingGui ui;
 #endif
 
 	//-
@@ -384,12 +386,12 @@ private:
 		//--------------------------------------------------------------
 	void setDebug_Clock(bool b)
 	{
-		guiManager.bDebug = b;
+		ui.bDebug = b;
 	}
 	//--------------------------------------------------------------
 	void toggleDebug_Clock()
 	{
-		guiManager.bDebug = !guiManager.bDebug;
+		ui.bDebug = !ui.bDebug;
 	}
 	//--------------------------------------------------------------
 	void setDebug_Layout(bool b)
@@ -461,7 +463,7 @@ private:
 	void refresh_GuiWidgets();
 
 #ifdef USE_OFX_SURFING_IM_GUI
-	void draw_ImGui_Widgets();
+	void draw_ImGui_Windows();
 	void draw_ImGui_Sources();
 	void draw_ImGui_ClockMonitor();
 	void draw_ImGui_ClockBpm();
@@ -491,7 +493,7 @@ private:
 	ofParameterGroup params_CONTROL;
 
 	ofParameter<bool> bPlaying_Internal_State; // Player state only for internal clock
-	ofParameter<bool> bPlaying_External_State; // Player state only for external clock
+	ofParameter<bool> bPlaying_ExternalSync_State; // Player state only for external clock
 
 	ofParameter<bool> bEnableClock; // Enable clock (affects all clock types)
 	ofParameter<bool> bMode_Internal_Clock; // Enable internal clock
@@ -670,6 +672,7 @@ private:
 	int midiIn_Clock_Port_OPENED;
 	int midiIn_Port_PRE = -1;
 	ofParameter<std::string> midiIn_PortName{ "","" };
+	vector<string> names_MidiInPorts;
 
 	//----
 
@@ -824,7 +827,7 @@ private:
 
 				if (Beat_current != Beat_current_PRE)
 				{
-					ofLogVerbose(__FUNCTION__) << "LINK beat changed:" << Beat_current;
+					ofLogVerbose("ofxBeatClock") << (__FUNCTION__) << "LINK beat changed:" << Beat_current;
 					Beat_current_PRE = Beat_current;
 
 					//-
@@ -895,7 +898,7 @@ private:
 	//--------------------------------------------------------------
 	void LINK_exit()
 	{
-		ofLogNotice(__FUNCTION__) << "Remove LINK listeners";
+		ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "Remove LINK listeners";
 		ofRemoveListener(link.bpmChanged, this, &ofxBeatClock::LINK_bpmChanged);
 		ofRemoveListener(link.numPeersChanged, this, &ofxBeatClock::LINK_numPeersChanged);
 		ofRemoveListener(link.playStateChanged, this, &ofxBeatClock::LINK_playStateChanged);
@@ -914,14 +917,14 @@ private:
 
 		if (name != "PEERS") // exclude log
 		{
-			ofLogVerbose(__FUNCTION__) << name << " : " << e;
+			ofLogVerbose("ofxBeatClock") << (__FUNCTION__) << name << " : " << e;
 		}
 
 		//-
 
 		if (name == "PLAY")
 		{
-			ofLogNotice(__FUNCTION__) << "LINK PLAY: " << bPlaying_LinkState;
+			ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "LINK PLAY: " << bPlaying_LinkState;
 
 			if (LINK_Enable && (link.getNumPeers() != 0))
 			{
@@ -961,7 +964,7 @@ private:
 
 		else if (name == "LINK")
 		{
-			ofLogNotice(__FUNCTION__) << "LINK: " << LINK_Enable;
+			ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "LINK: " << LINK_Enable;
 
 			//TEST:
 			//if (LINK_Enable)
@@ -992,7 +995,7 @@ private:
 
 		else if (name == "BPM" && LINK_Enable)
 		{
-			ofLogNotice(__FUNCTION__) << "LINK BPM";
+			ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "LINK BPM";
 
 			if (link.getBPM() != LINK_BPM)
 			{
@@ -1012,7 +1015,7 @@ private:
 
 		else if (name == "RESYNC" && LINK_ResyncBeat && LINK_Enable)
 		{
-			ofLogNotice(__FUNCTION__) << "LINK RESTART";
+			ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "LINK RESTART";
 			LINK_ResyncBeat = false;
 
 			link.setBeat(0.0);
@@ -1032,7 +1035,7 @@ private:
 
 		else if (name == "FORCE RESET" && LINK_ResetBeats && LINK_Enable)
 		{
-			ofLogNotice(__FUNCTION__) << "LINK RESET";
+			ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "LINK RESET";
 			LINK_ResetBeats = false;
 
 			link.setBeatForce(0.0);
@@ -1049,7 +1052,7 @@ private:
 		//{
 		//	if (LINK_Beat_Selector != LINK_Beat_Selector_PRE)//changed
 		//	{
-		//		ofLogNotice(__FUNCTION__) << "LINK GO BEAT: " << LINK_Beat_Selector;
+		//		ofLogNotice("ofxBeatClock")<<(__FUNCTION__) << "LINK GO BEAT: " << LINK_Beat_Selector;
 		//		LINK_Beat_Selector_PRE = LINK_Beat_Selector;
 		//
 		//		link.setBeat(LINK_Beat_Selector);
@@ -1070,7 +1073,7 @@ private:
 	//--------------------------------------------------------------
 	void LINK_bpmChanged(double& bpm)
 	{
-		ofLogNotice(__FUNCTION__) << bpm;
+		ofLogNotice("ofxBeatClock") << (__FUNCTION__) << bpm;
 
 		LINK_BPM = bpm;
 
@@ -1081,7 +1084,7 @@ private:
 	//--------------------------------------------------------------
 	void LINK_numPeersChanged(std::size_t& peers)
 	{
-		ofLogNotice(__FUNCTION__) << peers;
+		ofLogNotice("ofxBeatClock") << (__FUNCTION__) << peers;
 		LINK_Peers_string = ofToString(peers);
 
 		if (peers == 0)
@@ -1093,7 +1096,7 @@ private:
 	//--------------------------------------------------------------
 	void LINK_playStateChanged(bool& state)
 	{
-		ofLogNotice(__FUNCTION__) << (state ? "play" : "stop");
+		ofLogNotice("ofxBeatClock") << (__FUNCTION__) << (state ? "play" : "stop");
 
 		// don't need update if it's already "mirrored"
 		if (state != bPlaying_LinkState && bMODE_AbletonLinkSync && LINK_Enable)

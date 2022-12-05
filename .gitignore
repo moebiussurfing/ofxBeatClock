@@ -563,3 +563,6 @@ examples/example-ofxBeatClock/bin/data/ofxBeatClock/settings/BeatClock_Settings.
 examples/example-ofxBeatClock/bin/imgui.ini
 examples/example-ofxBeatClock/bin/data/Gui/guiManager_WindowsSpecials.json
 examples/example-ofxBeatClock/bin/data/Gui/guiManager_Panels.json
+examples/example-ofxBeatClock/bin/data/Gui/guiManager_Panels.json
+examples/example-ofxBeatClock/bin/data/Gui/guiManager_WindowsSpecials.json
+examples/example-ofxBeatClock/bin/example-ofxBeatClock.exp
