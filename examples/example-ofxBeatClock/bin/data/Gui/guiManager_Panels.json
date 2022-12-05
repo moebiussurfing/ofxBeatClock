@@ -3,14 +3,16 @@
         "Params_Advanced": {
             "Auto_Resize": "1",
             "Debug": "0",
-            "Help": "0",
+            "Game_Mode": "0",
             "Help_App": "0",
+            "Help_Internal": "0",
             "Keys": "1",
             "Link_Windows": "1",
             "Log": "0",
             "Minimize": "1",
             "MouseWheel": "1",
-            "Pad": "0"
+            "Pad": "0",
+            "Solo": "0"
         }
     }
 }
