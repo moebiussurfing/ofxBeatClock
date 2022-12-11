@@ -784,7 +784,7 @@ void ofxBeatClock::draw_ImGui_Sources()
 			ui.Add(bGui_ClockBpm, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
 			ui.AddSpacingSeparated();
 
-			ui.Add(bEnableClock, OFX_IM_TOGGLE_SMALL);
+			ui.Add(bEnableClock, OFX_IM_TOGGLE_BIG_BORDER);
 
 			// Hide all
 
@@ -1347,7 +1347,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 
 			// Extra
 			if (!bGui_Sources) {
-				ui.Add(bEnableClock, OFX_IM_TOGGLE_BIG);
+				ui.Add(bEnableClock, OFX_IM_TOGGLE_BIG_BORDER);
 			}
 
 			//--
@@ -1366,7 +1366,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 			{
 				if (bMode_Internal_Clock)
 				{
-					if (!bGui_Sources || ui.bMinimize) {
+					if (bEnableClock && (!bGui_Sources || ui.bMinimize)) {
 						ui.Add(BPM_Tap_Tempo_TRIG, OFX_IM_BUTTON_BIG);
 					}
 
