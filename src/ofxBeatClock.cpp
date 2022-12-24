@@ -1170,6 +1170,190 @@ void ofxBeatClock::draw_ImGui_CircleBeatWidget()
 }
 
 //--------------------------------------------------------------
+void ofxBeatClock::draw_ImGui_GameMode()
+{
+	//--
+
+	// 1. BPM + counters
+
+	// BPM number
+
+	ui.pushStyleFont(3);
+	const auto sz1 = ImGui::CalcTextSize(infoClockBpmLabel.c_str());
+	float sw1 = GetContentRegionAvail().x;
+	ImGui::Text("");
+	ImGui::SameLine(sw1 - sz1.x);
+	ImGui::Text(infoClockBpmLabel.c_str());
+	ui.popStyleFont();
+
+	//--
+
+	// BPM label
+
+	string infoClockBpmValue = "BPM";
+	ui.pushStyleFont(3);
+	float sw2 = GetContentRegionAvail().x;
+	ImGui::Text("");
+	const auto sz2 = ImGui::CalcTextSize(infoClockBpmValue.c_str());
+	ImGui::SameLine(sw2 - sz2.x);
+	ImGui::Text(infoClockBpmValue.c_str());
+	ui.popStyleFont();
+
+	//ui.AddLabelHuge(infoClockBpmValue.c_str(), false, true);
+
+	//--
+
+	//if (!ui.bMinimize)
+	{
+		// 1 : 1
+
+		ui.pushStyleFont(2);
+		{
+			const auto sz = ImGui::CalcTextSize(infoClockTimer.c_str());
+			float sw = GetContentRegionAvail().x;
+			ImGui::Text("");
+			ImGui::SameLine(sw - sz.x);
+			ImGui::Text(infoClockTimer.c_str());
+		}
+		ui.popStyleFont();
+
+		ImGui::Spacing();
+
+		//--
+
+		// Source Input Info
+
+		//if (infoClock1 != "" && infoClock2 != "") 
+		{
+			ui.pushStyleFont(1);
+			{
+				// 1
+				if (infoClock1 != "")
+				{
+					//// right
+					//const auto sz = ImGui::CalcTextSize(infoClock1.c_str());
+					//float sw = GetContentRegionAvail().x;
+					//ImGui::Text("");
+					//ImGui::SameLine(sw - sz.x);
+
+					ImGui::TextWrapped(infoClock1.c_str());
+
+					ImGui::Spacing();
+				}
+
+				// 2
+				if (infoClock2 != "")
+				{
+					ImGui::TextWrapped(infoClock2.c_str());
+				}
+			}
+			ui.popStyleFont();
+
+			ui.AddSpacing();
+		}
+	}
+
+	//ImGui::TextWrapped(strExtMidiClock.c_str());
+	//ImGui::TextWrapped(strLink.c_str());
+
+	//if (!ui.bMinimize)
+	{
+		// 3. Debug
+		if (infoDebug != "")
+		{
+			ui.pushStyleFont(0);
+			{
+				ImGui::TextWrapped(infoDebug.c_str());
+				ui.AddSpacing();
+			}
+			ui.popStyleFont();
+		}
+	}
+
+	//ImGui::TextWrapped(strMessageInfoFull.c_str());
+
+	//--
+
+	float __w100 = ui.getWidgetsWidth(1);
+	float _w4 = ui.getWidgetsWidth(4);
+	float _h = _w4;
+
+	//--
+
+	// 1. Beat Boxes 1-2-3-4
+
+	//if (!ui.bMinimize)
+	{
+		ui.pushStyleFont(1);
+		{
+			ImGui::PushStyleColor(ImGuiCol_Button, cb[0]);
+			ImGui::Button("1", ImVec2(_w4, _h));
+			ImGui::PopStyleColor();
+			ImGui::SameLine(0, 0);
+
+			ImGui::PushStyleColor(ImGuiCol_Button, cb[1]);
+			ImGui::Button("2", ImVec2(_w4, _h));
+			ImGui::PopStyleColor();
+			ImGui::SameLine(0, 0);
+
+			ImGui::PushStyleColor(ImGuiCol_Button, cb[2]);
+			ImGui::Button("3", ImVec2(_w4, _h));
+			ImGui::PopStyleColor();
+			ImGui::SameLine(0, 0);
+
+			ImGui::PushStyleColor(ImGuiCol_Button, cb[3]);
+			ImGui::Button("4", ImVec2(_w4, _h));
+			ImGui::PopStyleColor();
+
+			ImGui::Spacing();
+		}
+		ui.popStyleFont();
+	}
+
+	//--
+
+	// 2. Circle Beat
+	draw_ImGui_CircleBeatWidget();
+
+	//--
+
+	// Extra
+	//if (!bGui_Sources) 
+	{
+		ui.Add(bEnableClock, OFX_IM_TOGGLE_BIG_BORDER);
+	}
+
+	//--
+
+	// 5. Play 
+	if (bEnableClock)
+	{
+		float val = ofMap(circleBeat.getValue(), 0, 1, 0.25, 1.f, true);
+		ofxImGuiSurfing::AddBigToggleNamed(bPlay, -1, -1, "PLAYING", "PLAY", true, val);
+	}
+
+	//--
+
+	// 6. Extra
+	// BPM, reset 
+	//if (ui.bMinimize)
+	{
+		if (bMode_Internal_Clock)
+		{
+			if (bEnableClock && (!bGui_Sources || ui.bMinimize)) {
+				ui.Add(BPM_Tap_Tempo_TRIG, OFX_IM_BUTTON_BIG);
+			}
+
+			if (!bGui_ClockBpm || ui.bMinimize) {
+				ui.AddSpacing();
+				ui.Add(BPM_Global);
+				ui.Add(bReset_BPM_Global, OFX_IM_BUTTON);
+			}
+		}
+	}
+}
+
+//--------------------------------------------------------------
 void ofxBeatClock::draw_ImGui_ClockMonitor()
 {
 	if (bGui_ClockMonitor) {
@@ -1182,10 +1366,15 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 
 		if (ui.BeginWindowSpecial(bGui_ClockMonitor))
 		{
-			float __w100 = ImGui::GetContentRegionAvail().x;
-			float _w4 = __w100 / 4;
+			//float __w100 = ImGui::GetContentRegionAvail().x;
+			//float _w4 = __w100 / 4;
+
+			float __w100 = ui.getWidgetsWidth(1);
+			float _w4 = ui.getWidgetsWidth(4);
 			float _h = _w4;
 
+			//--
+			
 			// Minimize
 
 			ui.Add(ui.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
@@ -1220,7 +1409,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 
 			//ui.AddLabelHuge(infoClockBpmValue.c_str(), false, true);
 
-			//-
+			//--
 
 			if (!ui.bMinimize)
 			{
@@ -1374,9 +1563,9 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 						ui.AddSpacing();
 						ui.Add(BPM_Global);
 						ui.Add(bReset_BPM_Global, OFX_IM_BUTTON);
-					}
 				}
 			}
+		}
 
 			//--
 
@@ -1390,8 +1579,8 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 			}
 
 			ui.EndWindowSpecial();
-		}
 	}
+}
 }
 
 //--------------------------------------------------------------
@@ -1629,7 +1818,7 @@ void ofxBeatClock::doBeatTickMonitor(int _beat)
 			{
 				bpmTapTempo.trigSound(1);
 			}
-		}
+			}
 
 		////TODO: 
 		////BUG: 
@@ -1655,8 +1844,8 @@ void ofxBeatClock::doBeatTickMonitor(int _beat)
 		//		tac.play();
 		//	}
 		//}
+		}
 	}
-}
 
 //--------------------------------------------------------------
 float ofxBeatClock::getBpm() const
@@ -1709,7 +1898,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 					bPlay = false;
 					return;
 				}
-			}
+				}
 
 			//// worklow
 			//// put one mode active. default is internal
@@ -1730,8 +1919,8 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 				if (bPlaying_LinkState != bPlay) bPlaying_LinkState = bPlay;
 			}
 #endif
-		}
-	}
+			}
+			}
 
 	//--
 
@@ -1836,7 +2025,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 			if (bPlay != bPlaying_LinkState)
 				bPlay = bPlaying_LinkState;
 		}
-	}
+		}
 #endif
 
 	//----
@@ -2192,7 +2381,7 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e)
 	//		reSync();
 	//	}
 	//}
-}
+			}
 
 //--------------------------------------------------------------
 void ofxBeatClock::Changed_Midi_In_BeatsInBar(int& beatsInBar)
@@ -2366,7 +2555,7 @@ void ofxBeatClock::newMidiMessage(ofxMidiMessage & message)
 				{
 					bMidiInClockRunning = true;
 					ofLogVerbose("ofxBeatClock") << "external midi clock started";
-				}
+			}
 				break;
 
 			case MIDI_STOP:
