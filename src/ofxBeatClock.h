@@ -75,7 +75,7 @@
 	- Add alternative and better timer approach using the audio-buffer to avoid out-of-sync problems of current timers
 	(https://forum.openframeworks.cc/t/audio-programming-basics/34392/10).
 	Problems happen when minimizing or moving the app window.. Any help is welcome!
-	- Add kind of plugin to add audio input to get BeatTick on the fly from incomming audio signal. (Using ofxBTrack)
+	- Add kind of plug-in to add audio input to get BeatTick on the fly from incoming audio signal. (Using ofxBTrack)
 
 */
 
@@ -468,6 +468,10 @@ private:
 	void draw_ImGui_ClockMonitor();
 	void draw_ImGui_ClockBpm();
 #endif
+
+public:
+
+	void draw_ImGui_GameMode(); // final user selected / most important controls!
 
 	//-
 
@@ -1103,7 +1107,7 @@ private:
 		{
 			bPlaying_LinkState = state;
 		}
-	}
+}
 
 #endif
 };
