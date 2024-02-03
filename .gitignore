@@ -566,3 +566,6 @@ examples/example-ofxBeatClock/bin/data/Gui/guiManager_Panels.json
 examples/example-ofxBeatClock/bin/data/Gui/guiManager_Panels.json
 examples/example-ofxBeatClock/bin/data/Gui/guiManager_WindowsSpecials.json
 examples/example-ofxBeatClock/bin/example-ofxBeatClock.exp
+*.json
+*.xml
+examples/example-ofxBeatClock/config.make

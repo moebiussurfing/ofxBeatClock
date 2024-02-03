@@ -396,7 +396,7 @@ void ofxBeatClock::setupGui()
 
 	string _fontName = "JetBrainsMono-Bold.ttf"; // WARNING: will crash if font not present!
 	std::string _path = "assets/fonts/"; // assets folder
-	ui.pushFont(_path + _fontName, 60);
+	ui.addFontStyle(_path + _fontName, 60);
 
 	//--
 
@@ -1178,26 +1178,26 @@ void ofxBeatClock::draw_ImGui_GameMode()
 
 	// BPM number
 
-	ui.pushStyleFont(3);
+	ui.PushFontStyle(3);
 	const auto sz1 = ImGui::CalcTextSize(infoClockBpmLabel.c_str());
 	float sw1 = GetContentRegionAvail().x;
 	ImGui::Text("");
 	ImGui::SameLine(sw1 - sz1.x);
 	ImGui::Text(infoClockBpmLabel.c_str());
-	ui.popStyleFont();
+	ui.PopFontStyle();
 
 	//--
 
 	// BPM label
 
 	string infoClockBpmValue = "BPM";
-	ui.pushStyleFont(3);
+	ui.PushFontStyle(3);
 	float sw2 = GetContentRegionAvail().x;
 	ImGui::Text("");
 	const auto sz2 = ImGui::CalcTextSize(infoClockBpmValue.c_str());
 	ImGui::SameLine(sw2 - sz2.x);
 	ImGui::Text(infoClockBpmValue.c_str());
-	ui.popStyleFont();
+	ui.PopFontStyle();
 
 	//ui.AddLabelHuge(infoClockBpmValue.c_str(), false, true);
 
@@ -1207,7 +1207,7 @@ void ofxBeatClock::draw_ImGui_GameMode()
 	{
 		// 1 : 1
 
-		ui.pushStyleFont(2);
+		ui.PushFontStyle(2);
 		{
 			const auto sz = ImGui::CalcTextSize(infoClockTimer.c_str());
 			float sw = GetContentRegionAvail().x;
@@ -1215,7 +1215,7 @@ void ofxBeatClock::draw_ImGui_GameMode()
 			ImGui::SameLine(sw - sz.x);
 			ImGui::Text(infoClockTimer.c_str());
 		}
-		ui.popStyleFont();
+		ui.PopFontStyle();
 
 		ImGui::Spacing();
 
@@ -1225,7 +1225,7 @@ void ofxBeatClock::draw_ImGui_GameMode()
 
 		//if (infoClock1 != "" && infoClock2 != "") 
 		{
-			ui.pushStyleFont(1);
+			ui.PushFontStyle(1);
 			{
 				// 1
 				if (infoClock1 != "")
@@ -1247,7 +1247,7 @@ void ofxBeatClock::draw_ImGui_GameMode()
 					ImGui::TextWrapped(infoClock2.c_str());
 				}
 			}
-			ui.popStyleFont();
+			ui.PopFontStyle();
 
 			ui.AddSpacing();
 		}
@@ -1261,12 +1261,12 @@ void ofxBeatClock::draw_ImGui_GameMode()
 		// 3. Debug
 		if (infoDebug != "")
 		{
-			ui.pushStyleFont(0);
+			ui.PushFontStyle(0);
 			{
 				ImGui::TextWrapped(infoDebug.c_str());
 				ui.AddSpacing();
 			}
-			ui.popStyleFont();
+			ui.PopFontStyle();
 		}
 	}
 
@@ -1284,7 +1284,7 @@ void ofxBeatClock::draw_ImGui_GameMode()
 
 	//if (!ui.bMinimize)
 	{
-		ui.pushStyleFont(1);
+		ui.PushFontStyle(1);
 		{
 			ImGui::PushStyleColor(ImGuiCol_Button, cb[0]);
 			ImGui::Button("1", ImVec2(_w4, _h));
@@ -1307,7 +1307,7 @@ void ofxBeatClock::draw_ImGui_GameMode()
 
 			ImGui::Spacing();
 		}
-		ui.popStyleFont();
+		ui.PopFontStyle();
 	}
 
 	//--
@@ -1386,26 +1386,26 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 
 			// BPM number
 
-			ui.pushStyleFont(3);
+			ui.PushFontStyle(3);
 			const auto sz1 = ImGui::CalcTextSize(infoClockBpmLabel.c_str());
 			float sw1 = GetContentRegionAvail().x;
 			ImGui::Text("");
 			ImGui::SameLine(sw1 - sz1.x);
 			ImGui::Text(infoClockBpmLabel.c_str());
-			ui.popStyleFont();
+			ui.PopFontStyle();
 
 			//--
 
 			// BPM label
 
 			string infoClockBpmValue = "BPM";
-			ui.pushStyleFont(3);
+			ui.PushFontStyle(3);
 			float sw2 = GetContentRegionAvail().x;
 			ImGui::Text("");
 			const auto sz2 = ImGui::CalcTextSize(infoClockBpmValue.c_str());
 			ImGui::SameLine(sw2 - sz2.x);
 			ImGui::Text(infoClockBpmValue.c_str());
-			ui.popStyleFont();
+			ui.PopFontStyle();
 
 			//ui.AddLabelHuge(infoClockBpmValue.c_str(), false, true);
 
@@ -1415,7 +1415,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 			{
 				// 1 : 1
 
-				ui.pushStyleFont(2);
+				ui.PushFontStyle(2);
 				{
 					const auto sz = ImGui::CalcTextSize(infoClockTimer.c_str());
 					float sw = GetContentRegionAvail().x;
@@ -1423,7 +1423,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 					ImGui::SameLine(sw - sz.x);
 					ImGui::Text(infoClockTimer.c_str());
 				}
-				ui.popStyleFont();
+				ui.PopFontStyle();
 
 				ImGui::Spacing();
 
@@ -1433,7 +1433,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 
 				//if (infoClock1 != "" && infoClock2 != "") 
 				{
-					ui.pushStyleFont(1);
+					ui.PushFontStyle(1);
 					{
 						// 1
 						if (infoClock1 != "")
@@ -1455,7 +1455,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 							ImGui::TextWrapped(infoClock2.c_str());
 						}
 					}
-					ui.popStyleFont();
+					ui.PopFontStyle();
 
 					ui.AddSpacing();
 				}
@@ -1469,12 +1469,12 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 				// 3. Debug
 				if (infoDebug != "")
 				{
-					ui.pushStyleFont(0);
+					ui.PushFontStyle(0);
 					{
 						ImGui::TextWrapped(infoDebug.c_str());
 						ui.AddSpacing();
 					}
-					ui.popStyleFont();
+					ui.PopFontStyle();
 				}
 			}
 
@@ -1486,7 +1486,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 
 			if (!ui.bMinimize)
 			{
-				ui.pushStyleFont(1);
+				ui.PushFontStyle(1);
 				{
 					ImGui::PushStyleColor(ImGuiCol_Button, cb[0]);
 					ImGui::Button("1", ImVec2(_w4, _h));
@@ -1509,7 +1509,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 
 					ImGui::Spacing();
 				}
-				ui.popStyleFont();
+				ui.PopFontStyle();
 			}
 
 			//--
@@ -1522,7 +1522,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 			// 4. Tap
 			if (strTapTempo != "")
 			{
-				ui.pushStyleFont(2);
+				ui.PushFontStyle(2);
 				{
 					int speed = 10;//blink speed when measuring taps
 					bool b = (ofGetFrameNum() % (2 * speed) < speed);
@@ -1531,7 +1531,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor()
 					ImGui::TextWrapped(strTapTempo.c_str());
 					ImGui::PopStyleColor();
 				}
-				ui.popStyleFont();
+				ui.PopFontStyle();
 			}
 
 			// Extra
