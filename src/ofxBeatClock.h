@@ -3,15 +3,13 @@
 //
 //	OPTIONAL DEFINES
 
-//TODO: 
-//#define USE_ofxAbletonLink // -> Can be commented to not include the Ableton Link feature/add-on.
+//TODO:
+#define USE_ofxAbletonLink // -> Can be commented to not include the Ableton Link feature/add-on.
 
-//#define USE_AUDIO_BUFFER_TIMER_MODE // -> [WIP] A better alternative clock engine based on audio buffer. 
+//#define USE_AUDIO_BUFFER_TIMER_MODE // -> [WIP] A better alternative clock engine based on audio buffer.
 
 //
 //---------------------------------
-
-
 
 /*
 	BUG:
@@ -95,27 +93,26 @@
 
 */
 
-
 //----
 
 #pragma once
 
 #include "ofMain.h"
 
-#include "ofxMidiClock.h" // used for external midi clock sync (1)
-#include "ofxMidi.h"
-#include "ofxMidiTimecode.h"
-#include "ofxDawMetro.h" // used for internal (using threaded timer) clock (2)
-#include "ofxSurfingHelpers.h"
-#include "CircleBeat.h"
 #include "BpmTapTempo.h"
+#include "CircleBeat.h"
+#include "ofxDawMetro.h" // used for internal (using threaded timer) clock (2)
 #include "ofxInteractiveRect.h" // engine to move the gui. TODO: add resize by mouse too.
+#include "ofxMidi.h"
+#include "ofxMidiClock.h" // used for external midi clock sync (1)
+#include "ofxMidiTimecode.h"
+#include "ofxSurfingHelpers.h"
 
 // NOTE: Can't be disabled for the moment. but is not difficult if you need it.
 // Required ImGui, can't go straightforward with ofxGui!
-#define USE_OFX_SURFING_IM_GUI 
+#define USE_OFX_SURFING_IM_GUI
 #ifdef USE_OFX_SURFING_IM_GUI
-#include "ofxSurfingImGui.h"
+	#include "ofxSurfingImGui.h"
 #endif
 
 //----
@@ -123,18 +120,18 @@
 // * OPTIONAL : Ableton Link feature *
 
 #ifdef USE_ofxAbletonLink
-#include "ofxAbletonLink.h" // used for external Ableton Live Link engine (3)
+	#include "ofxAbletonLink.h" // used for external Ableton Live Link engine (3)
 #endif
 
-/// * Is the only external mode where OF app works as clock master. 
+/// * Is the only external mode where OF app works as clock master.
 /// (besides external midi sync slave)
 /// * It can control the Ableton bpm, play/stop etc from OF.
 /// What is Ableton Link?
 /// "This is the codebase for Ableton Link, a technology that synchronizes musical beat,
 /// tempo, and phase across multiple applications running on one or more devices.
 /// Applications on devices connected to a local network discover each other automatically
-/// and form a musical session in which each participant can perform independently: 
-/// anyone can start or stop while still staying in time.Anyone can change the tempo, 
+/// and form a musical session in which each participant can perform independently:
+/// anyone can start or stop while still staying in time.Anyone can change the tempo,
 /// the others will follow.Anyone can join or leave without disrupting the session."
 /// https://github.com/Ableton/link -> original libs
 /// https://www.ableton.com/en/link/ -> videos and tutorials
@@ -154,7 +151,7 @@
 /// when it's enabled ofxDawMetro is not used and could be not loaded.
 /// WIP: alternative and better timer approach using the audio-buffer
 /// to avoid out-of-sync problems of current timers
-/// (https://forum.openframeworks.cc/t/audio-programming-basics/34392/10). 
+/// (https://forum.openframeworks.cc/t/audio-programming-basics/34392/10).
 /// Problems happen when minimizing or moving the app window.. Any help is welcome!
 /// (code is at the bottom)
 /// un-comment to enable this NOT WORKING yet alternative mode
@@ -176,20 +173,18 @@
 //----
 
 // Only to long song mode on external midi sync vs simpler 4 bars / 16 beats
-#define ENABLE_PATTERN_LIMITING//comment to disable
+#define ENABLE_PATTERN_LIMITING //comment to disable
 #define PATTERN_STEP_BAR_LIMIT 4
-#define PATTERN_STEP_BEAT_LIMIT 16//TODO: this are 16th ticks not beat!
+#define PATTERN_STEP_BEAT_LIMIT 16 //TODO: this are 16th ticks not beat!
 #define BPM_INIT 120
 #define BPM_INIT_MIN 40
 #define BPM_INIT_MAX 400
-#define USE_VISUAL_FEEDBACK_FADE//comment to try improve performance... Could add more optimizations maybe
+#define USE_VISUAL_FEEDBACK_FADE //comment to try improve performance... Could add more optimizations maybe
 
 //-
 
-class ofxBeatClock : public ofBaseApp, public ofxMidiListener, public ofxDawMetro::MetroListener
-{
+class ofxBeatClock : public ofBaseApp, public ofxMidiListener, public ofxDawMetro::MetroListener {
 public:
-
 	ofxBeatClock();
 	~ofxBeatClock();
 
@@ -218,13 +213,13 @@ public:
 		if (BeatTick) {
 			//ofLogNotice("ofxBeatClock")<<(__FUNCTION__) << "BeatTick ! #" << Beat_current;
 			return Beat_current;
-		}
-		else return -1;
+		} else
+			return -1;
 	}
 
 	// Current_bpm_clock_values
-	float getBpm() const;//returns BPM_Global
-	int getTimeBar() const;//returns duration of global bar in ms
+	float getBpm() const; //returns BPM_Global
+	int getTimeBar() const; //returns duration of global bar in ms
 
 	void setBpm_ClockInternal(float bpm); // to set bpm from outside
 
@@ -235,8 +230,7 @@ public:
 	//ofParameter<bool> bGui_PreviewClockNative; // beat boxes, text info and beat ball (all except gui panels)
 
 	//--------------------------------------------------------------
-	bool isPlaying() const
-	{
+	bool isPlaying() const {
 		bool _isPlaying = false;
 #ifdef USE_ofxAbletonLink
 		_isPlaying = bPlaying_Internal_State || bPlaying_ExternalSync_State || bPlaying_LinkState;
@@ -257,7 +251,6 @@ public:
 	}
 
 private:
-
 	//TODO: could be nice to add some callback system..
 	ofParameter<int> Bar_current;
 	ofParameter<int> Beat_current;
@@ -266,11 +259,10 @@ private:
 	//--
 
 private:
-
-	void update(ofEventArgs& args);
+	void update(ofEventArgs & args);
 	void exit();
 	//void windowResized(int w, int h);
-	void keyPressed(ofKeyEventArgs& eventArgs);
+	void keyPressed(ofKeyEventArgs & eventArgs);
 
 	void drawGui();
 
@@ -283,14 +275,12 @@ private:
 	//-
 
 private:
-
 	int window_W;
 	int window_H;
 
 	//-
 
 private:
-
 	void startup();
 
 	CircleBeat circleBeat;
@@ -299,7 +289,6 @@ private:
 	//-
 
 private:
-
 	ofParameter<bool> bKeys;
 
 	//-
@@ -307,28 +296,27 @@ private:
 	// Midi_in_clock
 
 private:
-
 	ofxMidiIn midiIn;
-	ofxMidiClock midiIn_Clock;//< clock message parser
+	ofxMidiClock midiIn_Clock; //< clock message parser
 
 	ofxMidiMessage midiIn_Clock_Message;
-	void newMidiMessage(ofxMidiMessage& eventArgs);
+	void newMidiMessage(ofxMidiMessage & eventArgs);
 
-	double midiIn_Clock_Bpm;//< song tempo in bpm, computed from clock length
-	bool bMidiInClockRunning;//< is the clock sync running?
-	unsigned int MIDI_beats;//< song pos in beats
-	int MIDI_quarters;//convert total # beats to # quarters
-	int MIDI_bars;//compute # of bars
-	double MIDI_seconds;//< song pos in seconds, computed from beats
+	double midiIn_Clock_Bpm; //< song tempo in bpm, computed from clock length
+	bool bMidiInClockRunning; //< is the clock sync running?
+	unsigned int MIDI_beats; //< song pos in beats
+	int MIDI_quarters; //convert total # beats to # quarters
+	int MIDI_bars; //compute # of bars
+	double MIDI_seconds; //< song pos in seconds, computed from beats
 
 	//TEST
 	//int MIDI_ticks;//16th ticks are not implemented on the used ofxMidi example
 
 	//-
 
-	ofParameter<int> midiIn_BeatsInBar;//compute remainder as # TARGET_NOTES_params within the current bar
-	void Changed_Midi_In_BeatsInBar(int& beatsInBar);//only used in midiIn clock sync 
-	int beatsInBar_PRE;//not required
+	ofParameter<int> midiIn_BeatsInBar; //compute remainder as # TARGET_NOTES_params within the current bar
+	void Changed_Midi_In_BeatsInBar(int & beatsInBar); //only used in midiIn clock sync
+	int beatsInBar_PRE; //not required
 
 	//-
 
@@ -337,17 +325,14 @@ private:
 	void setup_MidiIn_Clock();
 
 public:
-
 	//--------------------------------------------------------------
-	void toggleVisibleGui()
-	{
+	void toggleVisibleGui() {
 		bGui = !bGui;
 	}
 
 	//--
 
 private:
-
 	void draw_ImGui_CircleBeatWidget();
 
 	bool bb[4];
@@ -361,10 +346,8 @@ private:
 	// Red anchor circle to debug mark
 	bool bDebugLayout = false;
 	//--------------------------------------------------------------
-	void draw_Anchor(int x, int y)
-	{
-		if (bDebugLayout)
-		{
+	void draw_Anchor(int x, int y) {
+		if (bDebugLayout) {
 			ofPushStyle();
 			ofFill();
 			ofSetColor(ofColor(0, 200));
@@ -374,8 +357,10 @@ private:
 
 			//text
 			int pad;
-			if (y < 15) pad = 10;
-			else pad = -10;
+			if (y < 15)
+				pad = 10;
+			else
+				pad = -10;
 			ofDrawBitmapStringHighlight(ofToString(x) + "," + ofToString(y), x, y + pad);
 			ofPopStyle();
 		}
@@ -383,31 +368,26 @@ private:
 
 	//public:
 
-		//--------------------------------------------------------------
-	void setDebug_Clock(bool b)
-	{
+	//--------------------------------------------------------------
+	void setDebug_Clock(bool b) {
 		ui.bDebug = b;
 	}
 	//--------------------------------------------------------------
-	void toggleDebug_Clock()
-	{
+	void toggleDebug_Clock() {
 		ui.bDebug = !ui.bDebug;
 	}
 	//--------------------------------------------------------------
-	void setDebug_Layout(bool b)
-	{
+	void setDebug_Layout(bool b) {
 		bDebugLayout = b;
 	}
 	//--------------------------------------------------------------
-	void toggleDebug_Layout()
-	{
+	void toggleDebug_Layout() {
 		bDebugLayout = !bDebugLayout;
 	}
 
 	//--
 
 private:
-
 	// Main text color
 	//ofColor colorText;
 
@@ -416,7 +396,6 @@ private:
 	// Monitor_visual_feedback
 
 private:
-
 	// Beat Ball
 	ofPoint circlePos;
 
@@ -424,39 +403,37 @@ private:
 
 	//public:
 
-		//--------------------------------------------------------------
+	//--------------------------------------------------------------
 	void setFrameRate(float _fps) {
 		dt = 1.0f / _fps;
 	}
 
 private:
-
 	// Main receiver
 	// Trigs sound and gui drawing ball visual feedback
-	void doBeatTickMonitor(int beat);//trigs ball drawing and sound ticker
+	void doBeatTickMonitor(int beat); //trigs ball drawing and sound ticker
 
 	int lastBeatFlash = -1;
 	//void draw_BeatBalFlash(int _onBeat){}
 
 	//-
 
-////TODO:
-////WIP
-//private:
-//smooth clock for midi input clock sync
-////  REFRESH_FEQUENCY
-////used only when BPM_MIDI_CLOCK_REFRESH_RATE is defined
-//unsigned long BPM_LAST_Tick_Time_LAST;//test
-//unsigned long BPM_LAST_Tick_Time_ELLAPSED;//test
-//unsigned long BPM_LAST_Tick_Time_ELLAPSED_PRE;//test
-//long ELLAPSED_diff;//test
-//unsigned long bpm_CheckUpdated_lastTime;
+	////TODO:
+	////WIP
+	//private:
+	//smooth clock for midi input clock sync
+	////  REFRESH_FEQUENCY
+	////used only when BPM_MIDI_CLOCK_REFRESH_RATE is defined
+	//unsigned long BPM_LAST_Tick_Time_LAST;//test
+	//unsigned long BPM_LAST_Tick_Time_ELLAPSED;//test
+	//unsigned long BPM_LAST_Tick_Time_ELLAPSED_PRE;//test
+	//long ELLAPSED_diff;//test
+	//unsigned long bpm_CheckUpdated_lastTime;
 
 	//-
 
-//public:
+	//public:
 private:
-
 	void setupGui();
 	void buildGuiStyles();
 	void refresh_Gui();
@@ -470,30 +447,26 @@ private:
 #endif
 
 public:
-
 	void draw_ImGui_GameMode(); // final user selected / most important controls!
 
 	//-
 
 private:
-
 	ofParameterGroup params_INTERNAL;
 	ofParameterGroup params_EXTERNAL_MIDI;
 	ofParameterGroup params_BPM_Clock;
 
-	ofJson confg_Button_C, confg_Button_L, confg_ButtonSmall, confg_Sliders;//json theme
+	ofJson confg_Button_C, confg_Button_L, confg_ButtonSmall, confg_Sliders; //json theme
 
 	//-
 
 	// Params
 
 public:
-
 	ofParameter<bool> bPlay; // Play global for all different source clock modes
 	ofParameter<bool> bGui; // Main GUI
 
 private:
-
 	ofParameterGroup params_CONTROL;
 
 	ofParameter<bool> bPlaying_Internal_State; // Player state only for internal clock
@@ -508,7 +481,6 @@ private:
 	//----
 
 public:
-
 	// This is the main and final target bpm, is the destination of all other clocks (internal, external midi sync or ableton link)
 
 	ofParameter<float> BPM_Global; // Global tempo bpm.
@@ -517,7 +489,6 @@ public:
 	//----
 
 private:
-
 	ofParameter<bool> BPM_Tap_Tempo_TRIG; // Trig the measurements of tap tempo
 
 	// Helpers to modify current bpm
@@ -527,27 +498,23 @@ private:
 
 	//--
 
-//public:
+	//public:
 private:
-
 	//--
 
 	// These methods could be useful only to visualfeedback on integrating to other bigger guis on ofApp..
 	//--------------------------------------------------------------
-	bool getInternalClockModeState()
-	{
+	bool getInternalClockModeState() {
 		return bMode_Internal_Clock;
 	}
 	//--------------------------------------------------------------
-	bool getExternalClockModeState()
-	{
+	bool getExternalClockModeState() {
 		return bMode_External_MIDI_Clock;
 	}
 
 #ifdef USE_ofxAbletonLink
 	//--------------------------------------------------------------
-	bool getLinkClockModeState()
-	{
+	bool getLinkClockModeState() {
 		return bMODE_AbletonLinkSync;
 	}
 #endif
@@ -555,9 +522,8 @@ private:
 	//--
 
 private:
-
 	// Main callback handler
-	void Changed_Params(ofAbstractParameter& e);
+	void Changed_Params(ofAbstractParameter & e);
 
 	//-
 
@@ -570,13 +536,13 @@ private:
 
 	// Callbacks defined inside the addon class. can't be renamed here
 	// Overide ofxDawMetro::MetroListener's method if necessary
-	void onBarEvent(int& bar) override;
-	void onBeatEvent(int& beat) override;
-	void onSixteenthEvent(int& sixteenth) override;
+	void onBarEvent(int & bar) override;
+	void onBeatEvent(int & beat) override;
+	void onSixteenthEvent(int & sixteenth) override;
 
 	ofParameter<float> BPM_ClockInternal;
 
-	//NOTE: 
+	//NOTE:
 	// For the moment this BPM variables is being used as
 	// main tempo (sometimes) for other clock sources too.
 	// TODO:
@@ -584,8 +550,8 @@ private:
 
 	ofParameterGroup params_ClockInternal;
 	ofParameter<bool> clockInternal_Active;
-	void Changed_ClockInternal_Bpm(float& value);
-	void Changed_ClockInternal_Active(bool& value);
+	void Changed_ClockInternal_Bpm(float & value);
+	void Changed_ClockInternal_Active(bool & value);
 
 	//-
 
@@ -598,11 +564,9 @@ private:
 	// Settings
 
 private:
-
 	std::string path_Global;
 
 private:
-
 	void saveSettings(std::string path);
 	void loadSettings(std::string path);
 
@@ -636,7 +600,6 @@ private:
 	//--
 
 private:
-
 	// Sound metronome
 	ofParameter<bool> bSoundTickEnable; // enable sound ticks
 	ofParameter<float> soundVolume; // sound ticks volume
@@ -644,11 +607,9 @@ private:
 	//-
 
 private:
-
 	void reset_ClockValues(); // set gui display text clock to 0:0:0
 
 private:
-
 	// Strings for monitor drawing
 	// 1:1:1
 	std::string Bar_string;
@@ -663,7 +624,6 @@ private:
 	// Tap_engine
 
 private:
-
 	void tap_Update();
 	float tap_BPM;
 	bool SOUND_wasDisabled = false; // sound disabler to better user workflow
@@ -675,7 +635,7 @@ private:
 	void setup_MidiIn_Port(int p);
 	int midiIn_Clock_Port_OPENED;
 	int midiIn_Port_PRE = -1;
-	ofParameter<std::string> midiIn_PortName{ "","" };
+	ofParameter<std::string> midiIn_PortName { "", "" };
 	vector<string> names_MidiInPorts;
 
 	//----
@@ -687,6 +647,13 @@ private:
 	bool ENABLE_pattern_limits;
 	int pattern_BEAT_limit;
 	int pattern_BAR_limit;
+
+private:
+	int Beat_current_PRE; // used to detect changes only on link mode
+	float Beat_float_current; // link beat received  with decimals (float) and starting from 0 not 1
+	//TODO:
+	// Link
+	std::string Beat_float_string;
 
 	//----
 
@@ -703,13 +670,6 @@ private:
 
 #ifdef USE_AUDIO_BUFFER_TIMER_MODE
 private:
-	//TODO: 
-	// Link
-	int Beat_current_PRE; // used to detect changes only on link mode
-	float Beat_float_current; // link beat received  with decimals (float) and starting from 0 not 1 
-	std::string Beat_float_string;
-
-private:
 	void setupAudioBuffer(int _device);
 	void closeAudioBuffer();
 	ofParameter<bool> MODE_AudioBufferTimer;
@@ -717,15 +677,16 @@ private:
 	int deviceOut;
 	int samples = 0;
 	int ticksPerBeat = 4;
-	//default is 4. 
+	//default is 4.
 	//is this a kind of resolution if we set bigger like 16?
 	int samplesPerTick;
 	int sampleRate;
 	int bufferSize;
 	int DEBUG_ticks = 0;
 	bool DEBUG_bufferAudio = false;
+
 public:
-	void audioOut(ofSoundBuffer& buffer);
+	void audioOut(ofSoundBuffer & buffer);
 #endif
 
 	//----
@@ -744,30 +705,28 @@ private:
 	////ofParameter<float> valueKnob{ "value", 0.f, -10.f, 10.0f };
 	//ofParameter<float> valueKnob{ "value", 0.5f, 0.f, 1.0f };
 
-	ofParameter<bool> LINK_Enable;//enable link
-	ofParameter<float> LINK_BPM;//link bpm
-	ofParameter<bool> bPlaying_LinkState;//control and get Ableton Live playing too, mirrored like Link does
-	ofParameter<float> LINK_Phase;//phase on the bar. cycled from 0.0f to 4.0f
-	ofParameter<bool> LINK_ResyncBeat;//set beat 0
-	ofParameter<bool> LINK_ResetBeats;//reset "unlimited-growing" beat counter
-	ofParameter<std::string> LINK_Beat_string;//monitor beat counter
+	ofParameter<bool> LINK_Enable; //enable link
+	ofParameter<float> LINK_BPM; //link bpm
+	ofParameter<bool> bPlaying_LinkState; //control and get Ableton Live playing too, mirrored like Link does
+	ofParameter<float> LINK_Phase; //phase on the bar. cycled from 0.0f to 4.0f
+	ofParameter<bool> LINK_ResyncBeat; //set beat 0
+	ofParameter<bool> LINK_ResetBeats; //reset "unlimited-growing" beat counter
+	ofParameter<std::string> LINK_Beat_string; //monitor beat counter
 	//amount of beats are not limited nor in sync / mirrored with Ableton Live.
-	ofParameter<std::string> LINK_Peers_string;//number of synced devices/apps on your network
+	ofParameter<std::string> LINK_Peers_string; //number of synced devices/apps on your network
 	//ofParameter<int> LINK_Beat_Selector;//TODO: TEST
 	//int LINK_Beat_Selector_PRE = -1;
 
 	//--------------------------------------------------------------
-	void LINK_setup()
-	{
+	void LINK_setup() {
 		link.setup();
 
 		ofAddListener(params_LINK.parameterChangedE(), this, &ofxBeatClock::Changed_LINK_Params);
 	}
 
 	//--------------------------------------------------------------
-	void LINK_update()
-	{
-		if (bMODE_AbletonLinkSync)//not required but prophylactic
+	void LINK_update() {
+		if (bMODE_AbletonLinkSync) //not required but prophylactic
 		{
 			//display text
 			clockActive_Type = "ABLETON LINK";
@@ -782,33 +741,28 @@ private:
 
 			//assign link states to our variables
 
-			if (LINK_Enable && (link.getNumPeers() != 0))
-			{
-				LINK_Phase = link.getPhase();//link bar phase
+			if (LINK_Enable && (link.getNumPeers() != 0)) {
+				LINK_Phase = link.getPhase(); //link bar phase
 
 				Beat_float_current = (float)link.getBeat();
 				Beat_float_string = ofToString(Beat_float_current, 2);
 
-				LINK_Beat_string = ofToString(link.getBeat(), 0);//link beat with decimal
+				LINK_Beat_string = ofToString(link.getBeat(), 0); //link beat with decimal
 				//amount of beats are not limited nor in sync / mirrored with Ableton Live.
 			}
 
 			//---
 
 			//update mean clock counters and update gui
-			if (LINK_Enable && bPlaying_LinkState && (link.getNumPeers() != 0))
-			{
-				int _beats = (int)Beat_float_current;//starts in beat 0 not 1
+			if (LINK_Enable && bPlaying_LinkState && (link.getNumPeers() != 0)) {
+				int _beats = (int)Beat_float_current; //starts in beat 0 not 1
 
 				//-
 
 				//beat
-				if (ENABLE_pattern_limits)
-				{
-					Beat_current = 1 + (_beats % 4);//limited to 4 beats. starts in 1
-				}
-				else
-				{
+				if (ENABLE_pattern_limits) {
+					Beat_current = 1 + (_beats % 4); //limited to 4 beats. starts in 1
+				} else {
 					Beat_current = 1 + (_beats);
 				}
 				Beat_string = ofToString(Beat_current);
@@ -817,20 +771,16 @@ private:
 
 				//bar
 				int _bars = _beats / 4;
-				if (ENABLE_pattern_limits)
-				{
+				if (ENABLE_pattern_limits) {
 					Bar_current = 1 + _bars % pattern_BAR_limit;
-				}
-				else
-				{
+				} else {
 					Bar_current = 1 + _bars;
 				}
 				Bar_string = ofToString(Bar_current);
 
 				//---
 
-				if (Beat_current != Beat_current_PRE)
-				{
+				if (Beat_current != Beat_current_PRE) {
 					ofLogVerbose("ofxBeatClock") << (__FUNCTION__) << "LINK beat changed:" << Beat_current;
 					Beat_current_PRE = Beat_current;
 
@@ -847,22 +797,17 @@ private:
 
 		// blink gui label if link is not connected! (no peers)
 		// to alert user to re click LINK buttons(in OF app and Ableton too)
-		if (link.getNumPeers() == 0)
-		{
-			if ((ofGetFrameNum() % 60) < 30)
-			{
+		if (link.getNumPeers() == 0) {
+			if ((ofGetFrameNum() % 60) < 30) {
 				LINK_Peers_string = "0";
-			}
-			else
-			{
+			} else {
 				LINK_Peers_string = " ";
 			}
 		}
 	}
 
 	//--------------------------------------------------------------
-	void LINK_draw()
-	{
+	void LINK_draw() {
 		//ofPushStyle();
 
 		//// text
@@ -900,8 +845,7 @@ private:
 	}
 
 	//--------------------------------------------------------------
-	void LINK_exit()
-	{
+	void LINK_exit() {
 		ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "Remove LINK listeners";
 		ofRemoveListener(link.bpmChanged, this, &ofxBeatClock::LINK_bpmChanged);
 		ofRemoveListener(link.numPeersChanged, this, &ofxBeatClock::LINK_numPeersChanged);
@@ -915,8 +859,7 @@ private:
 	// Callbacks
 
 	//--------------------------------------------------------------
-	void Changed_LINK_Params(ofAbstractParameter& e)
-	{
+	void Changed_LINK_Params(ofAbstractParameter & e) {
 		std::string name = e.getName();
 
 		if (name != "PEERS") // exclude log
@@ -926,12 +869,10 @@ private:
 
 		//-
 
-		if (name == "PLAY")
-		{
+		if (name == "PLAY") {
 			ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "LINK PLAY: " << bPlaying_LinkState;
 
-			if (LINK_Enable && (link.getNumPeers() != 0))
-			{
+			if (LINK_Enable && (link.getNumPeers() != 0)) {
 				//TODO:
 				// BUG:
 				// play engine do not works fine
@@ -954,20 +895,17 @@ private:
 
 				// workflow
 				// set gui display text clock to 0:0:0
-				if (!bPlaying_LinkState)
-				{
+				if (!bPlaying_LinkState) {
 					reset_ClockValues();
 				}
 			}
 			// workflow
-			else if (bPlaying_LinkState)
-			{
+			else if (bPlaying_LinkState) {
 				bPlaying_LinkState = false; // if not enable block to play disabled
 			}
 		}
 
-		else if (name == "LINK")
-		{
+		else if (name == "LINK") {
 			ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "LINK: " << LINK_Enable;
 
 			//TEST:
@@ -981,34 +919,27 @@ private:
 			//}
 
 			//TEST:
-			if (LINK_Enable)
-			{
+			if (LINK_Enable) {
 				link.enableLink();
-			}
-			else
-			{
+			} else {
 				link.disableLink();
 
 				// workflow
-				if (bPlaying_LinkState)
-				{
+				if (bPlaying_LinkState) {
 					bPlaying_LinkState = false; // if not enable block to play disabled
 				}
 			}
 		}
 
-		else if (name == "BPM" && LINK_Enable)
-		{
+		else if (name == "BPM" && LINK_Enable) {
 			ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "LINK BPM";
 
-			if (link.getBPM() != LINK_BPM)
-			{
+			if (link.getBPM() != LINK_BPM) {
 				link.setBPM(LINK_BPM);
 			}
 
-			if (bMODE_AbletonLinkSync)
-			{
-				//TODO: 
+			if (bMODE_AbletonLinkSync) {
+				//TODO:
 				// it's required if ofxDawMetro is not being used?
 				BPM_ClockInternal = LINK_BPM;
 
@@ -1017,15 +948,13 @@ private:
 			}
 		}
 
-		else if (name == "RESYNC" && LINK_ResyncBeat && LINK_Enable)
-		{
+		else if (name == "RESYNC" && LINK_ResyncBeat && LINK_Enable) {
 			ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "LINK RESTART";
 			LINK_ResyncBeat = false;
 
 			link.setBeat(0.0);
 
-			if (bMODE_AbletonLinkSync)
-			{
+			if (bMODE_AbletonLinkSync) {
 				Tick_16th_current = 0;
 				Tick_16th_string = ofToString(Tick_16th_current);
 
@@ -1037,8 +966,7 @@ private:
 			}
 		}
 
-		else if (name == "FORCE RESET" && LINK_ResetBeats && LINK_Enable)
-		{
+		else if (name == "FORCE RESET" && LINK_ResetBeats && LINK_Enable) {
 			ofLogNotice("ofxBeatClock") << (__FUNCTION__) << "LINK RESET";
 			LINK_ResetBeats = false;
 
@@ -1075,8 +1003,7 @@ private:
 
 	// Receive from master device (i.e Ableton Live)
 	//--------------------------------------------------------------
-	void LINK_bpmChanged(double& bpm)
-	{
+	void LINK_bpmChanged(double & bpm) {
 		ofLogNotice("ofxBeatClock") << (__FUNCTION__) << bpm;
 
 		LINK_BPM = bpm;
@@ -1086,29 +1013,24 @@ private:
 	}
 
 	//--------------------------------------------------------------
-	void LINK_numPeersChanged(std::size_t& peers)
-	{
+	void LINK_numPeersChanged(std::size_t & peers) {
 		ofLogNotice("ofxBeatClock") << (__FUNCTION__) << peers;
 		LINK_Peers_string = ofToString(peers);
 
-		if (peers == 0)
-		{
+		if (peers == 0) {
 			LINK_Phase = 0.f;
 		}
 	}
 
 	//--------------------------------------------------------------
-	void LINK_playStateChanged(bool& state)
-	{
+	void LINK_playStateChanged(bool & state) {
 		ofLogNotice("ofxBeatClock") << (__FUNCTION__) << (state ? "play" : "stop");
 
 		// don't need update if it's already "mirrored"
-		if (state != bPlaying_LinkState && bMODE_AbletonLinkSync && LINK_Enable)
-		{
+		if (state != bPlaying_LinkState && bMODE_AbletonLinkSync && LINK_Enable) {
 			bPlaying_LinkState = state;
 		}
-}
+	}
 
 #endif
 };
-
