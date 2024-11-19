@@ -569,3 +569,6 @@ examples/example-ofxBeatClock/bin/example-ofxBeatClock.exp
 *.json
 *.xml
 examples/example-ofxBeatClock/config.make
+examples/example-ofxBeatClock/bin/data/ofxBeatClock/settings/Midi_Settings.xml
+examples/example-ofxBeatClock/bin/data/ofxBeatClock/settings/Midi_Settings.xml
+examples/example-ofxBeatClock/bin/data/ofxWindowApp/ofxWindowApp.json

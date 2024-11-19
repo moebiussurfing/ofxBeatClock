@@ -3,6 +3,8 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
+	w.setup();
+
 	ofBackground(ofColor::orangeRed);
 
 	beatClock.setup();
@@ -22,4 +24,9 @@ void ofApp::Changed_Tick() // Callback to receive BeatTicks
 {
 	if (beatClock.getBeat() == 1)ofLogNotice(__FUNCTION__) << "--------";
 	ofLogNotice(__FUNCTION__) << "Beat! #" << beatClock.getBeat();
+}
+
+//--------------------------------------------------------------
+void ofApp::exit() {
+	w.save();
 }

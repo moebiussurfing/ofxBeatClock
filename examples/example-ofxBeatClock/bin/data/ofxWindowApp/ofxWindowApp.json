@@ -1,36 +1,27 @@
 [
     {
-        "Preset": "Big",
         "position": {
-            "x": -1918.0,
-            "y": 25.0
+            "x": 0.0,
+            "y": 38.0
         },
         "size": {
-            "height": 1053,
-            "width": 1916
+            "height": 713,
+            "width": 945
         },
         "window_mode": "OF_WINDOW"
     },
     {
-        "Preset": "Mini",
-        "position": {
-            "x": 20.0,
-            "y": 20.0
-        },
-        "size": {
-            "height": 200,
-            "width": 200
-        },
-        "window_mode": "OF_WINDOW"
-    },
-    {
-        "extra_settings": {
-            "debugPerformance": "1",
-            "fps": "60",
-            "lockMode": "0",
-            "miniPreset": "0",
-            "showInfo": "0",
-            "vsync": "0"
+        "Extra": {
+            "Session": {
+                "DebugPerformance": "1",
+                "DisableAutosave": "0",
+                "ShowWindowInfo": "0",
+                "WindowOnTop": "0"
+            },
+            "Window": {
+                "Fps": "60",
+                "vSync": "1"
+            }
         }
     }
 ]

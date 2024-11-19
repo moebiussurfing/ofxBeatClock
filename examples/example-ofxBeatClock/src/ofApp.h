@@ -9,6 +9,7 @@ class ofApp : public ofBaseApp {
 public:
 	void setup();
 	void draw();
+	void exit();
 
 	ofxBeatClock beatClock;
 	ofEventListener listenerBeat;
