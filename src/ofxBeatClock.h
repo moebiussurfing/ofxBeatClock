@@ -4,7 +4,7 @@
 //	OPTIONAL DEFINES
 
 //TODO:
-//#define USE_ofxAbletonLink // -> Can be commented to not include the Ableton Link feature/add-on.
+#define USE_ofxAbletonLink // -> Can be commented to not include the Ableton Link feature/add-on.
 
 //TODO:
 //#define USE_AUDIO_BUFFER_TIMER_MODE // -> [WIP] A better alternative clock engine based on audio buffer.
@@ -750,6 +750,10 @@ private:
 
 				LINK_Beat_string = ofToString(link.getBeat(), 0); //link beat with decimal
 				//amount of beats are not limited nor in sync / mirrored with Ableton Live.
+
+				//--
+
+				BPM_Global = link.getBPM();
 			}
 
 			//---

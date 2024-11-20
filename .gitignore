@@ -572,3 +572,7 @@ examples/example-ofxBeatClock/config.make
 examples/example-ofxBeatClock/bin/data/ofxBeatClock/settings/Midi_Settings.xml
 examples/example-ofxBeatClock/bin/data/ofxBeatClock/settings/Midi_Settings.xml
 examples/example-ofxBeatClock/bin/data/ofxWindowApp/ofxWindowApp.json
+examples/example-ofxBeatClock/bin/data/ofxWindowApp/ofxWindowApp.json
+examples/example-ofxBeatClock/bin/data/ofxWindowApp/ofxWindowApp.json
+examples/example-ofxBeatClock/bin/data/ofxWindowApp/ofxWindowApp.json
+examples/example-ofxBeatClock/bin/data/assets/fonts/telegrama_render.otf
