@@ -1529,7 +1529,6 @@ void ofxBeatClock::draw_ImGui_ClockMonitor() {
 						ui.Add(BPM_Global);
 
 						//TODO: must fix
-#if 0
 						ui.PushButtonRepeat();
 						if (ui.AddButton("-", OFX_IM_DEFAULT, 2)) {
 							BPM_ClockInternal = BPM_ClockInternal.get() - (float)OFXBEATCLOCK_BPM_INCREMENTS;
@@ -1539,7 +1538,7 @@ void ofxBeatClock::draw_ImGui_ClockMonitor() {
 							BPM_ClockInternal = BPM_ClockInternal.get() + (float)OFXBEATCLOCK_BPM_INCREMENTS;
 						}
 						ui.PopButtonRepeat();
-#endif
+
 						ui.Add(bReset_BPM_Global, OFX_IM_BUTTON);
 					}
 				}

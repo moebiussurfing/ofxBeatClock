@@ -2,6 +2,7 @@ ofxAbletonLink
 ofxBeatClock
 ofxImGui
 ofxMidi
+ofxMidiOutClock
 ofxSurfingHelpers
 ofxSurfingImGui
 ofxWindowApp
