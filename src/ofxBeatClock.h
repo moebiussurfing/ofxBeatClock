@@ -9,6 +9,8 @@
 //TODO:
 //#define OFXBEATCLOCK_USE_AUDIO_BUFFER_TIMER_MODE // -> [WIP] A better alternative clock engine based on audio buffer.
 
+#define OFXBEATCLOCK_USE_ofxMidiOutClock // Enable midi out clock
+
 //
 //---------------------------------
 
@@ -145,6 +147,12 @@
 
 //----
 
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+#include "ofxMidiOutClock.h"
+#endif
+
+//----
+
 //* OPTIONAL : maybe better alternative internal clock *
 
 ///TODO:
@@ -180,7 +188,8 @@
 #define BPM_INIT 120
 #define BPM_INIT_MIN 40
 #define BPM_INIT_MAX 400
-#define OFXBEATCLOCK_USE_VISUAL_FEEDBACK_FADE //comment to try improve performance... Could add more optimizations maybe
+#define OFXBEATCLOCK_USE_VISUAL_FEEDBACK_FADE //comment to try improve performance... 
+//Could add more optimizations maybe
 #define OFXBEATCLOCK_BPM_INCREMENTS 0.001f;
 
 //-
@@ -296,17 +305,6 @@ private:
 
 	//-
 
-	// Midi_out_clock
-	void setup_MidiOut_Clock();
-	float bpmOut;
-	ofxMidiOut midiOut;
-	float pulseDuration; // microseconds per pulse
-	uint64_t lastPulseTime;
-	bool clockRunning;
-	int channelOut;
-
-	//-
-
 // Midi_in_clock
 
 private:
@@ -401,6 +399,17 @@ private:
 
 	//--
 
+	// Midi out clock to external
+
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+	ofxMidiOutClock midiOutClock;
+	void setup_MidiOut_Clock();
+	ofParameter<bool> bGui_MidiOutClock;
+	ofParameter<bool> bEnableMidiOutClockLink;
+#endif
+
+	//--
+
 private:
 	// Main text color
 	//ofColor colorText;
@@ -458,6 +467,9 @@ private:
 	void draw_ImGui_Sources();
 	void draw_ImGui_ClockMonitor();
 	void draw_ImGui_ClockBpm();
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+	void draw_ImGui_MidiOutClock();
+#endif
 #endif
 
 public:
@@ -716,7 +728,6 @@ private:
 
 	ofParameter<bool> LINK_Enable; //enable link
 	ofParameter<float> LINK_BPM; //link bpm
-	ofParameter<bool> bPlaying_LinkState; //control and get Ableton Live playing too, mirrored like Link does
 	ofParameter<float> LINK_Phase; //phase on the bar. cycled from 0.0f to 4.0f
 	ofParameter<bool> LINK_ResyncBeat; //set beat 0
 	ofParameter<bool> LINK_ResetBeats; //reset "unlimited-growing" beat counter
@@ -725,6 +736,7 @@ private:
 	ofParameter<std::string> LINK_Peers_string; //number of synced devices/apps on your network
 	//ofParameter<int> LINK_Beat_Selector;//TODO: TEST
 	//int LINK_Beat_Selector_PRE = -1;
+	ofParameter<bool> bPlaying_LinkState; //control and get Ableton Live playing too, mirrored like Link does
 
 	void LINK_setup();
 	void LINK_update();
@@ -733,6 +745,7 @@ private:
 	void LINK_bpmChanged(double& bpm);
 	void LINK_numPeersChanged(std::size_t& peers);
 	void LINK_playStateChanged(bool& state);
+
 	void Changed_LINK_Params(ofAbstractParameter& e);
 #endif
 

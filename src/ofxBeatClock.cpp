@@ -24,7 +24,10 @@ void ofxBeatClock::setup() {
 
 	//--
 
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
 	setup_MidiOut_Clock();
+#endif
+
 	setup_MidiIn_Clock();
 	// should be defined before rest of GUI to list midi ports being included on gui
 
@@ -229,6 +232,11 @@ void ofxBeatClock::setup() {
 	params_AppSettings.add(bGui_ClockBpm);
 	params_AppSettings.add(bGui_Sources);
 
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+	params_AppSettings.add(bGui_MidiOutClock);
+	params_AppSettings.add(bEnableMidiOutClockLink);
+#endif
+
 	params_AppSettings.add(bMode_Internal_Clock);
 	params_AppSettings.add(bMode_External_MIDI_Clock);
 
@@ -377,6 +385,10 @@ void ofxBeatClock::setupGui() {
 	ui.addWindowSpecial(bGui_ClockMonitor);
 	ui.addWindowSpecial(bGui_Sources);
 	ui.addWindowSpecial(bGui_ClockBpm);
+
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+	ui.addWindowSpecial(bGui_MidiOutClock);
+#endif
 
 	ui.startup();
 
@@ -661,24 +673,15 @@ void ofxBeatClock::refresh_GuiWidgets() {
 	}
 }
 
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
 //--------------------------------------------------------------
 void ofxBeatClock::setup_MidiOut_Clock() {
-	// external midi clock
-
 	ofLogNotice("ofxBeatClock") << (__FUNCTION__);
-
-	// print the available output ports to the console
-	midiOut.listOutPorts();
-
-	// connect
-	midiOut.openPort(1); // by number
-	//midiOut.openPort("IAC Driver Pure Data In"); // by name
-	//midiOut.openVirtualPort("ofxMidiOut"); // open a virtual port
-
-	//channel = 1;
-
-	midiOut.sendMidiByte(MIDI_START);
+	midiOutClock.setup();
+	bGui_MidiOutClock.set("MIDI OUT CLOCK", false);
+	bEnableMidiOutClockLink.set("ENABLE OUT LINK", false);
 }
+#endif
 
 //--------------------------------------------------------------
 void ofxBeatClock::setup_MidiIn_Clock() {
@@ -755,6 +758,12 @@ void ofxBeatClock::update(ofEventArgs& args) {
 
 #ifdef OFXBEATCLOCK_USE_ofxAbletonLink
 	if (bMODE_AbletonLinkSync) LINK_update();
+#endif
+
+	//--
+
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+		midiOutClock.update();
 #endif
 }
 
@@ -954,6 +963,33 @@ void ofxBeatClock::draw_ImGui_Sources() {
 		}
 	}
 }
+
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+//--------------------------------------------------------------
+void ofxBeatClock::draw_ImGui_MidiOutClock() {
+	if (bGui_MidiOutClock) {
+		IMGUI_SUGAR__WINDOWS_CONSTRAINTSW_SMALL;
+
+		if (ui.BeginWindowSpecial(bGui_MidiOutClock)) {
+			ui.Add(ui.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+			ui.AddSpacingSeparated();
+			//ui.AddGroup(midiOutClock.params);
+
+			ui.Add(bEnableMidiOutClockLink, OFX_IM_TOGGLE_BIG_BORDER_BLINK);
+			ui.Add(midiOutClock.bPlay, OFX_IM_TOGGLE_BIG_BORDER_BLINK);
+			ui.AddCombo(midiOutClock.portNumber, midiOutClock.portNames);
+			if (ui.isMaximized()) {
+				ui.Add(midiOutClock.vReconnect);
+				ui.Add(midiOutClock.bpm);
+				ui.Add(midiOutClock.vResetBpm);
+				//ui.Add(midiOutClock.bDebug);
+			}
+
+			ui.EndWindowSpecial();
+		}
+	}
+}
+#endif
 
 //--------------------------------------------------------------
 void ofxBeatClock::draw_ImGui_ClockBpm() {
@@ -1552,6 +1588,11 @@ void ofxBeatClock::draw_ImGui_ClockMonitor() {
 				ui.AddSpacingSeparated();
 
 				ui.Add(bGui_Sources, OFX_IM_TOGGLE_ROUNDED);
+
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+				ui.Add(bGui_MidiOutClock, OFX_IM_TOGGLE_ROUNDED);
+#endif
+
 				ui.Add(bGui_ClockBpm, OFX_IM_TOGGLE_ROUNDED);
 			}
 
@@ -1569,6 +1610,10 @@ void ofxBeatClock::draw_ImGui_Windows() {
 		if (bGui_ClockMonitor) draw_ImGui_ClockMonitor();
 		if (bGui_Sources) draw_ImGui_Sources();
 		if (bGui_ClockBpm) draw_ImGui_ClockBpm();
+
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+		if (bGui_MidiOutClock) draw_ImGui_MidiOutClock();
+#endif
 	}
 	ui.End();
 }
@@ -1590,6 +1635,12 @@ void ofxBeatClock::draw() {
 	//		}
 	//#endif
 	//}
+
+	//--
+
+//#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+//	midiOutClock.draw();
+//#endif
 
 	//--
 
@@ -1624,9 +1675,9 @@ void ofxBeatClock::exit() {
 	midiIn.removeListener(this);
 	midiIn_BeatsInBar.removeListener(this, &ofxBeatClock::Changed_Midi_In_BeatsInBar);
 
-	// clean up
-	midiOut.sendMidiByte(MIDI_STOP);
-	midiOut.closePort();
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+	midiOutClock.exit();
+#endif
 
 	//--
 
@@ -1878,6 +1929,12 @@ void ofxBeatClock::Changed_Params(ofAbstractParameter& e) {
 #ifdef OFXBEATCLOCK_USE_ofxAbletonLink
 			else if (bMODE_AbletonLinkSync) {
 				if (bPlaying_LinkState != bPlay) bPlaying_LinkState = bPlay;
+			}
+#endif
+
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+			if(bEnableMidiOutClockLink) {
+				midiOutClock.bPlay = bPlay;
 			}
 #endif
 		}
@@ -2386,6 +2443,10 @@ void ofxBeatClock::Changed_ClockInternal_Bpm(float& value) {
 
 	//TODO:
 	clockInternal.resetTimer(); //(?) is this required (?)
+
+#ifdef OFXBEATCLOCK_USE_ofxMidiOutClock 
+	midiOutClock.setBpm(value);
+#endif
 
 	//-
 
