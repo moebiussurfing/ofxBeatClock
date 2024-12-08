@@ -55,14 +55,15 @@ You can uncomment ```#define USE_AUDIO_BUFFER_TIMER_MODE``` on ```ofxBeatClock.h
 * [ofxImGuiSurfing](https://github.com/moebiussurfing/ofxSurfingImGui)
 * [ofxImGui](https://github.com/Daandelange/ofxImGui/). / _Fork from_ @**Daandelange**.  
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)
-* [ofxAbletonLink](https://github.com/2bbb/ofxAbletonLink). / _Optional. Can be disabled._  
+* [ofxAbletonLink](https://github.com/2bbb/ofxAbletonLink). / _Optional. It can be disabled._  
+* [ofxMidiOutClock](https://github.com/moebiussurfing/ofxMidiOutClock). / _Optional for MIDI out clock. It can be disabled._  
 * [ofxWindowApp](https://github.com/moebiussurfing/ofxWindowApp). / _Not required. For examples only._  
 
 Already included into ```OF_ADD-ON/libs```. No need to add manually:  
 * [ofxDawMetro](https://github.com/castovoid/ofxDawMetro)  
 
 ## Tested Systems
-- **Windows 10** / **VS 2022** / **oF 0.12+**
+- **Windows 10** / **VS 2022** / **OF 0.12.0** / **OF 0.12+ Master branch could break**
 
 ## Author
 An add-on by **@moebiusSurfing**  
